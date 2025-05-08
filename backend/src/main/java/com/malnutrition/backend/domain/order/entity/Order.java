@@ -3,8 +3,7 @@ package com.malnutrition.backend.domain.order.entity;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
-import com.malnutrition.backend.domain.user.entity.User;
-import com.malnutrition.backend.global.jpa.BaseEntity;
+import com.malnutrition.backend.domain.user.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,23 +14,25 @@ public class Order {
     @Id
     private String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id")
     private User user;
 
-    String paymentKey;
-    long amount;
-    @Enumerated(EnumType.STRING)
-    OrderStatus orderStatus;
-
-    @Enumerated(EnumType.STRING)
-    TossPaymentMethod tossPaymentMethod;
-
-    @Enumerated(EnumType.STRING)
-    TossPaymentStatus tossPaymentStatus;
+    private String paymentKey;
 
     @Column(nullable = false)
-    String tossOrderId;
+    private long amount;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    @Enumerated(EnumType.STRING)
+    private TossPaymentMethod tossPaymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    private TossPaymentStatus tossPaymentStatus;
+
+    @Column(nullable = false)
+    private String tossOrderId;
 
     LocalDateTime requestedAt; //결제 요청 시간
 

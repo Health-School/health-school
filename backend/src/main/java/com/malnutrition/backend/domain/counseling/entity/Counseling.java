@@ -1,4 +1,10 @@
 package com.malnutrition.backend.domain.counseling.entity;
 
-public class Counseling {
+import com.malnutrition.backend.global.jpa.BaseEntity;
+
+
+
+public class Counseling  {
+
+
 }

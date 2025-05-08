@@ -1,20 +1,29 @@
 package com.malnutrition.backend.domain.certification.usercertification.entity;
 
 import com.malnutrition.backend.domain.certification.certification.entity.Certification;
-import com.malnutrition.backend.domain.user.entity.User;
+import com.malnutrition.backend.domain.certification.usercertification.enums.ApproveStatus;
+import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
+@Table(name = "user_certifications")
+@SuperBuilder
+@NoArgsConstructor
 public class UserCertification extends BaseEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name =  "certification_id")
     Certification certification;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    ApproveStatus approveStatus;
+
 }
