@@ -22,7 +22,7 @@ public class Counseling extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private String type;
+    private String type; //상담 종류: 운동(exercise), 건강(health) 등 자유롭게 작성
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Column(nullable = false)
@@ -33,7 +33,5 @@ public class Counseling extends BaseEntity {
     @Column(nullable = false)
     @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
     private User trainer;
-
-
 
 }
