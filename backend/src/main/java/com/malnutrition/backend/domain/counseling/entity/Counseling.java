@@ -18,7 +18,7 @@ public class Counseling extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @Column(nullable = false)
