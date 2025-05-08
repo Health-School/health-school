@@ -2,7 +2,7 @@ package com.malnutrition.backend.domain.machine.machinbody.entity;
 
 import com.malnutrition.backend.domain.machine.body.entity.Body;
 import com.malnutrition.backend.domain.machine.machine.entity.Machine;
-import com.malnutrition.backend.domain.user.entity.User;
+
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

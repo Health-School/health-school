@@ -2,7 +2,7 @@ package com.malnutrition.backend.domain.lecture.like.entity;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
-import com.malnutrition.backend.domain.user.entity.User;
+import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;

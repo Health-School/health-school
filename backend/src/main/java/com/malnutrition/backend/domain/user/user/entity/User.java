@@ -1,12 +1,11 @@
-package com.malnutrition.backend.domain.user.entity;
+package com.malnutrition.backend.domain.user.user.entity;
 
-import com.malnutrition.backend.domain.user.enums.Role;
+import com.malnutrition.backend.domain.image.entity.Image;
+import com.malnutrition.backend.domain.user.user.enums.Role;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -17,6 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class User extends BaseEntity {
+
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", nullable = true)
+    Image profileImage;
 
     @Column(length = 255, nullable = false)
     private String password;
@@ -38,5 +41,6 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Role roles;
+
 
 }

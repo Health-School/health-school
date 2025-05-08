@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.counseling.entity;
 
-import com.malnutrition.backend.domain.user.entity.User;
+
+import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
