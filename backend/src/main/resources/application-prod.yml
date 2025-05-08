@@ -1,0 +1,26 @@
+custom:
+  site:
+    frontUrl: "https://www.fivelogs.site"
+    backUrl: "https://api.fivelogs.site"
+
+db:
+  datasource:
+    url: "${rds.url}"
+    username: "${rds.username}"
+    password: "${rds.password}"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+cookie:
+  domain: ".fivelogs.site"
+
+profile:
+  use_s3: true
+  view_url: "/api/images/view/" # 버킷 url 필요
+
+redis:
+  host: redis
+
+cloud:
+  aws:
+    s3:
+      bucket: fivelogs-bucket

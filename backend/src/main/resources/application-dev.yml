@@ -1,0 +1,28 @@
+## 개발(로컬) 환경 설정
+
+db:
+  datasource:
+    url: jdbc:mysql://localhost:3306/health_school?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: dev
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+redis:
+  host: localhost
+
+custom:
+  site:
+    frontUrl: "http://localhost:3000"
+    backUrl: "http://localhost:${server.port}"
+
+cookie:
+  domain: "localhost"
+
+profile:
+  use_s3: false
+  view_url: "/api/images/view/"
+
+cloud:
+  aws:
+    s3:
+      bucket: fivelogs-bucket

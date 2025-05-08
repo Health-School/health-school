@@ -1,0 +1,82 @@
+## 루트 설정
+server:
+  port: 8090
+spring:
+  application:
+    name: health_school
+  profiles:
+    active: dev
+    include: secret
+  datasource:
+    url: ${db.datasource.url}
+    username: ${db.datasource.username}
+    password: ${db.datasource.password}
+    driver-class-name: ${db.datasource.driver-class-name}
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            clientId: ${kakao.clientId}
+            scope:
+              - profile_nickname
+              - account_email
+
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  data:
+    redis:
+      host: ${redis.host}
+      port: 6379
+      password: ""  # 비밀번호 없으면 생략 가능
+      timeout: 2s   # 초 단위 가능 (권장)
+  cache:
+    type: redis
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${email.username}
+    password: ${email.password}  # Google 계정에서 발급한 앱 비밀번호
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  level:
+    com.ll.blog: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+    org.springframework.security: TRACE
+
+image:
+  profile:
+    upload_path: "images/profiles"  # 항상 공통
+    use_s3: ${profile.use_s3}
+    view_url: ${profile.view_url} # 이미지를 보는용, s3는 버킷 저장소 url
+
