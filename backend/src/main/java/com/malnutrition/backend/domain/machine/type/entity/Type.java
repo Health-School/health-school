@@ -1,5 +1,4 @@
-package com.malnutrition.backend.domain.machine.body.entity;
-
+package com.malnutrition.backend.domain.machine.type.entity;
 
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.Column;
@@ -11,12 +10,12 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-@Table(name = "bodies")
+@Table(name = "types")
 @Getter
 @Setter
 @AllArgsConstructor
 @ToString
-public class Body extends BaseEntity {
+public class Type extends BaseEntity {
     @Column(nullable = false)
     private String name;
 }
