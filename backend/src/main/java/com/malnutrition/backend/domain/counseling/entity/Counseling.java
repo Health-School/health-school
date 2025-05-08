@@ -15,15 +15,25 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @ToString
 public class Counseling extends BaseEntity {
+    @Column(nullable = false)
     private String title;
 
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
+    @Column(nullable = false)
     private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @Column(nullable = false)
     @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
+    private User trainer;
+
+
 
 }
