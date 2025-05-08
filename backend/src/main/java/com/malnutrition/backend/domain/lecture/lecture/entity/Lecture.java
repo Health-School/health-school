@@ -1,6 +1,8 @@
 package com.malnutrition.backend.domain.lecture.lecture.entity;
 
 
+import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
+import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.CriteriaBuilder;

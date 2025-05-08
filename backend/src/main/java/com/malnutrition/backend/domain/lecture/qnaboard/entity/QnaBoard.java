@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.qnaboard.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.qnaboard.enums.OpenStatus;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
