@@ -2,10 +2,17 @@ package com.malnutrition.backend.domain.user.user.entity;
 
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.user.user.enums.Role;
+import com.malnutrition.backend.domain.user.user.enums.UserStatus;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -30,7 +37,7 @@ public class User extends BaseEntity {
     @Column(length = 50, nullable = false, unique = true)
     private String nickname;
 
-    @Column(length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = true)
     private String phoneNumber;
 
     @Column(length = 255)
@@ -42,5 +49,19 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private UserStatus userStatus;
+    public User(long id, String email, String nickname) {
+        this.setId(id);
+        this.email = email;
+        this.nickname = nickname;
+    }
 
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        ArrayList<Role> roles = new ArrayList<>();
+        roles.add(this.role);
+        return roles
+                .stream()
+                .map((name) -> new SimpleGrantedAuthority("ROLE_" + name))
+                .toList();
+    }
 }
