@@ -1,14 +1,7 @@
 package com.malnutrition.backend.domain.counseling.entity;
 
-<<<<<<< HEAD
-import com.malnutrition.backend.global.jpa.BaseEntity;
 
-
-
-public class Counseling  {
-
-=======
-import com.malnutrition.backend.domain.user.entity.User;
+import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +32,5 @@ public class Counseling extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id", nullable = false)  // FK 이름을 명시적으로 지정
     private User trainer;
->>>>>>> 6da4e28a5afc68070b714e3a8737a6d690735b83
 
 }
