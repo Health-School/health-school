@@ -26,6 +26,17 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation ("org.springframework.boot:spring-boot-starter-mail") // email service
+	implementation ("org.springframework.boot:spring-boot-starter-data-redis") // redis
+	implementation ("org.springframework.data:spring-data-redis") //redis
+	implementation ("io.jsonwebtoken:jjwt-api:0.12.6")
+	implementation ("io.jsonwebtoken:jjwt-impl:0.12.6")
+	implementation ("io.jsonwebtoken:jjwt-jackson:0.12.6")
+	implementation ("org.springframework.boot:spring-boot-starter-security") //security
+	implementation("org.springframework.boot:spring-boot-starter-actuator") // actuator , health check
+	implementation("org.springframework.boot:spring-boot-starter-validation") // 유효성 검사
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client") // oauth2
+	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5") //sweager
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	annotationProcessor("org.projectlombok:lombok")
