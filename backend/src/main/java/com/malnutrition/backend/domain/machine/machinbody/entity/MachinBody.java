@@ -18,12 +18,10 @@ import lombok.experimental.SuperBuilder;
 @ToString
 public class MachinBody extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "machine_id")  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "machine_id",nullable = false)  // FK 이름을 명시적으로 지정
     private Machine machine;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "body_id")  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "body_id",nullable = false)  // FK 이름을 명시적으로 지정
     private Body body;
 }

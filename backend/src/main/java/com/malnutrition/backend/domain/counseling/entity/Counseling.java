@@ -25,13 +25,11 @@ public class Counseling extends BaseEntity {
     private String type; //상담 종류: 운동(exercise), 건강(health) 등 자유롭게 작성
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "user_id", nullable = false)  // FK 이름을 명시적으로 지정
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "trainer_id", nullable = false)  // FK 이름을 명시적으로 지정
     private User trainer;
 
 }

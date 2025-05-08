@@ -20,13 +20,11 @@ public class Machine extends BaseEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "user_id")  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "user_id",nullable = false)  // FK 이름을 명시적으로 지정
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "type_id")
+    @JoinColumn(name = "type_id",nullable = false)
     private Type type;
 
     //운동기록지 ID 들어가야 함...

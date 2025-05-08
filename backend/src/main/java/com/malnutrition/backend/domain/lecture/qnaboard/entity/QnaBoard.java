@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.lecture.qnaboard.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.qnaboard.enums.OpenStatus;
+import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -14,14 +15,13 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class QnaBoard {
+public class QnaBoard extends BaseEntity {
     @Column(nullable = false)
     private String title;
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "lecture_id")
+    @JoinColumn(name = "lecture_id",nullable = false)
     private Lecture lecture;
     @Enumerated(EnumType.STRING)
     private OpenStatus openStatus;

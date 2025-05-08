@@ -1,9 +1,11 @@
 package com.malnutrition.backend.domain.lecture.problem.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.jdbc.BadSqlGrammarException;
 
 @Entity
 @SuperBuilder
@@ -13,13 +15,12 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @AllArgsConstructor
 @ToString
-public class Problem {
+public class Problem extends BaseEntity {
     @Column(nullable = false)
     private String title;
     @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String content;
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(nullable = false)
-    @JoinColumn(name = "lecture_id")  // FK 이름을 명시적으로 지
+    @JoinColumn(name = "lecture_id",nullable = false)  // FK 이름을 명시적으로 지
     private Lecture lecture;
 }
