@@ -18,8 +18,6 @@ public class Comment {
     private String content;
     @ManyToOne(fetch = FetchType.LAZY)
     @Column(nullable = false)
-    @JoinColumn(name = "board_id")  // FK 이름을 명시적
-    private QnaBoard board;
-
-
+    @JoinColumn(name = "qnaboard_id")  // FK 이름을 명시적
+    private QnaBoard qnaBoard;
 }
