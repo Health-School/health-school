@@ -2,10 +2,7 @@ package com.malnutrition.backend.domain.user.exercisesheet.entitiy;
 
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -14,15 +11,15 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 public class ExerciseSheet extends BaseEntity {
-
     @ManyToOne
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
-    Integer reps;
+    private Integer reps;
 
-    Integer weight;
+    private Integer weight;
 
-    Integer set;
+    @Column(name = "sets")
+    private Integer sets;
 
 }

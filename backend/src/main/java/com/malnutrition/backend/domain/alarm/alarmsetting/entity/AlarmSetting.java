@@ -18,8 +18,8 @@ public class AlarmSetting extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    AlarmSettingType alarmSettingType;
+    private AlarmSettingType alarmSettingType;
 
     @Column(nullable = false)
-    boolean isEnabled;
+    private boolean isEnabled;
 }
