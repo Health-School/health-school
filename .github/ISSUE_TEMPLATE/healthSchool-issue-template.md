@@ -1,6 +1,6 @@
 ---
-name: fivelogs issue template
-about: fivelogs default template
+name: healthSchool issue template
+about: healthSchool default template
 title: "타입: 작업설명"
 labels: ""
 assignees: ""
