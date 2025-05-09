@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.lecture.lecturuser.entity;
+package com.malnutrition.backend.domain.lecture.lectureuser.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.user.user.entity.User;

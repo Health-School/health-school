@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.order.entity;
 
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.machine.machinetype.entity.MachineType;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
@@ -33,6 +35,10 @@ public class Order {
 
     @Column(nullable = false)
     private String tossOrderId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecture_id",nullable = false)
+    private Lecture lecture;
 
     LocalDateTime requestedAt; //결제 요청 시간
 

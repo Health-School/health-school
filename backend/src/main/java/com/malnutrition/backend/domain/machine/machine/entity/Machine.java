@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.machine.machine.entity;
 
-import com.malnutrition.backend.domain.machine.type.entity.Type;
+import com.malnutrition.backend.domain.machine.machinetype.entity.MachineType;
+import com.malnutrition.backend.domain.user.exercisesheet.entitiy.ExerciseSheet;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -24,10 +25,16 @@ public class Machine extends BaseEntity {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id",nullable = false)
-    private Type type;
+    @JoinColumn(name = "machineType_id",nullable = false)
+    private MachineType machineType;
 
-    //운동기록지 ID 들어가야 함...
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exerciseSheet_id",nullable = false)
+    private ExerciseSheet exerciseSheet;
+
+
+
+
 
 
 }

@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.machine.type.entity;
+package com.malnutrition.backend.domain.machine.machinetype.entity;
 
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.Column;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @AllArgsConstructor
 @ToString
-public class Type extends BaseEntity {
+public class MachineType extends BaseEntity {
     @Column(nullable = false)
     private String name;
 }
