@@ -12,20 +12,21 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_certifications")
-
 public class UserCertification extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    User user;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name =  "certification_id")
-    Certification certification;
+    private Certification certification;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    ApproveStatus approveStatus;
+    private ApproveStatus approveStatus;
+    //통과 기준이 될 자격증 이름:
 
 }

@@ -7,10 +7,18 @@ import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
     @Id
