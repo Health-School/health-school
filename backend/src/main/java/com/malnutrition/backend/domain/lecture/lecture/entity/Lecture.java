@@ -31,5 +31,7 @@ public class Lecture extends BaseEntity {
     private LectureLevel lectureLevel;
 
 
+    //강의 수강 기간은 무제한!!!
+
 
 }
