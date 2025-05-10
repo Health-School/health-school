@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.user.user.repository;
 
 
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.domain.user.user.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     boolean existsByNickname(String nickname);
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.profileImage WHERE u.id = :id")
     Optional<User> findByIdWithProfileImage(@Param("id") Long id);
+
 
 
 }

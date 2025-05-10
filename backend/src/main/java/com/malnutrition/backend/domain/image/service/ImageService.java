@@ -13,7 +13,4 @@ import org.springframework.transaction.annotation.Transactional;
 public class ImageService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
-
-
-
 }
