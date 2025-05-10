@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -166,4 +167,8 @@ public class UserService {
                 .orElseThrow(() -> new InvalidInvocationException("존재하지 않는 userId 입니다."));
     }
 
+    @Transactional(readOnly = true)
+    public List<User> findAllByProfileImageId(Long imageId){
+        return userRepository.findAllByProfileImageId(imageId);
+    }
 }

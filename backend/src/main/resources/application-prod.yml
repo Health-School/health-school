@@ -15,12 +15,7 @@ cookie:
 
 profile:
   use_s3: true
-  view_url: "/api/images/view/" # 버킷 url 필요
 
 redis:
   host: redis
 
-cloud:
-  aws:
-    s3:
-      bucket: fivelogs-bucket
