@@ -25,6 +25,12 @@ public class LectureService {
             throw new AccessDeniedException("트레이너만 강의를 등록할 수 있습니다.");
         }
 
+        // 제목이 이미 존재하는지 확인
+        if (lectureRepository.existsByTitle(request.getTitle())) {
+            throw new IllegalArgumentException("이미 존재하는 강의 제목입니다.");
+        }
+
+
         Lecture lecture = Lecture.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
