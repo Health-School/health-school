@@ -1,7 +1,7 @@
 package com.malnutrition.backend.domain.machine.machine.entity;
 
 import com.malnutrition.backend.domain.machine.machinetype.entity.MachineType;
-import com.malnutrition.backend.domain.user.exercisesheet.entitiy.ExerciseSheet;
+import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -29,12 +29,8 @@ public class Machine extends BaseEntity {
     private MachineType machineType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exerciseSheet_id",nullable = false)
+    @JoinColumn(name = "exerciseSheet_id")
     private ExerciseSheet exerciseSheet;
-
-
-
-
-
+    //운동 기구가 처음 등록되거나 사용된 시트가 없을 땐 null 이어야 할 것 같음!!!
 
 }

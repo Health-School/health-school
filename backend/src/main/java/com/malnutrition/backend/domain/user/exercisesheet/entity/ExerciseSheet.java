@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.user.exercisesheet.entitiy;
+package com.malnutrition.backend.domain.user.exercisesheet.entity;
 
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
