@@ -49,7 +49,7 @@ public class OrderController {
     }
 
 
-    // 결제 내역을 주문 ID로 조회
+    // 결제 내역을 주문 ID로 조회 -> 영수증으로도 이용하기에 충분(정보가 다들어가있음)
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderById(@PathVariable String orderId) {
         OrderResponse orderResponse = orderService.getOrderDtoById(orderId);

@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/actuator/**",
             "/error", "/css/**", "/js/**",
             "/api/v1/users/join", "/api/v1/users/login",
-            "/api/v1/lectures/**", "/api/v1/orders/**"
+            "/api/v1/lectures/**", "/api/v1/orders/**",
+            "/api/v1/lectureUsers/**"
 
     };
 
