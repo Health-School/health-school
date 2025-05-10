@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notifications")
@@ -21,5 +23,13 @@ public class NotificationController {
     ) {
         NotificationResponseDto responseDto = notificationService.createNotification(lectureId, dto);
         return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/lecture/{lectureId}")
+    public ResponseEntity<List<NotificationResponseDto>> getNotificationsByLecture(
+            @PathVariable(name = "lectureId") Long lectureId
+    ) {
+        List<NotificationResponseDto> notifications = notificationService.getNotificationsByLecture(lectureId);
+        return ResponseEntity.ok(notifications);
     }
 }

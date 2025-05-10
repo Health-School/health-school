@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +55,20 @@ public class NotificationService {
                 saved.getLecture().getTitle(),
                 saved.getCreatedDate()
         );
+    }
+    @Transactional
+    public List<NotificationResponseDto> getNotificationsByLecture(Long lectureId) {
+        List<Notification> notifications = notificationRepository.findByLectureIdOrderByCreatedDateDesc(lectureId);
+
+        return notifications.stream()
+                .map(notification -> new NotificationResponseDto(
+                        notification.getId(),
+                        notification.getTitle(),
+                        notification.getContent(),
+                        notification.getLecture().getTitle(),
+                        notification.getCreatedDate()
+                ))
+                .collect(Collectors.toList());
     }
 }
 
