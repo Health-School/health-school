@@ -25,7 +25,7 @@ public class LectureController {
 
 
     @PostMapping
-    public ResponseEntity<String> addLecture(@RequestBody LectureRequestDto request, @RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<String> addLecture(@RequestBody LectureRequestDto request) {
         // lectureLevel을 LectureLevel enum으로 변환
         LectureLevel lectureLevel = LectureLevel.valueOf(request.getLectureLevel().toUpperCase());
 

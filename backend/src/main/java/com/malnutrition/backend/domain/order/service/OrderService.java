@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +19,28 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     // 사용자의 결제 내역을 조회
-    public List<Order> getOrdersByUser(User user) {
-        return orderRepository.findByUser(user);
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrdersByUser(User user) {
+        List<Order> orders = orderRepository.findByUser(user);
+        if (orders.isEmpty()) {
+            return Collections.emptyList(); // 비어 있는 리스트 반환
+        }
+
+        return orders.stream()
+                .map(order -> new OrderResponse(
+                        order.getId(),
+                        order.getAmount(),
+                        order.getOrderStatus().toString(),
+                        order.getTossPaymentMethod().toString(),
+                        order.getRequestedAt(),
+                        order.getApprovedAt(),
+                        order.getLecture().getId(),
+                        order.getLecture().getTitle(),
+                        order.getLecture().getTrainer().getNickname()
+                ))
+                .collect(Collectors.toList());
     }
+
 
     // 결제 내역을 주문 ID로 조회
     @Transactional(readOnly = true)
