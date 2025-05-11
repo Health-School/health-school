@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
@@ -24,7 +25,7 @@ public class ImageS3Service {
                 .bucket(bucketName)
                 .key(key) // 폴더/파일명 형태 가능
                 .contentType(contentType)
-//                .acl(ObjectCannedACL.PUBLIC_READ) // ✅ 퍼블릭 읽기 권한 부여
+//                .acl("public-read") // ✅ 문자열로 퍼블릭 읽기 권한 지정
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));

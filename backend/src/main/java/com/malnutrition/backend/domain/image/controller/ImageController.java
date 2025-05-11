@@ -65,7 +65,7 @@ public class ImageController {
 
     // 이미지 보기 (브라우저에 직접 출력)
     @GetMapping("/view/{id}")
-    @Operation(summary = "이미지 보기", description = "ID로 이미지를 브라우저에 표시합니다.")
+    @Operation(summary = "로컬 이미지 보기", description = "ID로 이미지를 브라우저에 표시합니다.")
     public ResponseEntity<Resource> viewImage(@PathVariable("id") Long id) {
         return imageService.viewImage(id);
     }
