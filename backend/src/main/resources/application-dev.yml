@@ -20,9 +20,4 @@ cookie:
 
 profile:
   use_s3: false
-  view_url: "/api/images/view/"
 
-cloud:
-  aws:
-    s3:
-      bucket: fivelogs-bucket

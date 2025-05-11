@@ -52,7 +52,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(token, "login success"));
     }
     @DeleteMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> deleteUser() {
+    public ResponseEntity<ApiResponse<Void>> logoutUser() {
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
 //        userService.deleteUser();
@@ -66,7 +66,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(me,"인가 성공"));
     }
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> leaveUser(@RequestBody PasswordRequestDto passwordRequestDto){
+    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(@RequestBody PasswordRequestDto passwordRequestDto){
         User actor = rq.getActor();
         userService.deleteUser(actor.getId(), passwordRequestDto.getPassword());
         return ResponseEntity.ok(ApiResponse.success(null, "회원탈퇴 성공"));
