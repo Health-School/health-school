@@ -70,4 +70,26 @@ public class ExerciseSheetService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 운동 기록을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
+    public List<ExerciseSheetResponseDto> getExerciseSheetsByUserAndDateDesc(Long userId, LocalDate exerciseDate) {
+        List<ExerciseSheet> sheets = exerciseSheetRepository.findByUserIdAndExerciseDateDesc(userId, exerciseDate);
+
+        return sheets.stream().map(sheet -> {
+            List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
+                    .map(mes -> new MachineExerciseSheetResponseDto(
+                            mes.getMachine().getName(),
+                            mes.getReps(),
+                            mes.getSets(),
+                            mes.getWeight()
+                    )).toList();
+
+            return new ExerciseSheetResponseDto(
+                    sheet.getExerciseDate(),
+                    sheet.getExerciseStartTime(),
+                    sheet.getExerciseEndTime(),
+                    machineDtos
+            );
+        }).toList();
+    }
+
 }

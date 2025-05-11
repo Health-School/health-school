@@ -71,6 +71,21 @@ public class ExerciseSheetController {
         }
     }
 
+    @GetMapping("/date-desc")
+    public ResponseEntity<?> getExerciseSheetsByDateDesc(@RequestParam("date") String date) {
+        try {
+            User user = rq.getActor();  // 로그인한 사용자 정보
+            LocalDate exerciseDate = LocalDate.parse(date);
+
+            List<ExerciseSheetResponseDto> response = exerciseSheetService.getExerciseSheetsByUserAndDateDesc(user.getId(), exerciseDate);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("운동 기록 조회 중 오류가 발생했습니다.");
+        }
+    }
+
 
 
 
