@@ -50,6 +50,11 @@ public class ExerciseSheetService {
             Machine machine = machineRepository.findById(m.getMachineId())
                     .orElseThrow(() -> new IllegalArgumentException("해당 운동기구가 존재하지 않습니다."));
 
+            // approved 여부 확인
+            if (!machine.isApproved()) {
+                throw new IllegalArgumentException("승인되지 않은 운동기구는 등록할 수 없습니다.");
+            }
+
             MachineExerciseSheet mes = MachineExerciseSheet.builder()
                     .exerciseSheet(sheet)
                     .machine(machine)
@@ -63,6 +68,7 @@ public class ExerciseSheetService {
 
         return sheet;
     }
+
 
     @Transactional
     public ExerciseSheet getExerciseSheetById(Long id, Long userId) {
