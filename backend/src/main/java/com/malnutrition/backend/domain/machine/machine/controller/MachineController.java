@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.machine.machine.service.MachineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,5 +22,15 @@ public class MachineController {
     public ResponseEntity<List<MachineResponseDto>> getAllMachines() {
         List<MachineResponseDto> machines = machineService.getAllApprovedMachines();
         return ResponseEntity.ok(machines);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getMachineDetail(@PathVariable Long id) {
+        try {
+            MachineResponseDto dto = machineService.getMachineDetailById(id);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
     }
 }
