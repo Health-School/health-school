@@ -4,7 +4,9 @@ public class PermitUrl {
 
     //모든 메서드 요청 허용
     public static final String[] ALL_URLS = {
-
+            "/api/v1/lectures/**", "/api/v1/orders/**",
+            "/api/v1/lectureUsers/**","/api/v1/notifications/**",
+            "/api/v1/exerciseSheets/**"
     };
     public static final String[] GET_URLS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
