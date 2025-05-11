@@ -5,22 +5,33 @@ import com.malnutrition.backend.domain.machine.machine.repository.MachineReposit
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.entity.MachineExerciseSheet;
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.repository.MachineExerciseSheetRepository;
 import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetCreateDto;
-import com.malnutrition.backend.domain.user.exercisesheet.dto.dto.MachineExerciseSheetCreateDto;
+import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetResponseDto;
+import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseSheetCreateDto;
+import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseSheetResponseDto;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
 import com.malnutrition.backend.domain.user.exercisesheet.repository.ExerciseSheetRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
+import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ExerciseSheetService {
+
     private final ExerciseSheetRepository exerciseSheetRepository;
     private final UserRepository userRepository;
     private final MachineRepository machineRepository;
     private final MachineExerciseSheetRepository machineExerciseSheetRepository;
+    private final Rq rq;  // 로그인한 사용자 정보
+
     @Transactional
     public ExerciseSheet createFullExerciseSheet(ExerciseSheetCreateDto dto, Long userId) {
         User user = userRepository.findById(userId)
@@ -52,4 +63,11 @@ public class ExerciseSheetService {
 
         return sheet;
     }
+
+    @Transactional
+    public ExerciseSheet getExerciseSheetById(Long id, Long userId) {
+        return exerciseSheetRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 운동 기록을 찾을 수 없습니다."));
+    }
+
 }

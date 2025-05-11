@@ -20,7 +20,7 @@ public class MachineExerciseSheet extends BaseEntity {
     @JoinColumn(name = "exerciseSheet_id")
     private ExerciseSheet exerciseSheet;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "machine_id")
     private Machine machine;
 

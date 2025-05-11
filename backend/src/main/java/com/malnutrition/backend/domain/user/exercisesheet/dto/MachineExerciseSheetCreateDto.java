@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.user.exercisesheet.dto.dto;
+package com.malnutrition.backend.domain.user.exercisesheet.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

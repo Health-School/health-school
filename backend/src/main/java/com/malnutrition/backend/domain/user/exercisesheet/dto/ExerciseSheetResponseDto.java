@@ -1,17 +1,16 @@
 package com.malnutrition.backend.domain.user.exercisesheet.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
-public class ExerciseSheetCreateDto {
+@AllArgsConstructor
+public class ExerciseSheetResponseDto {
     private LocalDate exerciseDate;
     private LocalTime exerciseStartTime;
     private LocalTime exerciseEndTime;
-    private List<MachineExerciseSheetCreateDto> machineExercises;
+    private List<MachineExerciseSheetResponseDto> machineExercises;
 }
