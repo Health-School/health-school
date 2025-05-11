@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.image.service;
 
 import com.malnutrition.backend.domain.image.config.ImageProperties;
+import com.malnutrition.backend.domain.image.dto.ImageFileInfo;
 import com.malnutrition.backend.domain.image.dto.ImageResponseDto;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.repository.ImageRepository;
@@ -31,12 +32,9 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final ImageProperties imageProperties;
     private final ImageS3Service imageS3Service;
-    private final UserService userService;
 
-    private record ImageFileInfo(String originalName, String serverFileName, String savedPath) {
 
-    }
-    private ImageFileInfo getImageFileInfo(MultipartFile file, String uploadPath){
+    ImageFileInfo getImageFileInfo(MultipartFile file, String uploadPath){
         String originalName = file.getOriginalFilename();
         String serverFileName = UUID.randomUUID().toString() + "_" + originalName;
 
@@ -44,112 +42,28 @@ public class ImageService {
         return new ImageFileInfo(originalName, serverFileName, savedPath);
     }
 
-    // 이미지 저장
     @Transactional
-    public ImageResponseDto saveImageLocal(MultipartFile file, Long userId) {
+    public ImageFileInfo saveFileToLocal(MultipartFile file, String uploadPath) throws IOException {
+        // 파일 정보 생성
+        ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
 
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어 있습니다.");
+        String serverFileName = imageFileInfo.getServerFileName();
+
+        // 저장 디렉터리 경로 생성
+        File destinationDir = new File(System.getProperty("user.dir"), uploadPath);
+        if (!destinationDir.exists()) {
+            destinationDir.mkdirs();
         }
 
-        try {
-            String uploadPath = imageProperties.getUploadPath();
-            ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
+        // 파일 저장
+        File newFile = new File(destinationDir, serverFileName);
+        file.transferTo(newFile);
 
-            String originalName = imageFileInfo.originalName;
-            String serverFileName = imageFileInfo.serverFileName;
-            String savedPath = imageFileInfo.savedPath;
-
-            // 로컬 저장 경로
-            File destinationDir = new File(System.getProperty("user.dir"), uploadPath);
-
-            if (!destinationDir.exists()) {
-                destinationDir.mkdirs();
-            }
-
-            File newFile = new File(destinationDir, serverFileName);
-            file.transferTo(newFile);
-
-            User user = userService.findByIdWithProfileImage(userId);
-            Image profileImage = user.getProfileImage();
-            //기존 이미지 삭제
-            if (!Objects.isNull(profileImage)) {
-                File preFile = new File(System.getProperty("user.dir"), profileImage.getPath());
-                deleteFile(preFile);
-            }
-
-            //이미지 저장
-            Image savedImage = saveProfileImage(originalName, serverFileName, savedPath, user);
-
-            return ImageResponseDto.builder()
-                    .id(savedImage.getId())
-                    .originalName(savedImage.getOriginalName())
-                    .profileImageUrl(getImageProfileUrl(savedImage))
-                    .build();
-
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류 발생", e);
-        }
+        return imageFileInfo;
     }
 
     @Transactional
-    public Image saveProfileImage(String originalName, String serverFileName, String savedPath, User user) {
-        Image image = Image.builder()
-                .originalName(originalName)
-                .serverImageName(serverFileName)
-                .path(savedPath)
-                .build();
-
-        Image savedImage = imageRepository.save(image);
-        user.setProfileImage(savedImage);
-        return savedImage;
-    }
-
-    @Transactional
-    public ImageResponseDto saveImageS3(MultipartFile file, Long userId)  {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어 있습니다.");
-        }
-        try {
-            String uploadPath = imageProperties.getUploadPath();
-            ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
-
-            String originalName = imageFileInfo.originalName;
-            String serverFileName = imageFileInfo.serverFileName;
-            String savedPath = imageFileInfo.savedPath;
-
-            imageS3Service.uploadFile(savedPath,file.getInputStream(),file.getSize(), file.getContentType());
-
-            User user = userService.findByIdWithProfileImage(userId);
-            Image preProfileImage = user.getProfileImage();
-            if(!Objects.isNull(preProfileImage)){
-                imageS3Service.deleteFile(preProfileImage.getPath());
-            }
-            Image savedImage = saveProfileImage(originalName, serverFileName, savedPath, user);
-
-
-            return ImageResponseDto.builder()
-                    .id(savedImage.getId())
-                    .originalName(savedImage.getOriginalName())
-                    .profileImageUrl(getImageProfileUrl(savedImage))
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류 발생", e);
-        }
-
-    }
-
-    @Transactional
-    public ImageResponseDto saveImageWithStorageChoice(MultipartFile file, Long userId) {
-        boolean useS3 = imageProperties.isUseS3();
-        // 로컬 저장 또는 S3 저장 선택
-        if (useS3) {
-            return saveImageS3(file, userId);  // S3 저장 로직
-        } else {
-            return saveImageLocal(file, userId);  // 로컬 저장 로직
-        }
-    }
-    private static void deleteFile(File preFile) {
+    public void deleteFile(File preFile) {
         if(preFile.exists()){
             boolean deleted = preFile.delete();
             if (deleted) {
@@ -163,36 +77,18 @@ public class ImageService {
     }
 
     // 이미지 하나 조회
+    @Transactional(readOnly = true)
     public Optional<Image> getImageById(Long id) {
         return imageRepository.findById(id);
     }
 
     // 전체 이미지 리스트 조회
+    @Transactional(readOnly = true)
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
 
 
-    // 이미지 삭제 (Delete)
-    @Transactional
-    public String deleteImage(Long imageId, Long userId) {
-        User user = userService.findByIdWithProfileImage(userId);
-        log.info("user {}", user);
-        // 이 이미지를 사용하는 모든 유저 찾기
-        List<User> usersUsingImage = userService.findAllByProfileImageId(imageId);
-        // 이미지 파일 삭제
-        File preFile = new File(System.getProperty("user.dir"), user.getProfileImage().getPath());
-        deleteFile(preFile);
-        // 각 유저의 프로필 이미지 끊기
-        for (User u : usersUsingImage) {
-            u.setProfileImage(null);
-        }
-
-        // 이미지 삭제
-        imageRepository.deleteById(imageId);
-
-        return "이미지가 삭제되었습니다.";
-    }
 
 
     // 로컬 이미지 보기
@@ -217,6 +113,74 @@ public class ImageService {
                 .body(resource);
     }
 
+
+    @Transactional
+    public Image saveImageLocal(MultipartFile file, String uploadPath) {
+
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어 있습니다.");
+        }
+        try {
+
+            ImageFileInfo imageFileInfo = saveFileToLocal(file, uploadPath);
+            String originalName = imageFileInfo.getOriginalName();
+            String serverFileName = imageFileInfo.getServerFileName();
+            String savedPath = imageFileInfo.getSavedPath();
+            return saveImage(originalName, serverFileName, savedPath);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류 발생", e);
+        }
+    }
+
+
+    @Transactional
+    public Image saveImage(String originalName, String serverFileName, String savedPath) {
+        Image image = Image.builder()
+                .originalName(originalName)
+                .serverImageName(serverFileName)
+                .path(savedPath)
+                .build();
+
+        Image savedImage = imageRepository.save(image);
+        return savedImage;
+    }
+
+    @Transactional
+    public Image saveImageS3(MultipartFile file, String uploadPath)  {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어 있습니다.");
+        }
+        try {
+            ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
+
+            String originalName = imageFileInfo.getOriginalName();
+            String serverFileName = imageFileInfo.getServerFileName();
+            String savedPath = imageFileInfo.getSavedPath();
+
+            imageS3Service.uploadFile(savedPath,file.getInputStream(),file.getSize(), file.getContentType());
+
+
+            return saveImage(originalName, serverFileName, savedPath);
+
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 중 오류 발생", e);
+        }
+
+    }
+
+    //이미지 저장, s3(배포), or local
+    @Transactional
+    public Image saveImageWithStorageChoice(MultipartFile file, String uploadPath) {
+        boolean useS3 = imageProperties.isUseS3();
+        // 로컬 저장 또는 S3 저장 선택
+        if (useS3) {
+            return saveImageS3(file, uploadPath);  // S3 저장 로직
+        } else {
+            return saveImageLocal(file, uploadPath);  // 로컬 저장 로직
+        }
+    }
+
     @Transactional(readOnly = true)
     public  String getImageProfileUrl(Image image){
         boolean useS3 = imageProperties.isUseS3();
@@ -227,8 +191,7 @@ public class ImageService {
         } else {
             profileUrl = "http://localhost:8090" + imageProperties.getViewUrl()+ image.getId();
         }
-
         return profileUrl;
     }
->>>>>>> 378cf0184b3f0525004192a67df13557adba795d
+
 }

@@ -8,12 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageProperties {
 
-    @Value("${image.profile.use_s3}")
+    @Value("${image.use_s3}")
     private boolean useS3;
 
     @Value("${image.profile.upload_path}")
-    private String uploadPath;
+    private String profileUploadPath;
 
-    @Value("${image.profile.view_url}")
+    @Value("${image.certification.upload_path}")
+    private String certificationUploadPath;
+
+    @Value("${image.view_url}")
     private String viewUrl;
 }

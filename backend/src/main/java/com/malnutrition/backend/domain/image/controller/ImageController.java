@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.image.controller;
 import com.malnutrition.backend.domain.image.dto.ImageResponseDto;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.image.service.ProfileImageService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
@@ -25,14 +26,15 @@ import java.util.Optional;
 public class ImageController {
 
     private final ImageService imageService;
+    private final ProfileImageService profileImageService;
     private final Rq rq;
 
     //  이미지 업로드
     @Operation(summary = "이미지 업로드", description = "json형태로 받기 + 이미지 파일 꼭 있어야 작동.")
     @PostMapping(value = "/profile/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ImageResponseDto>> uploadImage(@RequestPart("profileImage") MultipartFile file) {
+    public ResponseEntity<ApiResponse<ImageResponseDto>> uploadImage(@RequestPart("profileImage") MultipartFile profileImage) {
         User actor = rq.getActor();
-        ImageResponseDto savedImage = imageService.saveImageWithStorageChoice(file, actor.getId());
+        ImageResponseDto savedImage = profileImageService.saveImageWithStorageChoice(profileImage, actor.getId());
         ApiResponse<ImageResponseDto> response = ApiResponse.success(savedImage, "이미지 업로드 성공");
         return ResponseEntity.ok(response);
     }
@@ -54,12 +56,12 @@ public class ImageController {
         return ResponseEntity.ok(ApiResponse.success(images, "전체 이미지 조회 성공"));
     }
 
-    // 이미지 삭제
-    @DeleteMapping("/{id}")
+    // 프로파일 이미지 삭제
+    @DeleteMapping("/profile/{id}")
     @Operation(summary = "이미지 삭제", description = "ID로 이미지를 삭제합니다.")
     public ResponseEntity<ApiResponse<String>> deleteImage(@PathVariable("id") Long imageId) {
         Long userId = rq.getActor().getId();
-        String result = imageService.deleteImage(imageId, userId);
+        String result = profileImageService.deleteImage(imageId, userId);
         return ResponseEntity.ok(ApiResponse.success(result, "이미지 삭제 성공"));
     }
 
