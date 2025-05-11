@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 public class Comment extends BaseEntity {
     @Column(columnDefinition = "LONGTEXT", nullable = false)
     private String content;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "qnaboard_id",nullable = false)  // FK 이름을 명시적
     private QnaBoard qnaBoard;

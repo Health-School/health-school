@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "exercise_sheets")
@@ -17,10 +19,13 @@ public class ExerciseSheet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "exercise_start_datetime", nullable = false)
-    private LocalDateTime exerciseStartDateTime;
+    @Column(name = "exercise_date", nullable = false)
+    private LocalDate exerciseDate;
 
-    @Column(name = "exercise_end_datetime", nullable = false)
-    private LocalDateTime exerciseEndDateTime;
+    @Column(name = "exercise_start_time", nullable = false)
+    private LocalTime exerciseStartTime;
+
+    @Column(name = "exercise_end_time", nullable = false)
+    private LocalTime exerciseEndTime;
 
 }
