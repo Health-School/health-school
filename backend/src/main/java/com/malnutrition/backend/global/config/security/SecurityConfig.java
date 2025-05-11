@@ -1,4 +1,4 @@
-package com.malnutrition.backend.global.config;
+package com.malnutrition.backend.global.config.security;
 
 import com.malnutrition.backend.global.security.oauth.CustomOauth2AuthenticationSuccessHandler;
 import com.malnutrition.backend.global.security.security.CustomAuthenticationFilter;
@@ -6,6 +6,7 @@ import com.malnutrition.backend.global.security.security.CustomAuthorizationRequ
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,22 +33,33 @@ public class SecurityConfig {
     private final CustomOauth2AuthenticationSuccessHandler customOauth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
     //통과 시킬꺼 넣어야함
-    private final String[] permitURL = {
-            "/v3/api-docs/**", "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/actuator/**",
-            "/error", "/css/**", "/js/**",
-            "/api/v1/users/join", "/api/v1/users/login",
-            "/api/v1/images/view/*"
-    };
+//    private final String[] permitURL = {
+//            "/v3/api-docs/**", "/swagger-ui/**",
+//            "/swagger-ui.html",
+//            "/actuator/**",
+//            "/error", "/css/**", "/js/**",
+//            "/api/v1/users/join", "/api/v1/users/login",
+//            "/api/v1/images/view/*"
+//    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests( auth -> auth
-                        .requestMatchers(permitURL).permitAll()
-                        .anyRequest().authenticated())
+                        // GET 요청 허용
+                        .requestMatchers(HttpMethod.GET, PermitUrl.GET_URLS).permitAll()
+                        // POST 요청 허용
+                        .requestMatchers(HttpMethod.POST, PermitUrl.POST_URLS).permitAll()
+                        // PUT 요청 허용
+                        .requestMatchers(HttpMethod.PUT, PermitUrl.PUT_URLS).permitAll()
+                        // DELETE 요청 허용
+                        .requestMatchers(HttpMethod.DELETE, PermitUrl.DELETE_URLS).permitAll()
+                        // 모든 요청 허용 (ALL_URLS)
+                        .requestMatchers(PermitUrl.ALL_URLS).permitAll()
+                        // 나머지 요청은 인증 필요
+                        .anyRequest().authenticated()
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .formLogin( form -> form.disable())
