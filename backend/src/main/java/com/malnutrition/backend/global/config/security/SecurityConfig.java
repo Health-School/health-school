@@ -33,14 +33,6 @@ public class SecurityConfig {
     private final CustomOauth2AuthenticationSuccessHandler customOauth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
     //통과 시킬꺼 넣어야함
-//    private final String[] permitURL = {
-//            "/v3/api-docs/**", "/swagger-ui/**",
-//            "/swagger-ui.html",
-//            "/actuator/**",
-//            "/error", "/css/**", "/js/**",
-//            "/api/v1/users/join", "/api/v1/users/login",
-//            "/api/v1/images/view/*"
-//    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

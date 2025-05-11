@@ -17,6 +17,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @ToString
 public class Body extends BaseEntity {
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 }

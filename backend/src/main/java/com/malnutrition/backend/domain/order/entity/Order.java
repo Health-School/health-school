@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -22,9 +23,10 @@ import java.time.LocalDateTime;
 @Table(name = "orders")
 public class Order {
     @Id
+    @Column(length = 36) // UUID는 36자입니다. 명시적으로 지정
     private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_Id")
     private User user;
 
@@ -44,7 +46,7 @@ public class Order {
     @Column(nullable = false)
     private String tossOrderId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "lecture_id",nullable = false)
     private Lecture lecture;
 

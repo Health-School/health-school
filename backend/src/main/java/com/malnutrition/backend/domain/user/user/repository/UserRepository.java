@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.user.user.repository;
 
 
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.domain.user.user.enums.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findByIdWithProfileImage(@Param("id") Long id);
 
     List<User> findAllByProfileImageId(Long id);
+
 
 
 }

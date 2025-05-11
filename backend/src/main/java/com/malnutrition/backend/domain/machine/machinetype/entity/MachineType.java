@@ -16,6 +16,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @ToString
 public class MachineType extends BaseEntity {
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 }
