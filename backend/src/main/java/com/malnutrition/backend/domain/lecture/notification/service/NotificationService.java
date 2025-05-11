@@ -4,6 +4,7 @@ import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.lecture.notification.dto.NotificationCreateDto;
 import com.malnutrition.backend.domain.lecture.notification.dto.NotificationResponseDto;
+import com.malnutrition.backend.domain.lecture.notification.dto.NotificationUpdateDto;
 import com.malnutrition.backend.domain.lecture.notification.entity.Notification;
 import com.malnutrition.backend.domain.lecture.notification.repository.NotificationRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -70,6 +71,61 @@ public class NotificationService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public NotificationResponseDto getNotificationById(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공지사항을 찾을 수 없습니다."));
+
+        return new NotificationResponseDto(
+                notification.getId(),
+                notification.getTitle(),
+                notification.getContent(),
+                notification.getLecture().getTitle(),
+                notification.getCreatedDate()
+        );
+    }
+
+    @Transactional
+    public NotificationResponseDto updateNotification(Long notificationId, NotificationUpdateDto dto, User currentUser) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공지사항을 찾을 수 없습니다."));
+
+        Lecture lecture = notification.getLecture();
+
+        // 작성자 검증: 강의 작성자(trainer)의 id와 현재 사용자 id 비교
+        if (!lecture.getTrainer().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("ADMIN")) {
+            throw new IllegalArgumentException("공지사항을 수정할 권한이 없습니다.");
+        }
+
+        // 수정
+        notification.setTitle(dto.getTitle());
+        notification.setContent(dto.getContent());
+
+        return new NotificationResponseDto(
+                notification.getId(),
+                notification.getTitle(),
+                notification.getContent(),
+                lecture.getTitle(),
+                notification.getCreatedDate()
+        );
+    }
+
+    @Transactional
+    public void deleteNotification(Long notificationId, User currentUser) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공지사항을 찾을 수 없습니다."));
+
+        Lecture lecture = notification.getLecture();
+
+        // 작성자 검증: 강의 작성자(trainer)의 id와 현재 사용자 id 비교
+        if (!lecture.getTrainer().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("ADMIN")) {
+            throw new IllegalArgumentException("공지사항을 수정할 권한이 없습니다.");
+        }
+
+        notificationRepository.delete(notification);
+    }
+
 }
 
 
