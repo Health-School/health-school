@@ -6,6 +6,7 @@ import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "exercise_sheets")
 @Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 public class ExerciseSheet extends BaseEntity {
@@ -33,7 +35,7 @@ public class ExerciseSheet extends BaseEntity {
     @Column(name = "exercise_end_time", nullable = false)
     private LocalTime exerciseEndTime;
 
-    @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<MachineExerciseSheet> machineExerciseSheets;
 
 

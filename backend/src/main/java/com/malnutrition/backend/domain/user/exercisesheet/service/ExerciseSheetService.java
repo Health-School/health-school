@@ -92,4 +92,69 @@ public class ExerciseSheetService {
         }).toList();
     }
 
+    @Transactional
+    public ExerciseSheetResponseDto updateExerciseSheet(Long sheetId, ExerciseSheetCreateDto dto, Long userId) {
+        ExerciseSheet sheet = exerciseSheetRepository.findById(sheetId)
+                .orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
+
+        if (!sheet.getUser().getId().equals(userId)) {
+            throw new SecurityException("수정 권한이 없습니다.");
+        }
+
+        sheet.setExerciseDate(dto.getExerciseDate());
+        sheet.setExerciseStartTime(dto.getExerciseStartTime());
+        sheet.setExerciseEndTime(dto.getExerciseEndTime());
+
+        // 기존 연관관계 제거
+        sheet.getMachineExerciseSheets().clear();
+
+        // 새 연관관계 설정
+        List<MachineExerciseSheet> newMachineExercises = (List<MachineExerciseSheet>) dto.getMachineExercises().stream().map(m -> {
+            Machine machine = machineRepository.findById(m.getMachineId())
+                    .orElseThrow(() -> new IllegalArgumentException("운동 기구를 찾을 수 없습니다."));
+            return MachineExerciseSheet.builder()
+                    .exerciseSheet(sheet)
+                    .machine(machine)
+                    .reps(m.getReps())
+                    .sets(m.getSets())
+                    .weight(m.getWeight())
+                    .build();
+        }).toList();
+
+        sheet.getMachineExerciseSheets().addAll(newMachineExercises);
+
+        // 자동 cascade로 저장됨
+
+        List<MachineExerciseSheetResponseDto> machineDtos = newMachineExercises.stream().map(mes ->
+                new MachineExerciseSheetResponseDto(
+                        mes.getMachine().getName(),
+                        mes.getReps(),
+                        mes.getSets(),
+                        mes.getWeight()
+                )).toList();
+
+        return new ExerciseSheetResponseDto(
+                sheet.getExerciseDate(),
+                sheet.getExerciseStartTime(),
+                sheet.getExerciseEndTime(),
+                machineDtos
+        );
+    }
+
+    @Transactional
+    public void deleteExerciseSheet(Long sheetId, Long userId) {
+        ExerciseSheet sheet = exerciseSheetRepository.findById(sheetId)
+                .orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
+
+        if (!sheet.getUser().getId().equals(userId)) {
+            throw new SecurityException("삭제 권한이 없습니다.");
+        }
+
+        // 연관된 MachineExerciseSheet가 orphanRemoval=true 이면, 아래 한 줄로 삭제 가능
+        exerciseSheetRepository.delete(sheet);
+    }
+
+
+
+
 }
