@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "exercise_sheets")
 @SuperBuilder
@@ -15,11 +17,10 @@ public class ExerciseSheet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private Integer reps;
+    @Column(name = "exercise_start_datetime", nullable = false)
+    private LocalDateTime exerciseStartDateTime;
 
-    private Integer weight;
-
-    @Column(name = "sets")
-    private Integer sets;
+    @Column(name = "exercise_end_datetime", nullable = false)
+    private LocalDateTime exerciseEndDateTime;
 
 }

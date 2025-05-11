@@ -22,15 +22,14 @@ public class Machine extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",nullable = false)  // FK 이름을 명시적으로 지정
-    private User user;
+    private User user; //신청자 명
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "machineType_id",nullable = false)
     private MachineType machineType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exerciseSheet_id")
-    private ExerciseSheet exerciseSheet;
+    private boolean approved; //운동기구 추가 요청이 성공했는지 안되었는지
+
     //운동 기구가 처음 등록되거나 사용된 시트가 없을 땐 null 이어야 할 것 같음!!!
 
 }
