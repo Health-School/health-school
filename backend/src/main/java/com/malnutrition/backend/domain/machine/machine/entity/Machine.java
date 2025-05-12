@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.machine.machine.entity;
 
+import com.malnutrition.backend.domain.machine.machinebody.entity.MachineBody;
 import com.malnutrition.backend.domain.machine.machinetype.entity.MachineType;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -7,6 +8,9 @@ import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @SuperBuilder
@@ -27,6 +31,9 @@ public class Machine extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "machineType_id",nullable = false)
     private MachineType machineType;
+
+    @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MachineBody> machineBodies;
 
     private boolean approved; //운동기구 추가 요청이 성공했는지 안되었는지
 
