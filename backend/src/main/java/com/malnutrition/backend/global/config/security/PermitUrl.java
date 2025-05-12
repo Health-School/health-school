@@ -6,7 +6,7 @@ public class PermitUrl {
     public static final String[] ALL_URLS = {
             "/api/v1/lectures/**", "/api/v1/orders/**",
             "/api/v1/lectureUsers/**","/api/v1/notifications/**",
-            "/api/v1/exerciseSheets/**"
+            "/api/v1/exerciseSheets/**","/api/v1/admin/machine-types/**"
     };
     public static final String[] GET_URLS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
