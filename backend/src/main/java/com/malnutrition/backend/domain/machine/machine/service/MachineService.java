@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.machine.machine.service;
 
 import com.malnutrition.backend.domain.machine.body.entity.Body;
 import com.malnutrition.backend.domain.machine.body.repository.BodyRepository;
+import com.malnutrition.backend.domain.machine.machine.dto.MachineRegisterRequest;
 import com.malnutrition.backend.domain.machine.machine.dto.MachineResponseDto;
 import com.malnutrition.backend.domain.machine.machine.entity.Machine;
 import com.malnutrition.backend.domain.machine.machine.repository.MachineRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,6 +115,43 @@ public class MachineService {
 
         machineRepository.delete(machine); // 연관된 machineBody도 같이 삭제됨
     }
+
+    @Transactional
+    public MachineDto registerMachine(MachineRegisterRequest request) {
+        User user = rq.getActor();
+
+        if (!user.getRole().name().equals("TRAINER")) {
+            throw new SecurityException("트레이너 권한이 필요합니다.");
+        }
+
+        MachineType type = machineTypeRepository.findById(request.getMachineTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 기구 타입입니다."));
+
+        Machine machine = Machine.builder()
+                .name(request.getName())
+                .user(user)
+                .machineType(type)
+                .approved(false) // 요청 상태
+                .machineBodies(new ArrayList<>())
+                .build();
+
+        machine = machineRepository.save(machine);
+
+        for (Long bodyId : request.getBodyIds()) {
+            Body body = bodyRepository.findById(bodyId)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 운동 부위 ID입니다."));
+
+            MachineBody machineBody = MachineBody.builder()
+                    .machine(machine)
+                    .body(body)
+                    .build();
+
+            machine.getMachineBodies().add(machineBody);
+        }
+
+        return new MachineDto(machine.getId(), machine.getName(), machine.getMachineType().getName(), machine.isApproved());
+    }
+
 
 
 
