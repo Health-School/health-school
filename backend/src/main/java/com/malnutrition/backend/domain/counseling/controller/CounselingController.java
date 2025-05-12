@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.counseling.controller;
 
 import com.malnutrition.backend.domain.counseling.dto.CounselingDto;
 import com.malnutrition.backend.domain.counseling.service.CounselingService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,11 @@ public class CounselingController {
     public ResponseEntity<?> createCounseling(@RequestBody CounselingDto dto) {
         try {
             CounselingDto created = counselingService.createCounseling(dto);
-            return ResponseEntity.ok(created);
+            return ResponseEntity.ok(ApiResponse.success(created, "회원 상담지 작성 성공!"));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -33,27 +34,27 @@ public class CounselingController {
     public ResponseEntity<?> updateCounseling(@PathVariable Long id, @RequestBody CounselingDto dto) {
         try {
             CounselingDto updated = counselingService.updateCounseling(id, dto);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(ApiResponse.success(updated, "상담지 수정 성공!"));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCounseling(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(counselingService.getCounselingById(id));
+            return ResponseEntity.ok(ApiResponse.success(counselingService.getCounselingById(id), "조회 성공!"));
         } catch (SecurityException e) {         // 권한 없음
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", e.getMessage()));
+                    .body(Map.of("message", ApiResponse.fail(e.getMessage())));
         } catch (IllegalArgumentException e) {  // 존재하지 않음
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", e.getMessage()));
+                    .body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {                 // 기타
             return ResponseEntity.internalServerError()
-                    .body(Map.of("message", "서버 오류"));
+                    .body(ApiResponse.fail("서버 오류"));
         }
     }
 
@@ -61,13 +62,13 @@ public class CounselingController {
     public ResponseEntity<?> getCounselingsByUserId(@PathVariable Long userId) {
         try {
             List<CounselingDto> counselingList = counselingService.getCounselingsByUserId(userId);
-            return ResponseEntity.ok(counselingList);
+            return ResponseEntity.ok(ApiResponse.success(counselingList, "조회 성공!"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
     }
 
@@ -75,13 +76,13 @@ public class CounselingController {
     public ResponseEntity<?> deleteCounseling(@PathVariable Long id) {
         try {
             counselingService.deleteCounseling(id);
-            return ResponseEntity.ok("상담지를 삭제했습니다.");
+            return ResponseEntity.ok(ApiResponse.success(null,"상담지를 삭제했습니다."));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
     }
 
