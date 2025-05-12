@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/certifications")
+@RequestMapping("/api/v1/admin/certifications")
 @Tag(name = "Certification", description = "Certification 관련 API")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class CertificationController {
 
     private final CertificationService certificationService;
@@ -24,21 +26,11 @@ public class CertificationController {
             tags = {"Certification"}
     )
     @PostMapping
-    public ResponseEntity<ApiResponse<CertificationRegisterRequestDto>> registerCertification(@RequestBody CertificationRegisterRequestDto certificationRegisterRequestDto){
-        //등록 신청
-        certificationService.registerCertification(certificationRegisterRequestDto);
 
-        
+    public ResponseEntity<ApiResponse<CertificationRegisterRequestDto>> registerCertification(@RequestBody CertificationRegisterRequestDto certificationRegisterRequestDto){
+        certificationService.registerCertification(certificationRegisterRequestDto);
         return ResponseEntity.ok().body(ApiResponse.success(certificationRegisterRequestDto, "자격증 등록 성공"));
     }
 
-    // 자격증 등록
-//    @Operation(
-//            summary = "자격증 등록",
-//            description = "자격증 등록",
-//            tags = {"User"}
-//    )
-//    @PostMapping
-//
 
 }
