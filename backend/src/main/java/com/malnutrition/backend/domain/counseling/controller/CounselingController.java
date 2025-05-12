@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/counselings")
 @RequiredArgsConstructor
@@ -35,6 +38,36 @@ public class CounselingController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCounseling(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(counselingService.getCounselingById(id));
+        } catch (SecurityException e) {         // 권한 없음
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {  // 존재하지 않음
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {                 // 기타
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("message", "서버 오류"));
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getCounselingsByUserId(@PathVariable Long userId) {
+        try {
+            List<CounselingDto> counselingList = counselingService.getCounselingsByUserId(userId);
+            return ResponseEntity.ok(counselingList);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
         }
     }
 
