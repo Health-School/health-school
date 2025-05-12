@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.counseling.schedule.service;
 import com.malnutrition.backend.domain.counseling.schedule.dto.ScheduleCreateDto;
 import com.malnutrition.backend.domain.counseling.schedule.dto.ScheduleDecisionDto;
 import com.malnutrition.backend.domain.counseling.schedule.dto.ScheduleDto;
+import com.malnutrition.backend.domain.counseling.schedule.dto.ScheduleUpdateDto;
 import com.malnutrition.backend.domain.counseling.schedule.entity.Schedule;
 import com.malnutrition.backend.domain.counseling.schedule.enums.ApprovalStatus;
 import com.malnutrition.backend.domain.counseling.schedule.repository.ScheduleRepository;
@@ -76,6 +77,43 @@ public class ScheduleService {
 
         return ScheduleDto.fromEntity(schedule);
     }
+
+    @Transactional
+    public ScheduleDto updateSchedule(Long scheduleId, ScheduleUpdateDto dto) {
+        User user = rq.getActor(); // 로그인한 사용자
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 스케줄이 존재하지 않습니다."));
+
+        // 신청자만 수정 가능
+        if (!schedule.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("자신의 스케줄만 수정할 수 있습니다.");
+        }
+
+        // 수정된 값 반영
+        schedule.setDesiredDate(dto.getDesiredDate());
+        schedule.setStartTime(dto.getStartTime());
+        schedule.setEndTime(dto.getEndTime());
+
+        // 수정된 스케줄 저장
+        Schedule updatedSchedule = scheduleRepository.save(schedule);
+
+        return ScheduleDto.fromEntity(updatedSchedule);
+    }
+
+    @Transactional
+    public void deleteSchedule(Long scheduleId) {
+        User user = rq.getActor(); // 로그인한 사용자
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 스케줄이 존재하지 않습니다."));
+
+        // 신청자만 삭제 가능
+        if (!schedule.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("자신의 스케줄만 삭제할 수 있습니다.");
+        }
+
+        // 스케줄 삭제
+        scheduleRepository.delete(schedule);
+    } //스케줄 취소
 
 
 
