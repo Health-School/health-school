@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.machine.body.controller;
 
 import com.malnutrition.backend.domain.machine.body.service.BodyService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,31 +18,31 @@ public class BodyController {
     @GetMapping
     public ResponseEntity<?> getAllBodies() {
         try {
-            return ResponseEntity.ok(bodyService.getAllBodies());
+            return ResponseEntity.ok(ApiResponse.success(bodyService.getAllBodies(), "조회 성공!"));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
     @PostMapping
     public ResponseEntity<?> createBody(@RequestParam String name) {
         try {
-            return ResponseEntity.ok(bodyService.createBody(name));
+            return ResponseEntity.ok(ApiResponse.success(bodyService.createBody(name), "생성 성공!"));
         } catch (IllegalArgumentException | SecurityException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류"));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail( "서버 오류"));
         }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBody(@PathVariable Long id, @RequestParam String name) {
         try {
-            return ResponseEntity.ok(bodyService.updateBody(id, name));
+            return ResponseEntity.ok(ApiResponse.success(bodyService.updateBody(id, name), "수정 성공!"));
         } catch (IllegalArgumentException | SecurityException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류"));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류"));
         }
     }
 
@@ -49,11 +50,11 @@ public class BodyController {
     public ResponseEntity<?> deleteBody(@PathVariable Long id) {
         try {
             bodyService.deleteBody(id);
-            return ResponseEntity.ok(Map.of("message", "삭제 성공"));
+            return ResponseEntity.ok(ApiResponse.success(null,"삭제 성공"));
         } catch (IllegalArgumentException | SecurityException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류"));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류"));
         }
     }
 }

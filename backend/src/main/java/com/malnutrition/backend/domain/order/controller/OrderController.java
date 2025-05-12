@@ -4,6 +4,7 @@ import com.malnutrition.backend.domain.order.dto.OrderResponse;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.service.OrderService;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,10 +42,10 @@ public class OrderController {
             }
 
             log.info("Fetching orders for user with email: {}", user.getEmail());
-            return ResponseEntity.status(200).body(orderService.getOrdersByUser(user));
+            return ResponseEntity.status(200).body(ApiResponse.success(orderService.getOrdersByUser(user), "결제 내역 조회 성공!"));
         } catch (Exception e) {
             log.error("Error occurred while fetching orders for user with email: {}", user.getEmail(), e);
-            throw new RuntimeException("Error occurred while fetching orders", e);
+            return ResponseEntity.status(500).body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -56,8 +57,8 @@ public class OrderController {
         if (orderResponse == null) {
             Map<String, String> body = new HashMap<>();
             body.put("message", "해당 결제 내역을 찾을 수 없습니다.");
-            return ResponseEntity.ok(body);
+            return ResponseEntity.ok(ApiResponse.success(body, "해당 결제 내역 조회 실패!"));
         }
-        return ResponseEntity.ok(orderResponse);
+        return ResponseEntity.ok(ApiResponse.success(orderResponse, "해당 결제 내역입니다!"));
     }
 }

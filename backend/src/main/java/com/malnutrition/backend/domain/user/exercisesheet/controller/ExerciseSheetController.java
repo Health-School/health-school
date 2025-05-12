@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseShe
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
 import com.malnutrition.backend.domain.user.exercisesheet.service.ExerciseSheetService;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,11 +32,11 @@ public class ExerciseSheetController {
         try {
             User user = rq.getActor();
             ExerciseSheet created = exerciseSheetService.createFullExerciseSheet(dto, user.getId());
-            return ResponseEntity.ok(created);
+            return ResponseEntity.ok(ApiResponse.success(created, "운동 기록지 생성 완료!"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("운동 기록지를 생성하는 중 예상치 못한 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록지를 생성하는 중 예상치 못한 오류가 발생했습니다."));
         }
     }
 
@@ -45,7 +47,7 @@ public class ExerciseSheetController {
             ExerciseSheet sheet = exerciseSheetService.getExerciseSheetById(id, user.getId());
 
             if (sheet == null) {
-                return ResponseEntity.status(404).body("운동 기록을 찾을 수 없습니다.");
+                return ResponseEntity.status(404).body(ApiResponse.fail("운동 기록을 찾을 수 없습니다."));
             }
 
             // ExerciseSheet에서 직접 DTO 변환
@@ -65,10 +67,10 @@ public class ExerciseSheetController {
                     machineDtos
             );
 
-            return ResponseEntity.ok(responseDto);
+            return ResponseEntity.ok(ApiResponse.success(responseDto, "운동 기록 조회 결과입니다."));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("운동 기록 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -79,11 +81,11 @@ public class ExerciseSheetController {
             LocalDate exerciseDate = LocalDate.parse(date);
 
             List<ExerciseSheetResponseDto> response = exerciseSheetService.getExerciseSheetsByUserAndDateDesc(user.getId(), exerciseDate);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.success(response, "운동 기록 조회 성공!"));
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("운동 기록 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -95,14 +97,14 @@ public class ExerciseSheetController {
         try {
             User user = rq.getActor();
             ExerciseSheetResponseDto updated = exerciseSheetService.updateExerciseSheet(id, dto, user.getId());
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(ApiResponse.success(updated, "운동 기록 수정 성공!"));
         } catch (SecurityException se) {
-            return ResponseEntity.status(403).body(se.getMessage());
+            return ResponseEntity.status(403).body(ApiResponse.fail(se.getMessage()));
         } catch (IllegalArgumentException ie) {
-            return ResponseEntity.status(404).body(ie.getMessage());
+            return ResponseEntity.status(404).body(ApiResponse.fail(ie.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("운동 기록 수정 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 수정 중 오류가 발생했습니다."));
         }
     }
 
@@ -111,14 +113,14 @@ public class ExerciseSheetController {
         try {
             User user = rq.getActor();  // 로그인한 사용자
             exerciseSheetService.deleteExerciseSheet(id, user.getId());
-            return ResponseEntity.ok("운동 기록이 삭제되었습니다.");
+            return ResponseEntity.ok(ApiResponse.success(null,"운동 기록이 삭제되었습니다."));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("운동 기록 삭제 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 삭제 중 오류가 발생했습니다."));
         }
     }
 

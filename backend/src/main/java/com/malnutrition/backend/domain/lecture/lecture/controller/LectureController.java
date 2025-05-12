@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.service.UserService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import com.malnutrition.backend.global.security.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class LectureController {
 
 
     @PostMapping
-    public ResponseEntity<String> addLecture(@RequestBody LectureRequestDto request) {
+    public ResponseEntity<?> addLecture(@RequestBody LectureRequestDto request) {
         // lectureLevel을 LectureLevel enum으로 변환
         LectureLevel lectureLevel = LectureLevel.valueOf(request.getLectureLevel().toUpperCase());
 
@@ -35,6 +36,6 @@ public class LectureController {
 
         // LectureRequestDto를 Lecture로 변환 후 강의 추가
         lectureService.addLecture(request, user, lectureLevel);
-        return ResponseEntity.ok("강의 등록이 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(null,"강의 등록이 완료되었습니다."));
     }
 }
