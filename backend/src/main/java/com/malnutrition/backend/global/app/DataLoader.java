@@ -28,12 +28,11 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if(!userService.isExistProvider("SYSTEM")){
             String email = "join@test.com";
-            String password = "1234";
             String nickname = "joinUser";
             String phoneNumber = "010-1111-2222";
             UserJoinRequestDto dto = UserJoinRequestDto.builder()
                     .email(email)
-                    .password(password)
+                    .password(adminPassword)
                     .nickname(nickname)
                     .phoneNumber(phoneNumber)
                     .build();
