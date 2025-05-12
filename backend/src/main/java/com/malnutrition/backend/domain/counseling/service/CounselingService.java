@@ -44,4 +44,23 @@ public class CounselingService {
 
         return CounselingDto.fromEntity(counseling);
     }
+
+    @Transactional
+    public CounselingDto updateCounseling(Long id, CounselingDto dto) {
+        User currentUser = rq.getActor();
+
+        Counseling counseling = counselingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 상담지가 존재하지 않습니다."));
+
+        if (!counseling.getTrainer().getId().equals(currentUser.getId())) {
+            throw new SecurityException("본인이 작성한 상담지만 수정할 수 있습니다.");
+        }
+
+        counseling.setTitle(dto.getTitle());
+        counseling.setContent(dto.getContent());
+        counseling.setType(dto.getType());
+
+        return CounselingDto.fromEntity(counseling);
+    }
+
 }
