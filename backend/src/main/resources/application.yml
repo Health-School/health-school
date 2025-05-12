@@ -80,6 +80,7 @@ image:
   view_url: "/api/v1/images/view/" # 이미지를 보는용, s3는 버킷 저장소 url
   certification:
     upload_path: "uploads/images/certification"
+
 cloud:
   aws:
     s3:

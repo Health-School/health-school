@@ -1,12 +1,14 @@
 package com.malnutrition.backend.global.config.security;
 
 import com.malnutrition.backend.global.security.oauth.CustomOauth2AuthenticationSuccessHandler;
+import com.malnutrition.backend.global.security.security.CustomAuthenticationEntryPoint;
 import com.malnutrition.backend.global.security.security.CustomAuthenticationFilter;
 import com.malnutrition.backend.global.security.security.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -32,6 +35,7 @@ public class SecurityConfig {
     private final CustomAuthenticationFilter customAuthenticationFilter;
     private final CustomOauth2AuthenticationSuccessHandler customOauth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     //통과 시킬꺼 넣어야함
 
     @Bean
@@ -69,7 +73,11 @@ public class SecurityConfig {
                                         authorizationEndpoint
                                                 .authorizationRequestResolver(customAuthorizationRequestResolver)
                                 )
+                )
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(customAuthenticationEntryPoint)
                 );
+
 
         ; //h2-console 접근 허용
         return http.build();

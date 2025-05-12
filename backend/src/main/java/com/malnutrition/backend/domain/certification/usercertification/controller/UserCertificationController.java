@@ -27,5 +27,4 @@ public class UserCertificationController {
         userCertificationService.registerUserCertification(userCertificationRegisterRequestDto, certificationImage);
         return ResponseEntity.ok().body(ApiResponse.success(null, "등록 신청 성공"));
     }
-
 }
