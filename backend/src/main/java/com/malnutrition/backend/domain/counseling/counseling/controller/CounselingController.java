@@ -1,7 +1,7 @@
-package com.malnutrition.backend.domain.counseling.controller;
+package com.malnutrition.backend.domain.counseling.counseling.controller;
 
-import com.malnutrition.backend.domain.counseling.dto.CounselingDto;
-import com.malnutrition.backend.domain.counseling.service.CounselingService;
+import com.malnutrition.backend.domain.counseling.counseling.dto.CounselingDto;
+import com.malnutrition.backend.domain.counseling.counseling.service.CounselingService;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

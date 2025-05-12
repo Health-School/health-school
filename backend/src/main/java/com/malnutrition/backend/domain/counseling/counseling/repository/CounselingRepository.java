@@ -1,6 +1,6 @@
-package com.malnutrition.backend.domain.counseling.repository;
+package com.malnutrition.backend.domain.counseling.counseling.repository;
 
-import com.malnutrition.backend.domain.counseling.entity.Counseling;
+import com.malnutrition.backend.domain.counseling.counseling.entity.Counseling;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

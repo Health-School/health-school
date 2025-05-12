@@ -1,6 +1,6 @@
-package com.malnutrition.backend.domain.counseling.dto;
+package com.malnutrition.backend.domain.counseling.counseling.dto;
 
-import com.malnutrition.backend.domain.counseling.entity.Counseling;
+import com.malnutrition.backend.domain.counseling.counseling.entity.Counseling;
 import lombok.*;
 
 @Getter

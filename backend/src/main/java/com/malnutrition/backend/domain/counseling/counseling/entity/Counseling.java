@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.counseling.entity;
+package com.malnutrition.backend.domain.counseling.counseling.entity;
 
 
 import com.malnutrition.backend.domain.user.user.entity.User;

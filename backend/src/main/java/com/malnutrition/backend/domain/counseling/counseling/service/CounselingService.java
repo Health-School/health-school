@@ -1,8 +1,8 @@
-package com.malnutrition.backend.domain.counseling.service;
+package com.malnutrition.backend.domain.counseling.counseling.service;
 
-import com.malnutrition.backend.domain.counseling.dto.CounselingDto;
-import com.malnutrition.backend.domain.counseling.entity.Counseling;
-import com.malnutrition.backend.domain.counseling.repository.CounselingRepository;
+import com.malnutrition.backend.domain.counseling.counseling.dto.CounselingDto;
+import com.malnutrition.backend.domain.counseling.counseling.entity.Counseling;
+import com.malnutrition.backend.domain.counseling.counseling.repository.CounselingRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
