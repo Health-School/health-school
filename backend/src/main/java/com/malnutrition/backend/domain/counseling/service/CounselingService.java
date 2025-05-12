@@ -109,5 +109,19 @@ public class CounselingService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteCounseling(Long counselingId) {
+        User current = rq.getActor();
+
+        Counseling counseling = counselingRepository.findById(counselingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 상담지를 찾을 수 없습니다."));
+
+        if (!counseling.getTrainer().getId().equals(current.getId())) {
+            throw new SecurityException("해당 상담지를 삭제할 권한이 없습니다.");
+        }
+
+        counselingRepository.delete(counseling);
+    }
+
 
 }
