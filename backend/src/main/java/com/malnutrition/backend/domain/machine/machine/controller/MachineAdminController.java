@@ -4,6 +4,7 @@ import com.malnutrition.backend.domain.machine.machine.entity.Machine;
 import com.malnutrition.backend.domain.machine.machine.repository.MachineRepository;
 import com.malnutrition.backend.domain.machine.machine.service.MachineService;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class MachineAdminController {
 
         // 관리자인지 확인
         if (!user.getRole().name().equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail("관리자 권한이 필요합니다."));
         }
 
         // 운동기구 찾기
@@ -40,7 +41,7 @@ public class MachineAdminController {
         machine.setApproved(true);
         machineRepository.save(machine);
 
-        return ResponseEntity.ok("운동기구 승인이 완료되었습니다.");
+        return ResponseEntity.ok(ApiResponse.success(null,"운동기구 승인이 완료되었습니다."));
     }
 
     @PutMapping("/{id}")
@@ -53,9 +54,9 @@ public class MachineAdminController {
         try {
             return ResponseEntity.ok(machineService.updateMachine(id, name, machineTypeId, bodyIds));
         } catch (IllegalArgumentException | SecurityException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류"));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류"));
         }
     }
 
@@ -63,11 +64,11 @@ public class MachineAdminController {
     public ResponseEntity<?> deleteMachine(@PathVariable Long id) {
         try {
             machineService.deleteMachine(id);
-            return ResponseEntity.ok(Map.of("message", "삭제 성공"));
+            return ResponseEntity.ok(ApiResponse.success(null,"삭제 성공"));
         } catch (IllegalArgumentException | SecurityException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류"));
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("서버 오류"));
         }
     }
 }
