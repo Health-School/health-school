@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,9 +33,8 @@ public class UserCertification extends BaseEntity {
     private ApproveStatus approveStatus;
     //통과 기준이 될 자격증 이름:
 
-
     @Column(nullable = false)
-    private LocalDateTime expirationDate; //유효기간 끝
+    private LocalDate expirationDate; //유효기간 끝
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_image_id")

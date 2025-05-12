@@ -10,5 +10,5 @@ import lombok.*;
 public class ImageResponseDto {
     private Long id;
     private String originalName;
-    private String profileImageUrl;
+    private String imageUrl;
 }

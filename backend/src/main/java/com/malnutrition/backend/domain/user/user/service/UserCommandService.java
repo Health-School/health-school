@@ -1,6 +1,5 @@
 package com.malnutrition.backend.domain.user.user.service;
 
-import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.user.user.dto.MeUserResponseDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
