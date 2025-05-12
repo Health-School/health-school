@@ -11,8 +11,13 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +119,93 @@ public class ScheduleService {
         // 스케줄 삭제
         scheduleRepository.delete(schedule);
     } //스케줄 취소
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getSchedulesByTrainer() {
+        User trainer = rq.getActor(); // 로그인한 사용자가 트레이너일 경우 그 사용자
+
+        // 트레이너가 관리하는 모든 스케줄 조회
+        List<Schedule> schedules = scheduleRepository.findByTrainer(trainer);
+
+        // 스케줄 리스트를 DTO로 변환하여 반환
+        return schedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getApprovedSchedulesByTrainer() {
+        User trainer = rq.getActor(); // 로그인한 사용자가 트레이너일 경우 그 사용자
+
+        // 트레이너가 관리하는 승인된 스케줄만 조회
+        List<Schedule> approvedSchedules = scheduleRepository.findByTrainerAndApprovalStatus(trainer, ApprovalStatus.APPROVED);
+
+        // 승인된 스케줄 리스트를 DTO로 변환하여 반환
+        return approvedSchedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ScheduleDto getScheduleByTrainerAndId(Long scheduleId) {
+        User trainer = rq.getActor(); // 로그인한 사용자가 트레이너일 경우 그 사용자
+
+        // 트레이너가 관리하는 스케줄 중에서 ID가 일치하는 스케줄 조회
+        Schedule schedule = scheduleRepository.findByTrainerAndId(trainer, scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 트레이너의 스케줄이 존재하지 않습니다."));
+
+        // 스케줄을 DTO로 변환하여 반환
+        return ScheduleDto.fromEntity(schedule);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getSchedulesByUser() {
+        User user = rq.getActor(); // 로그인한 사용자
+
+        // 사용자가 신청한 모든 스케줄 조회
+        List<Schedule> schedules = scheduleRepository.findByUser(user);
+
+        // 스케줄 리스트를 DTO로 변환하여 반환
+        return schedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getApprovedSchedules() {
+        // 승인된 스케줄 조회
+        List<Schedule> approvedSchedules = scheduleRepository.findByApprovalStatus(ApprovalStatus.APPROVED);
+
+        // 승인된 스케줄 리스트를 DTO로 변환하여 반환
+        return approvedSchedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ScheduleDto getScheduleById(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 스케줄이 존재하지 않습니다."));
+
+        // 스케줄을 DTO로 변환하여 반환
+        return ScheduleDto.fromEntity(schedule);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getSchedulesByTrainerAndDate(Long trainerId, LocalDate desiredDate) {
+        List<Schedule> schedules = scheduleRepository.findByTrainerIdAndDesiredDate(trainerId, desiredDate);
+        return schedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ScheduleDto> getSchedulesByUserAndDate(Long userId, LocalDate desiredDate) {
+        List<Schedule> schedules = scheduleRepository.findByUserIdAndDesiredDate(userId, desiredDate);
+        return schedules.stream()
+                .map(ScheduleDto::fromEntity)
+                .toList();
+    }
 
 
 
