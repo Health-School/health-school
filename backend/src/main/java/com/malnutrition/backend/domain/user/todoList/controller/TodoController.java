@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.user.todoList.controller;
 
 import com.malnutrition.backend.domain.user.todoList.dto.TodoCreateDto;
 import com.malnutrition.backend.domain.user.todoList.dto.TodoDto;
+import com.malnutrition.backend.domain.user.todoList.dto.TodoUpdateDto;
 import com.malnutrition.backend.domain.user.todoList.enums.TodoEnum;
 import com.malnutrition.backend.domain.user.todoList.service.TodoService;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,16 @@ public class TodoController {
     @GetMapping("/status")
     public ResponseEntity<?> getTodosByDone(@RequestParam("done") TodoEnum done) {
         return ResponseEntity.ok(todoService.getTodosByDoneStatus(done));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTodo(@PathVariable("id") Long id, @RequestBody TodoUpdateDto dto) {
+        try {
+            TodoDto updated = todoService.updateTodo(id, dto);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException | SecurityException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 
