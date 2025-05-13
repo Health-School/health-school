@@ -94,5 +94,19 @@ public class TodoService {
         return TodoDto.fromEntity(todo);
     }
 
+    @Transactional
+    public void deleteTodo(Long todoId) {
+        User user = rq.getActor(); // 로그인한 사용자
+
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 Todo가 존재하지 않습니다."));
+
+        if (!todo.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("삭제 권한이 없습니다.");
+        }
+
+        todoRepository.delete(todo);
+    }
+
 }
 

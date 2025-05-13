@@ -67,6 +67,16 @@ public class TodoController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTodo(@PathVariable("id") Long id) {
+        try {
+            todoService.deleteTodo(id);
+            return ResponseEntity.ok("삭제가 완료되었습니다.");
+        } catch (IllegalArgumentException | SecurityException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
 
 
