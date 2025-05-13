@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Table(name = "user_certifications")
 public class UserCertification extends BaseEntity {
 
@@ -39,4 +41,8 @@ public class UserCertification extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_image_id")
     private Image image; //자격증 이미지
+
+    @Column(columnDefinition = "TEXT") // 승인, 반려 사유 (관리자 입력)
+    private String adminComment;
+
 }

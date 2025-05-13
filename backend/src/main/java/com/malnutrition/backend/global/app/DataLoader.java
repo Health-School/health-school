@@ -27,7 +27,7 @@ public class DataLoader implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         if(!userService.isExistProvider("SYSTEM")){
-            String email = "join@test.com";
+            String email = "admin@health-school.com";
             String nickname = "joinUser";
             String phoneNumber = "010-1111-2222";
             UserJoinRequestDto dto = UserJoinRequestDto.builder()
