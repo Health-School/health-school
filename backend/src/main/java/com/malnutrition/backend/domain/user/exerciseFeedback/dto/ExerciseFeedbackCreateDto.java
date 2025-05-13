@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.user.exerciseFeedback.enums;
+package com.malnutrition.backend.domain.user.exerciseFeedback.dto;
 
 import lombok.Data;
 

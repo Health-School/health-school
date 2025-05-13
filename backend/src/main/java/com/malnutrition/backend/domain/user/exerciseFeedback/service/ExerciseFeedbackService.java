@@ -1,7 +1,8 @@
 package com.malnutrition.backend.domain.user.exerciseFeedback.service;
 
+import com.malnutrition.backend.domain.user.exerciseFeedback.dto.FeedbackUpdateDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.entity.ExerciseFeedback;
-import com.malnutrition.backend.domain.user.exerciseFeedback.enums.ExerciseFeedbackCreateDto;
+import com.malnutrition.backend.domain.user.exerciseFeedback.dto.ExerciseFeedbackCreateDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.dto.FeedbackDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.repository.ExerciseFeedbackRepository;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
@@ -12,8 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -106,6 +108,26 @@ public class ExerciseFeedbackService {
                 .map(FeedbackDto::fromEntity)
                 .toList();
     }
+    @Transactional
+    public FeedbackDto updateFeedback(Long feedbackId, FeedbackUpdateDto dto) {
+        User currentUser = rq.getActor();
+
+        ExerciseFeedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new NoSuchElementException("해당 피드백이 존재하지 않습니다."));
+
+        boolean isTrainer = feedback.getTrainer().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
+
+        if (!isTrainer && !isAdmin) {
+            throw new SecurityException("해당 피드백을 수정할 권한이 없습니다.");
+        }
+
+        feedback.setComment(dto.getContent());
+
+        return FeedbackDto.fromEntity(feedback);
+    }
+
+
 
 
 }

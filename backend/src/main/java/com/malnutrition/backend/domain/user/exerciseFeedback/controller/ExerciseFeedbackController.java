@@ -1,8 +1,9 @@
 package com.malnutrition.backend.domain.user.exerciseFeedback.controller;
 
 import com.malnutrition.backend.domain.user.exerciseFeedback.dto.FeedbackDto;
+import com.malnutrition.backend.domain.user.exerciseFeedback.dto.FeedbackUpdateDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.entity.ExerciseFeedback;
-import com.malnutrition.backend.domain.user.exerciseFeedback.enums.ExerciseFeedbackCreateDto;
+import com.malnutrition.backend.domain.user.exerciseFeedback.dto.ExerciseFeedbackCreateDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.service.ExerciseFeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,4 +62,20 @@ public class ExerciseFeedbackController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/{feedbackId}")
+    public ResponseEntity<?> updateFeedback(@PathVariable Long feedbackId,
+                                            @RequestBody FeedbackUpdateDto dto) {
+        try {
+            FeedbackDto updated = feedbackService.updateFeedback(feedbackId, dto);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("피드백 수정 중 오류가 발생했습니다.");
+        }
+    }
+
 }
