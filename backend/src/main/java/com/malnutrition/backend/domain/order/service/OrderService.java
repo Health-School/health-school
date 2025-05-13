@@ -1,9 +1,12 @@
 package com.malnutrition.backend.domain.order.service;
 
+import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
+import com.malnutrition.backend.domain.alarm.alarm.event.AlarmEventHandler;
 import com.malnutrition.backend.domain.order.dto.OrderResponse;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final AlarmEventHandler alarmEventHandler;
+    private final Rq rq;
 
     // 사용자의 결제 내역을 조회
     @Transactional(readOnly = true)
@@ -65,4 +70,11 @@ public class OrderService {
                 order.getLecture().getTrainer().getNickname()
         );
     }
+
+    public void orderSuccessEvent(){
+
+        AlarmRequestDto 시스템 = AlarmRequestDto.from(rq.getActor(), "시스템");
+        alarmEventHandler.handleAlarmMessageSend(시스템);
+    }
+
 }

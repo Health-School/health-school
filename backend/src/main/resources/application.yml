@@ -85,3 +85,4 @@ cloud:
   aws:
     s3:
       bucket: fivelogs-bucket # 임시 저장 테스트용,
+#      bucket: heathschool-video-picture

@@ -1,9 +1,11 @@
 package com.malnutrition.backend.domain.alarm.alarmsetting.entity;
 
-import com.malnutrition.backend.domain.alarm.alarmsetting.enums.AlarmSettingType;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -12,14 +14,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class AlarmSetting extends BaseEntity {
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User listener;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AlarmSettingType alarmSettingType;
-
-    @Column(nullable = false)
-    private boolean isEnabled;
+    private boolean marketingAlarm;
+    private boolean systemAlarm;
+    private boolean orderAlarm;
 }
