@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.user.exerciseFeedback.dto.FeedbackUpdateD
 import com.malnutrition.backend.domain.user.exerciseFeedback.entity.ExerciseFeedback;
 import com.malnutrition.backend.domain.user.exerciseFeedback.dto.ExerciseFeedbackCreateDto;
 import com.malnutrition.backend.domain.user.exerciseFeedback.service.ExerciseFeedbackService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,9 @@ public class ExerciseFeedbackController {
     public ResponseEntity<?> createFeedback(@RequestBody ExerciseFeedbackCreateDto dto) {
         try {
             ExerciseFeedback saved = feedbackService.createFeedback(dto);
-            return ResponseEntity.ok("피드백 작성이 완료되었습니다.");
+            return ResponseEntity.ok(ApiResponse.success(saved,"피드백 작성이 완료되었습니다."));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -33,33 +34,33 @@ public class ExerciseFeedbackController {
     public ResponseEntity<?> getBySheetId(@PathVariable Long sheetId) {
         try {
             List<FeedbackDto> list = feedbackService.getFeedbacksBySheetId(sheetId);
-            return ResponseEntity.ok(list);
+            return ResponseEntity.ok(ApiResponse.success(list, "조회 완료!"));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
     @GetMapping("/{feedbackId}")
     public ResponseEntity<?> getById(@PathVariable Long feedbackId) {
         try {
-            return ResponseEntity.ok(feedbackService.getFeedbackById(feedbackId));
+            return ResponseEntity.ok(ApiResponse.success(feedbackService.getFeedbackById(feedbackId), "조회 완료!"));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
     @GetMapping("/trainer/{trainerId}")
     public ResponseEntity<?> getByTrainerId(@PathVariable Long trainerId) {
         try {
-            return ResponseEntity.ok(feedbackService.getFeedbacksByTrainerId(trainerId));
+            return ResponseEntity.ok(ApiResponse.success(feedbackService.getFeedbacksByTrainerId(trainerId), "조회 완료!"));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -68,13 +69,13 @@ public class ExerciseFeedbackController {
                                             @RequestBody FeedbackUpdateDto dto) {
         try {
             FeedbackDto updated = feedbackService.updateFeedback(feedbackId, dto);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(ApiResponse.success(updated, "수정 완료!"));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.fail(e.getMessage()));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("피드백 수정 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -82,13 +83,13 @@ public class ExerciseFeedbackController {
     public ResponseEntity<?> deleteFeedback(@PathVariable Long feedbackId) {
         try {
             feedbackService.deleteFeedback(feedbackId);
-            return ResponseEntity.ok("피드백이 삭제되었습니다.");
+            return ResponseEntity.ok(ApiResponse.success(null,"피드백이 삭제되었습니다."));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.fail(e.getMessage()));
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.fail(e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("피드백 삭제 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.fail(e.getMessage()));
         }
     }
 
