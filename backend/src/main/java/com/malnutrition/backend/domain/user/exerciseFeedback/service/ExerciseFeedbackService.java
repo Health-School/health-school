@@ -60,8 +60,9 @@ public class ExerciseFeedbackService {
         boolean isSheetOwner = sheet.getUser().getId().equals(currentUser.getId());
         boolean isTrainerWriter = feedbacks.stream()
                 .anyMatch(f -> f.getTrainer().getId().equals(currentUser.getId()));
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
 
-        if (!isSheetOwner && !isTrainerWriter) {
+        if (!isSheetOwner && !isTrainerWriter && !isAdmin) {
             throw new SecurityException("운동 시트지의 피드백을 조회할 권한이 없습니다.");
         }
 
@@ -80,8 +81,9 @@ public class ExerciseFeedbackService {
 
         boolean isSheetOwner = feedback.getExerciseSheet().getUser().getId().equals(currentUser.getId());
         boolean isTrainerWriter = feedback.getTrainer().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
 
-        if (!isSheetOwner && !isTrainerWriter) {
+        if (!isSheetOwner && !isTrainerWriter && !isAdmin) {
             throw new SecurityException("해당 피드백을 조회할 권한이 없습니다.");
         }
 
@@ -92,10 +94,13 @@ public class ExerciseFeedbackService {
     @Transactional(readOnly = true)
     public List<FeedbackDto> getFeedbacksByTrainerId(Long trainerId) {
         User currentUser = rq.getActor();
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
 
-        if (!currentUser.getId().equals(trainerId)) {
+        if (!currentUser.getId().equals(trainerId) && !isAdmin) {
             throw new SecurityException("해당 트레이너의 피드백을 조회할 권한이 없습니다.");
         }
+
+
 
         return feedbackRepository.findByTrainerId(trainerId).stream()
                 .map(FeedbackDto::fromEntity)
