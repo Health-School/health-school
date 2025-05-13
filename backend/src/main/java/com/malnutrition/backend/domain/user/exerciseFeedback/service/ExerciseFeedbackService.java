@@ -127,6 +127,25 @@ public class ExerciseFeedbackService {
         return FeedbackDto.fromEntity(feedback);
     }
 
+    @Transactional
+    public void deleteFeedback(Long feedbackId) {
+        User currentUser = rq.getActor();
+
+        ExerciseFeedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new NoSuchElementException("해당 피드백이 존재하지 않습니다."));
+
+        boolean isTrainer = feedback.getTrainer().getId().equals(currentUser.getId());
+        boolean isSheetOwner = feedback.getExerciseSheet().getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole().name().equals("ADMIN");
+
+        if (!(isTrainer || isSheetOwner || isAdmin)) {
+            throw new SecurityException("해당 피드백을 삭제할 권한이 없습니다.");
+        }
+
+        feedbackRepository.delete(feedback);
+    }
+
+
 
 
 

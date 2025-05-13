@@ -78,4 +78,19 @@ public class ExerciseFeedbackController {
         }
     }
 
+    @DeleteMapping("/{feedbackId}")
+    public ResponseEntity<?> deleteFeedback(@PathVariable Long feedbackId) {
+        try {
+            feedbackService.deleteFeedback(feedbackId);
+            return ResponseEntity.ok("피드백이 삭제되었습니다.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("피드백 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
+
 }
