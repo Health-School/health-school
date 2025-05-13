@@ -9,11 +9,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserRoleUpdateRequestDto {
+public class UserCertificationVerificationRequestDto {
 
-    @NotNull(message = "처리할 사용자 자격증 ID는 필수")
-    private Long userCertificationId;
+    @NotNull(message = "변경할 검토 상태는 필수입니다.")
+    private ApproveStatus reviewStatus;
 
-    @NotNull(message = "변경할 승인 상태는 필수")
-    private ApproveStatus targetApproveStatus;
+    private String reason;
 }
