@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.user.user.repository;
 
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
+import org.eclipse.angus.mail.imap.protocol.BODY;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     List<User> findAllByProfileImageId(Long id);
 
-
+    boolean existsByProvider(String provider);
 
 }

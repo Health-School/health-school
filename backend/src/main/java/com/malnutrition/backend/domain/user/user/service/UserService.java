@@ -171,4 +171,10 @@ public class UserService {
     public List<User> findAllByProfileImageId(Long imageId){
         return userRepository.findAllByProfileImageId(imageId);
     }
+
+    @Transactional(readOnly = true)
+    public boolean isExistProvider(String provider){
+        return userRepository.existsByProvider(provider);
+    }
+
 }
