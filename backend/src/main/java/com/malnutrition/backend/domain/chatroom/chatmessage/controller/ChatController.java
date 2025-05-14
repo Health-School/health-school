@@ -44,6 +44,11 @@ public class ChatController {
         User sender = userRepository.findByNickname(enterMessage.getWriterName())
                 .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
 
+        if (!chatRoom.getSender().getId().equals(sender.getId()) &&
+                !chatRoom.getReceiver().getId().equals(sender.getId())) {
+            throw new IllegalArgumentException("이 채팅방에 접근 권한이 없습니다.");
+        }
+
         // 🔍 해당 유저의 최근 메시지 조회 (채팅방 기준)
         ChatMessage lastMessage = chatMessageRepository
                 .findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(roomId, sender.getId())
@@ -87,6 +92,11 @@ public class ChatController {
                 .orElseThrow(() -> new EntityNotFoundException("채팅방이 존재하지 않습니다."));
         User sender = userRepository.findByNickname(leaveMessage.getWriterName())
                 .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+
+        if (!chatRoom.getSender().getId().equals(sender.getId()) &&
+                !chatRoom.getReceiver().getId().equals(sender.getId())) {
+            throw new IllegalArgumentException("이 채팅방에 접근 권한이 없습니다.");
+        }
 
         String msg = leaveMessage.getWriterName() + "님이 채팅방을 나갔습니다.";
 

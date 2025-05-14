@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomResponseDto
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.chatroom.chatroom.repository.ChatRoomRepository;
 import com.malnutrition.backend.domain.chatroom.chatroom.service.ChatRoomService;
+import com.malnutrition.backend.global.rq.Rq;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +26,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final Rq rq;
 
     @PostMapping
     public ResponseEntity<ChatRoomResponseDto> createChatRoom(@RequestBody ChatRoomRequestDto requestDto) {
@@ -50,6 +53,23 @@ public class ChatRoomController {
                 .stream()
                 .map(ChatMessageResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/{roomId}/access-check")
+    public ResponseEntity<?> checkAccess(@PathVariable Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방이 존재하지 않습니다."));
+        Long userId = rq.getActor().getId();
+
+        boolean hasAccess = chatRoom.getSender().getId().equals(userId)
+                || chatRoom.getReceiver().getId().equals(userId);
+
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "채팅방 접근 권한이 없습니다."));
+        }
+
+        return ResponseEntity.ok().body(Map.of("message", "접근 허용"));
     }
 
 
