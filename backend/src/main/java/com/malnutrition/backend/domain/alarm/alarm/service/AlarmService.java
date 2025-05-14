@@ -1,7 +1,9 @@
 package com.malnutrition.backend.domain.alarm.alarm.service;
 
+import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
 import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmResponseDto;
 import com.malnutrition.backend.domain.alarm.alarm.entity.Alarm;
+import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmEventType;
 import com.malnutrition.backend.domain.alarm.alarm.repository.alarmRepository.AlarmRepository;
 import com.malnutrition.backend.domain.alarm.alarm.repository.emitterRepository.EmitterRepositoryImpl;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -67,13 +69,14 @@ public class AlarmService {
         emitter.onCompletion( () -> emitterRepository.deleteById(emitterId) );
         emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
 
-        //505 에러를 방지하기 위한 더미 이벤트 전송
+        //연결 유지용 더미 이벤트
         Map<String, String> dummyData = new HashMap<>();
         dummyData.put("message", "EventStream Created.");
         dummyData.put("createdAt", LocalDateTime.now().toString());
 
+
         //등록 후 SseEmitter 유효시간동안 어느 데이터도 전송되지 않는 다면 503 에러를 발생시키므로 이것에 대한 방지로 더이 이벤트 발생
-        sendAlarmMessage(emitter,  emitterId, dummyData);
+        sendAlarmMessage(emitter, AlarmEventType.DUMMY,  emitterId, dummyData);
 
         if (hasLostData(lastEventId)) {
             sendLostData(lastEventId, userId, emitter);
@@ -81,7 +84,7 @@ public class AlarmService {
             PageRequest pageable = PageRequest.of(0, 15, Sort.by("createdDate").descending());
             List<Alarm> content = alarmRepository.findByListener_Id(userId, pageable).getContent();
             content.forEach( (alarmMessage -> {
-                if(!alarmMessage.getIsRead()) sendAlarmMessage(emitter,  emitterId, AlarmResponseDto.create(alarmMessage));
+                /*if(!alarmMessage.getIsRead())*/ sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
             }) );
         }
         return emitter;
@@ -91,12 +94,13 @@ public class AlarmService {
         return userId + "_" + System.currentTimeMillis();
     }
 
-    private void sendAlarmMessage(SseEmitter emitter,  String emitterId, Object data) {
+    private void sendAlarmMessage(SseEmitter emitter, AlarmEventType alarmEventType, String emitterId, Object data) {
         try {
-            emitter.send(SseEmitter.event()
+            emitter.send(
+                    SseEmitter.event()
                     .id(emitterId)
+                    .name(alarmEventType.name())
                     .data(data, MediaType.APPLICATION_JSON));
-
         } catch (IOException exception) {
             emitterRepository.deleteById(emitterId);
         }
@@ -111,19 +115,18 @@ public class AlarmService {
         Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByUserId(String.valueOf(userId));
         eventCaches.entrySet().stream()
                 .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0 )
-                .forEach(entry -> sendAlarmMessage(emitter, entry.getKey(), entry.getValue()));
+                .forEach(entry -> sendAlarmMessage(emitter,AlarmEventType.ALARM, entry.getKey(), entry.getValue()));
     }
 
     @Transactional
-    public void send(User listener,
-                     String sender
-
-    ) {
-        String message = createMessage(sender);
-        String url = "";
+    public void send(AlarmRequestDto alarmRequestDto) {
+        User listener = alarmRequestDto.getListener();
+        String message = alarmRequestDto.getMessage();
+        String title = alarmRequestDto.getTitle();
+        String url = alarmRequestDto.getUrl();
         log.info("message {}", message);
         log.info("url {}", url);
-        Alarm alarmMessage = createAlarmMessage(listener, message, url);
+        Alarm alarmMessage = createAlarmMessage(listener,title, message, url);
         Alarm sanedAlarmMessage = alarmRepository.save(alarmMessage);
         log.info("message: {}", sanedAlarmMessage.toString());
         String listenerId = String.valueOf(listener.getId());
@@ -131,23 +134,16 @@ public class AlarmService {
         emitters.forEach(
                 (key, emitter) -> {
                     emitterRepository.saveEventCache(key, sanedAlarmMessage);
-                    sendAlarmMessage(emitter, key, AlarmResponseDto.create(sanedAlarmMessage)  );
+                    sendAlarmMessage(emitter,AlarmEventType.ALARM, key, AlarmResponseDto.from(sanedAlarmMessage)  );
                 }
         );
     }
-    public String createMessage(String sender) {
-        //memberId = 구매자
-        String message = sender + "님이 메세지를 보냅니다.";
-
-        return message;
-    }
 
 
-
-
-    private Alarm createAlarmMessage(User listener, String message, String url) {
+    private Alarm createAlarmMessage(User listener,String title, String message, String url) {
         return Alarm.builder()
                 .listener(listener)
+                .title(title)
                 .message(message)
                 .url(url)
                 .isRead(false)
