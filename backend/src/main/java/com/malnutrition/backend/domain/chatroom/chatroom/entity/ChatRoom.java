@@ -20,14 +20,15 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "chat_rooms")
 public class ChatRoom extends BaseEntity {
+    private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trainer_id")
-    User trainer;
+    @JoinColumn(name = "sender_id")
+    User sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    User user;
+    @JoinColumn(name = "receiver_id")
+    User receiver;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<ChatMessage> chatMessageList;

@@ -39,6 +39,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation") // 유효성 검사
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client") // oauth2
 	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5") //sweager
+	//WebSocket
+	implementation ("org.webjars:webjars-locator-core")
+	implementation ("org.webjars:sockjs-client:1.5.1")
+	implementation ("org.webjars:stomp-websocket:2.3.3")
+	implementation ("org.springframework.boot:spring-boot-starter-websocket")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	annotationProcessor("org.projectlombok:lombok")
