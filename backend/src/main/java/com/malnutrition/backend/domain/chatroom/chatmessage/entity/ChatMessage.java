@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.chatroom.chatmessage.entity;
 
+import com.malnutrition.backend.domain.chatroom.chatmessage.enums.MessageType;
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
@@ -31,7 +32,5 @@ public class ChatMessage extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String message;
-
-
 
 }
