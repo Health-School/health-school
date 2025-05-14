@@ -25,8 +25,6 @@ repositories {
 
 dependencies {
 
-	implementation("software.amazon.awssdk:url-connection-client")
-
 
 	implementation(platform("software.amazon.awssdk:bom:2.25.20")) // BOM 관리
 	implementation("software.amazon.awssdk:s3") // S3 클라이언트
