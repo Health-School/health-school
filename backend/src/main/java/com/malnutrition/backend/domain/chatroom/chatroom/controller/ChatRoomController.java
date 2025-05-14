@@ -44,6 +44,14 @@ public class ChatRoomController {
         }
     }
 
+    @GetMapping("/{roomId}/messages")
+    public List<ChatMessageResponseDto> getChatMessages(@PathVariable Long roomId) {
+        return chatMessageRepository.findByChatRoomIdOrderByCreatedDateAsc(roomId)
+                .stream()
+                .map(ChatMessageResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
 
 
 }

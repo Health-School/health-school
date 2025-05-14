@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.chatroom.chatmessage.dto;
 
+import com.malnutrition.backend.domain.chatroom.chatmessage.enums.UserType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,5 +11,7 @@ public class ChatEnterResponseMessageDto {
     private String writerName;
     private String message;
     private String receiverName;
+
+    private UserType userType;
 
 }
