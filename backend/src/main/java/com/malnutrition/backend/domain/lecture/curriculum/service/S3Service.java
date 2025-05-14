@@ -29,7 +29,7 @@ public class S3Service {
                     .contentType(file.getContentType())
                     .build();
 
-            // ✅ RequestBody.fromInputStream 대신 fromBytes로 대체
+            //  RequestBody.fromInputStream 대신 fromBytes로 대체
             byte[] bytes = file.getBytes(); // 이게 정확한 크기로 바이트를 읽음
             s3Client.putObject(request, RequestBody.fromBytes(bytes));
         } catch (Exception e) {

@@ -84,7 +84,7 @@ public class CurriculumService {
         Curriculum curriculum = curriculumRepository.findById(curriculumId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커리큘럼이 없습니다."));
 
-        // 🔐 권한 확인
+        // 권한 확인
         User actor = rq.getActor();
         if (!curriculum.getLecture().getTrainer().getId().equals(actor.getId())) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
