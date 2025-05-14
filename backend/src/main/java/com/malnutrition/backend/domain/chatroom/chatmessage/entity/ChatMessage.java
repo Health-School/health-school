@@ -23,11 +23,11 @@ import javax.print.attribute.standard.MediaSize;
 @Table(name = "chat_messages")
 public class ChatMessage extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id")
     User sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chatroom_id")
     ChatRoom chatRoom;
 
