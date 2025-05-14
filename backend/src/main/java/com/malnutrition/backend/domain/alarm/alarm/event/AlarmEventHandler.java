@@ -14,13 +14,12 @@ import org.springframework.stereotype.Component;
 public class AlarmEventHandler {
     private final AlarmService alarmService;
 
-
     @EventListener
     @Async
     public void handleAlarmMessageSend(AlarmRequestDto alarmMessageRequestDto) {
         log.info("event listener");
         log.info("alarmMessageRequestDto {}",  alarmMessageRequestDto);
-        alarmService.send( alarmMessageRequestDto.getListener(),
-                alarmMessageRequestDto.getSender());
+        alarmService.send( alarmMessageRequestDto);
     }
+
 }

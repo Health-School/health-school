@@ -16,18 +16,21 @@ public class AlarmResponseDto {
     Long id;
     String message;
     String url;
+    String title;
     boolean read;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    LocalDateTime createdDateTime;
+    LocalDateTime createdAt;
 
-    public static AlarmResponseDto create(Alarm alarmMessage) {
+    public static AlarmResponseDto from(Alarm alarmMessage) {
         return AlarmResponseDto.builder()
                 .id(alarmMessage.getId())
+                .title(alarmMessage.getTitle())
                 .message(alarmMessage.getMessage())
                 .url(alarmMessage.getUrl())
                 .read(alarmMessage.getIsRead())
-                .createdDateTime(alarmMessage.getCreatedDate())
+                .createdAt(alarmMessage.getCreatedDate())
                 .build();
     }
+
 }
