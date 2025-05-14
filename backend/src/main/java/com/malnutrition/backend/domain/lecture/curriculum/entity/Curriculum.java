@@ -9,23 +9,32 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-@Table(name = "curriculums")
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
 @ToString
+@Table(
+        name = "curriculums",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"lecture_id", "sequence"})
+        }
+)
 public class Curriculum extends BaseEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lecture_id",nullable = false)  // FK 이름을 명시적으로 지정
+    @JoinColumn(name = "lecture_id", nullable = false)
     private Lecture lecture;
+
     @Column(nullable = false)
     private String title;
+
     @Column(columnDefinition = "LONGTEXT")
     private String content;
+
     @Column(nullable = false)
     private Integer sequence;
-    @Column(nullable = false)
-    private String lectureUrl;
-    @Column(nullable = false)
-    private String urlCode;
+
+    @Column(name = "s3path", columnDefinition = "TEXT")
+    private String s3path;
 }
+
