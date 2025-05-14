@@ -38,8 +38,10 @@ type User = {
   nickname: string;
 };
 
-type EnterMessage = {
+type TimelineMessage = {
+  type: "system" | "chat";
   message: string;
+  writerName?: string;
   timestamp: Date;
 };
 
@@ -59,8 +61,9 @@ export default function ChatRoomPage({
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [enterMessages, setEnterMessages] = useState<EnterMessage[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [timelineMessages, setTimelineMessages] = useState<TimelineMessage[]>(
+    []
+  );
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -126,9 +129,10 @@ export default function ChatRoomPage({
             try {
               const enterMsg: ChatEnterMessage = JSON.parse(message.body);
               console.log("파싱된 입장 메시지:", enterMsg);
-              setEnterMessages((prev) => [
+              setTimelineMessages((prev) => [
                 ...prev,
                 {
+                  type: "system",
                   message: enterMsg.message,
                   timestamp: new Date(),
                 },
@@ -143,11 +147,11 @@ export default function ChatRoomPage({
           client.subscribe(`/subscribe/leave/room/${roomId}`, (message) => {
             try {
               console.log("퇴장 메시지 원본:", message.body);
-              // 서버에서 plain string으로 오는 메시지를 직접 사용
-              setEnterMessages((prev) => [
+              setTimelineMessages((prev) => [
                 ...prev,
                 {
-                  message: message.body, // JSON 파싱하지 않고 직접 사용
+                  type: "system",
+                  message: message.body,
                   timestamp: new Date(),
                 },
               ]);
@@ -159,10 +163,12 @@ export default function ChatRoomPage({
           client.subscribe(`/subscribe/chat/room/${roomId}`, (message) => {
             try {
               const chatMessage = JSON.parse(message.body);
-              setMessages((prev) => [
+              setTimelineMessages((prev) => [
                 ...prev,
                 {
-                  ...chatMessage,
+                  type: "chat",
+                  message: chatMessage.message,
+                  writerName: chatMessage.writerName,
                   timestamp: new Date(),
                 },
               ]);
@@ -222,26 +228,32 @@ export default function ChatRoomPage({
   const leaveChat = () => {
     if (!stompClient.current || !chatRoom || !currentUser) return;
 
-    const leaveData = {
-      writerName: currentUser.nickname,
-      receiverName: chatRoom.receiverName,
-    };
+    // 확인 다이얼로그 표시
+    const confirmLeave = window.confirm("정말로 채팅방을 나가시겠습니까?");
 
-    try {
-      stompClient.current.send(
-        `/publish/chat/room/leave/${roomId}`,
-        { "Content-Type": "application/json" },
-        JSON.stringify(leaveData)
-      );
+    if (confirmLeave) {
+      const leaveData = {
+        writerName: currentUser.nickname,
+        receiverName: chatRoom.receiverName,
+      };
 
-      // 웹소켓 연결 해제
-      stompClient.current.disconnect(() => {
-        console.log("채팅방 나가기 완료");
-        // 채팅방 목록 페이지로 이동
-        window.location.href = "/";
-      });
-    } catch (error) {
-      console.error("채팅방 나가기 실패:", error);
+      try {
+        stompClient.current.send(
+          `/publish/chat/room/leave/${roomId}`,
+          { "Content-Type": "application/json" },
+          JSON.stringify(leaveData)
+        );
+
+        // 웹소켓 연결 해제
+        stompClient.current.disconnect(() => {
+          console.log("채팅방 나가기 완료");
+          // 채팅방 목록 페이지로 이동
+          window.location.href = "/";
+        });
+      } catch (error) {
+        console.error("채팅방 나가기 실패:", error);
+        alert("채팅방 나가기에 실패했습니다. 다시 시도해주세요.");
+      }
     }
   };
 
@@ -315,44 +327,35 @@ export default function ChatRoomPage({
       {chatRoom ? (
         <>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">채팅방 #{chatRoom.id}</h2>
+            {/* <h2 className="text-xl font-bold">채팅방 #{chatRoom.id}</h2> */}
+            <h2 className="text-xl font-bold">채팅방명 #{chatRoom.title}</h2>
             <button
               onClick={leaveChat}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
             >
-              나가기
+              채팅방에서 나가기
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-            {/* System Messages (입장/퇴장) */}
             <div className="space-y-2">
-              {enterMessages.map((msg, index) => (
+              {timelineMessages.map((msg, index) => (
                 <div
-                  key={`system-${index}`}
-                  className="p-2 bg-gray-100 rounded-lg text-center"
-                >
-                  <p className="text-gray-600">{msg.message}</p>
-                  <p className="text-xs text-gray-500">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Chat Messages */}
-            <div className="space-y-2">
-              {messages.map((msg, index) => (
-                <div
-                  key={`chat-${index}`}
-                  className={`p-2 max-w-[80%] rounded-lg ${
-                    msg.writerName === currentUser?.nickname
-                      ? "ml-auto bg-blue-500 text-white"
-                      : "bg-gray-200"
+                  key={index}
+                  className={`p-2 rounded-lg ${
+                    msg.type === "system"
+                      ? "bg-gray-100 text-center"
+                      : msg.writerName === currentUser?.nickname
+                      ? "ml-auto bg-blue-500 text-white max-w-[80%]"
+                      : "bg-gray-200 max-w-[80%]"
                   }`}
                 >
-                  <p className="text-sm font-medium">{msg.writerName}</p>
-                  <p>{msg.message}</p>
+                  {msg.type === "chat" && (
+                    <p className="text-sm font-medium">{msg.writerName}</p>
+                  )}
+                  <p className={msg.type === "system" ? "text-gray-600" : ""}>
+                    {msg.message}
+                  </p>
                   <p className="text-xs text-right">
                     {msg.timestamp.toLocaleTimeString()}
                   </p>
