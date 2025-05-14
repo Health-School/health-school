@@ -17,6 +17,4 @@ public interface CurriculumRepository extends JpaRepository<Curriculum,Long> {
 """)
     Optional<Curriculum> findWithLectureAndUserById(@Param("id") Long id);
 
-    boolean existsByLectureIdAndSequenceAndIdNot(Long lectureId, Integer sequence, Long id);
-
 }
