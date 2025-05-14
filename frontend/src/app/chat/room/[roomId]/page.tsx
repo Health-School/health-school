@@ -1,0 +1,388 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import SockJS from "sockjs-client";
+import { CompatClient, Stomp } from "@stomp/stompjs";
+
+type ChatRoom = {
+  id: number;
+  title: string;
+  senderName: string;
+  receiverName: string;
+};
+
+type ChatEnterMessage = {
+  roomId: number;
+  writerName: string;
+  message: string;
+  receiverName: string;
+};
+
+type ChatLeaveMessage = {
+  roomId: number;
+  writerName: string;
+  message: string;
+  receiverName: string;
+};
+
+type WebSocketError = {
+  message?: string;
+  type?: string;
+  code?: number;
+};
+
+type User = {
+  id: number;
+  username: string;
+  nickname: string;
+};
+
+type EnterMessage = {
+  message: string;
+  timestamp: Date;
+};
+
+type ChatMessage = {
+  id?: number;
+  writerName: string;
+  message: string;
+  timestamp: Date;
+};
+
+export default function ChatRoomPage({
+  params,
+}: {
+  params: { roomId: string };
+}) {
+  const roomId = Number(params.roomId);
+  const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [enterMessages, setEnterMessages] = useState<EnterMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const messageEndRef = useRef<HTMLDivElement>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const stompClient = useRef<CompatClient | null>(null);
+
+  const fetchCurrentUser = async () => {
+    try {
+      // 쿠키 기반 인증
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`,
+        {
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      setCurrentUser(data.data);
+      return data.data;
+    } catch (error) {
+      console.error("사용자 정보 조회 실패:", error);
+      setError("사용자 정보를 가져오는데 실패했습니다.");
+      return null;
+    }
+  };
+
+  const connectWebSocket = (roomData: ChatRoom, user: User) => {
+    try {
+      console.log("웹소켓 연결 시도");
+      const wsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws-stomp`;
+      console.log("웹소켓 URL:", wsUrl);
+
+      const sock = new SockJS(wsUrl);
+      const client = Stomp.over(sock);
+
+      sock.onopen = () => {
+        console.log("SockJS 연결 성공");
+      };
+
+      sock.onclose = () => {
+        console.log("SockJS 연결 종료");
+      };
+
+      client.debug = (str) => {
+        console.log("STOMP Debug:", str);
+      };
+
+      stompClient.current = client;
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      client.connect(
+        headers,
+        () => {
+          console.log("STOMP 연결 성공");
+          console.log("현재 사용자:", user);
+
+          const subscriptionPath = `/subscribe/enter/room/${roomId}`;
+          console.log("구독 시도:", subscriptionPath);
+
+          const subscription = client.subscribe(subscriptionPath, (message) => {
+            console.log("수신된 메시지:", message);
+            try {
+              const enterMsg: ChatEnterMessage = JSON.parse(message.body);
+              console.log("파싱된 입장 메시지:", enterMsg);
+              setEnterMessages((prev) => [
+                ...prev,
+                {
+                  message: enterMsg.message,
+                  timestamp: new Date(),
+                },
+              ]);
+            } catch (err) {
+              console.error("메시지 파싱 오류:", err);
+            }
+          });
+
+          console.log("구독 완료:", subscription);
+
+          client.subscribe(`/subscribe/leave/room/${roomId}`, (message) => {
+            try {
+              console.log("퇴장 메시지 원본:", message.body);
+              // 서버에서 plain string으로 오는 메시지를 직접 사용
+              setEnterMessages((prev) => [
+                ...prev,
+                {
+                  message: message.body, // JSON 파싱하지 않고 직접 사용
+                  timestamp: new Date(),
+                },
+              ]);
+            } catch (err) {
+              console.error("퇴장 메시지 처리 오류:", err);
+            }
+          });
+
+          client.subscribe(`/subscribe/chat/room/${roomId}`, (message) => {
+            try {
+              const chatMessage = JSON.parse(message.body);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  ...chatMessage,
+                  timestamp: new Date(),
+                },
+              ]);
+            } catch (err) {
+              console.error("채팅 메시지 파싱 오류:", err);
+            }
+          });
+
+          const enterData = {
+            writerName: user.nickname,
+            receiverName: roomData.receiverName,
+          };
+
+          console.log("전송할 입장 데이터:", enterData);
+
+          client.send(
+            `/publish/chat/room/enter/${roomId}`,
+            headers,
+            JSON.stringify(enterData)
+          );
+
+          console.log("입장 메시지 전송 완료");
+        },
+        (error: WebSocketError) => {
+          console.error("STOMP 연결 실패:", error);
+          setError(`웹소켓 연결 실패: ${error?.message || "알 수 없는 오류"}`);
+        }
+      );
+    } catch (error: any) {
+      console.error("웹소켓 초기화 실패:", error);
+      setError(`웹소켓 초기화 실패: ${error.message}`);
+    }
+  };
+
+  const sendMessage = () => {
+    if (!stompClient.current || !chatRoom || !currentUser || !newMessage.trim())
+      return;
+
+    const messageData = {
+      writerName: currentUser.nickname,
+      receiverName: chatRoom.receiverName,
+      message: newMessage.trim(),
+    };
+
+    try {
+      stompClient.current.send(
+        `/publish/chat/message/${roomId}`,
+        { "Content-Type": "application/json" },
+        JSON.stringify(messageData)
+      );
+      setNewMessage("");
+    } catch (error) {
+      console.error("메시지 전송 실패:", error);
+    }
+  };
+
+  const leaveChat = () => {
+    if (!stompClient.current || !chatRoom || !currentUser) return;
+
+    const leaveData = {
+      writerName: currentUser.nickname,
+      receiverName: chatRoom.receiverName,
+    };
+
+    try {
+      stompClient.current.send(
+        `/publish/chat/room/leave/${roomId}`,
+        { "Content-Type": "application/json" },
+        JSON.stringify(leaveData)
+      );
+
+      // 웹소켓 연결 해제
+      stompClient.current.disconnect(() => {
+        console.log("채팅방 나가기 완료");
+        // 채팅방 목록 페이지로 이동
+        window.location.href = "/";
+      });
+    } catch (error) {
+      console.error("채팅방 나가기 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    const initializeChat = async () => {
+      const user = await fetchCurrentUser();
+      if (user) {
+        try {
+          setLoading(true);
+          console.log("채팅방 조회 시작:", roomId);
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chatrooms/${roomId}`
+          );
+          console.log("채팅방 데이터:", response.data);
+          setChatRoom(response.data);
+          connectWebSocket(response.data, user);
+          setError(null);
+        } catch (error: any) {
+          console.error("채팅방 조회 실패:", error.response || error);
+          if (error.response?.status === 404) {
+            setError("채팅방을 찾을 수 없습니다.");
+          } else {
+            setError(`채팅방 조회 중 오류가 발생했습니다: ${error.message}`);
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (roomId) {
+      initializeChat();
+    }
+
+    return () => {
+      if (stompClient.current) {
+        try {
+          stompClient.current.disconnect();
+          console.log("웹소켓 연결 해제");
+        } catch (error: any) {
+          console.error("웹소켓 연결 해제 실패:", error);
+        }
+      }
+    };
+  }, [roomId]);
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <p className="text-blue-500">채팅방 연결 중...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <p className="text-red-500">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 h-screen flex flex-col">
+      {chatRoom ? (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">채팅방 #{chatRoom.id}</h2>
+            <button
+              onClick={leaveChat}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              나가기
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+            {/* System Messages (입장/퇴장) */}
+            <div className="space-y-2">
+              {enterMessages.map((msg, index) => (
+                <div
+                  key={`system-${index}`}
+                  className="p-2 bg-gray-100 rounded-lg text-center"
+                >
+                  <p className="text-gray-600">{msg.message}</p>
+                  <p className="text-xs text-gray-500">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Messages */}
+            <div className="space-y-2">
+              {messages.map((msg, index) => (
+                <div
+                  key={`chat-${index}`}
+                  className={`p-2 max-w-[80%] rounded-lg ${
+                    msg.writerName === currentUser?.nickname
+                      ? "ml-auto bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <p className="text-sm font-medium">{msg.writerName}</p>
+                  <p>{msg.message}</p>
+                  <p className="text-xs text-right">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div ref={messageEndRef} />
+          </div>
+
+          {/* Message Input */}
+          <div className="flex gap-2 mt-auto">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+              placeholder="메시지를 입력하세요..."
+              className="flex-1 p-2 border rounded"
+            />
+            <button
+              onClick={sendMessage}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              전송
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>채팅방을 불러오는 중...</p>
+      )}
+    </div>
+  );
+}
