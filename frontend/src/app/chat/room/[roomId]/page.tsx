@@ -52,6 +52,16 @@ type ChatMessage = {
   timestamp: Date;
 };
 
+type UserType = "ENTER" | "LEAVE" | "TALK";
+
+type ChatResponseDto = {
+  id: number;
+  writerName: string;
+  message: string;
+  userType: UserType;
+  createdDate: string;
+};
+
 export default function ChatRoomPage({
   params,
 }: {
@@ -264,19 +274,54 @@ export default function ChatRoomPage({
         try {
           setLoading(true);
           console.log("채팅방 조회 시작:", roomId);
-          const response = await axios.get(
+
+          // 채팅방 정보 조회
+          const roomResponse = await axios.get(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chatrooms/${roomId}`
           );
-          console.log("채팅방 데이터:", response.data);
-          setChatRoom(response.data);
-          connectWebSocket(response.data, user);
+          console.log("채팅방 데이터:", roomResponse.data);
+
+          // 채팅 히스토리 조회
+          const historyResponse = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/chat/room/${roomId}/messages`
+          );
+          const chatHistory = historyResponse.data;
+          console.log("채팅 히스토리:", chatHistory);
+
+          // 현재 사용자의 마지막 상태 확인
+          const userMessages = chatHistory.filter(
+            (msg: ChatResponseDto) => msg.writerName === user.nickname
+          );
+          const lastUserMessage = userMessages[userMessages.length - 1];
+
+          setChatRoom(roomResponse.data);
+
+          if (!lastUserMessage || lastUserMessage.userType !== "LEAVE") {
+            // 처음 입장하거나 LEAVE가 아닌 경우 전체 히스토리 표시
+            const timelineMessages = chatHistory.map(
+              (msg: ChatResponseDto) => ({
+                type: msg.userType === "TALK" ? "chat" : "system",
+                message: msg.message,
+                writerName:
+                  msg.userType === "TALK" ? msg.writerName : undefined,
+                timestamp: new Date(msg.createdDate),
+              })
+            );
+            setTimelineMessages(timelineMessages);
+          } else {
+            // LEAVE 상태에서 재입장하는 경우 빈 타임라인으로 시작
+            setTimelineMessages([]);
+          }
+
+          // 웹소켓 연결 및 입장 메시지 전송
+          connectWebSocket(roomResponse.data, user);
           setError(null);
         } catch (error: any) {
-          console.error("채팅방 조회 실패:", error.response || error);
+          console.error("초기화 실패:", error.response || error);
           if (error.response?.status === 404) {
             setError("채팅방을 찾을 수 없습니다.");
           } else {
-            setError(`채팅방 조회 중 오류가 발생했습니다: ${error.message}`);
+            setError(`초기화 중 오류가 발생했습니다: ${error.message}`);
           }
         } finally {
           setLoading(false);
