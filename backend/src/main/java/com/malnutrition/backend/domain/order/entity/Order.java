@@ -7,10 +7,9 @@ import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,20 +19,29 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "orders")
 public class Order {
     @Id
-    @Column(length = 36) // UUID는 36자입니다. 명시적으로 지정
     private String id;
+
+    private String name; // lecuture 이름
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_Id")
     private User user;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "lecture_id",nullable = false)
+    private Lecture lecture;
+
     private String paymentKey;
 
     @Column(nullable = false)
-    private long amount;
+    private Long amount;
+
+    private Long totalAmount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
@@ -43,14 +51,15 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private TossPaymentStatus tossPaymentStatus;
 
-    @Column(nullable = false)
-    private String tossOrderId;
-
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "lecture_id",nullable = false)
-    private Lecture lecture;
 
     LocalDateTime requestedAt; //결제 요청 시간
 
     LocalDateTime approvedAt; //결제 승인 시간
+
+    @CreatedDate
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime updatedDate;
+
 }

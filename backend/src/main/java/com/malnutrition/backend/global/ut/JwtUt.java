@@ -1,4 +1,4 @@
-package com.malnutrition.backend.global.jwt;
+package com.malnutrition.backend.global.ut;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;

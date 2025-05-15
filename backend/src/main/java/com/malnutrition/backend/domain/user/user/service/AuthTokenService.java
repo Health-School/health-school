@@ -2,7 +2,7 @@ package com.malnutrition.backend.domain.user.user.service;
 
 
 import com.malnutrition.backend.domain.user.user.entity.User;
-import com.malnutrition.backend.global.jwt.JwtUt;
+import com.malnutrition.backend.global.ut.JwtUt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

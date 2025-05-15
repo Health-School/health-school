@@ -2,9 +2,14 @@ package com.malnutrition.backend.domain.order.service;
 
 import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
-import com.malnutrition.backend.domain.alarm.alarm.event.AlarmEventHandler;
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
+import com.malnutrition.backend.domain.order.dto.CreateOrderResponseDto;
 import com.malnutrition.backend.domain.order.dto.OrderResponse;
+import com.malnutrition.backend.domain.order.dto.CreateAmountRequestDto;
+import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
 import com.malnutrition.backend.domain.order.entity.Order;
+import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
@@ -13,9 +18,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +30,7 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final LectureService lectureService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -80,5 +88,50 @@ public class OrderService {
         AlarmRequestDto 시스템 = AlarmRequestDto.from(rq.getActor(),title, titleMessage,  null);
         applicationEventPublisher.publishEvent(시스템);
     }
+
+    public CreateOrderResponseDto createOrder(CreateAmountRequestDto saveAmountRequest){
+        User actor = rq.getActor();
+        String orderId = UUID.randomUUID().toString();
+
+        Lecture lectureById = lectureService.findLectureById(saveAmountRequest.getLectureId());
+
+        Order order = Order.builder()
+                .id(orderId)
+                .user(actor)
+                .lecture(lectureById)
+                .name(lectureById.getTitle())
+                .orderStatus(OrderStatus.PENDING)
+                .amount(saveAmountRequest.getAmount())
+                .build();
+
+        orderRepository.save(order);
+        return CreateOrderResponseDto.builder()
+                .orderId(order.getId())
+                .amount(order.getAmount())
+                .build();
+    }
+
+    @Transactional
+    public void confirmOrder(TossPaymentsResponse tossPaymentsResponse){
+        String orderId = tossPaymentsResponse.getOrderId();
+        Order order = findById(orderId);
+
+        order.setPaymentKey(tossPaymentsResponse.getPaymentKey());
+        order.setOrderStatus(OrderStatus.COMPLETED);
+        order.setTotalAmount(tossPaymentsResponse.getTotalAmount());
+        order.setPaymentKey(tossPaymentsResponse.getPaymentKey());
+        order.setTossPaymentMethod(tossPaymentsResponse.getMethod());
+        order.setTossPaymentStatus(tossPaymentsResponse.getStatus());
+        order.setRequestedAt(tossPaymentsResponse.getRequestedAt().toLocalDateTime());
+
+    }
+
+
+    @Transactional
+    public Order findById(String orderId){
+        return orderRepository.findById(orderId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 orderId 입니다."));
+    }
+
+
 
 }
