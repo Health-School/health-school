@@ -99,7 +99,7 @@ public class QnaBoardService {
                 .content(qna.getContent())
                 .lectureId(qna.getLecture().getId())
                 .lectureTitle(qna.getLecture().getTitle())
-                .userId(qna.getUser().getId())
+//                .userId(qna.getUser().getId())
 //                .username(qna.getUser().getUsername())
                 .openStatus(qna.getOpenStatus())
                 .createdDate(qna.getCreatedDate())

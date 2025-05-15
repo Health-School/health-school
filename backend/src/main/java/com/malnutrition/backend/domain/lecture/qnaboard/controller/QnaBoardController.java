@@ -23,37 +23,42 @@ public class QnaBoardController {
 
     @Operation(summary = "Q&A 질문 생성", description = "사용자 ID를 기반으로 Q&A 질문을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ApiResponse<QnaBoardResponseDto>> createQna(
+    public
+    ResponseEntity<ApiResponse<ApiResponse<QnaBoardResponseDto>>> createQna(
             @Parameter(description = "사용자 ID") @RequestParam("userId") Long userId,
             @RequestBody QnaBoardRequestDto requestDto) {
-        return ResponseEntity.ok(qnaBoardService.createQna(userId, requestDto));
-    }
+        return ResponseEntity.ok(ApiResponse.success(qnaBoardService.createQna(userId, requestDto),"생성성공"));
+        }
 
     @Operation(summary = "Q&A 질문 단건 조회", description = "QnA 게시글 ID로 특정 질문을 조회합니다.")
     @GetMapping("/{qnaId}")
-    public ResponseEntity<ApiResponse<QnaBoardResponseDto>> getQna(
+    public
+    ResponseEntity
+            <ApiResponse<ApiResponse<QnaBoardResponseDto>>> getQna(
             @Parameter(description = "QnA 게시글 ID") @PathVariable("qnaId") Long qnaId) {
-        return ResponseEntity.ok(qnaBoardService.getQna(qnaId));
+        return ResponseEntity.ok(ApiResponse.success(qnaBoardService.getQna(qnaId),"조회성공"));
     }
 
     @Operation(summary = "전체 Q&A 질문 조회", description = "등록된 모든 QnA 질문을 조회합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<QnaBoardResponseDto>>> getAllQnas() {
-        return ResponseEntity.ok(qnaBoardService.getAllQnas());
+    public ResponseEntity
+            <ApiResponse<ApiResponse<List<QnaBoardResponseDto>>>> getAllQnas() {
+        return ResponseEntity.ok(ApiResponse.success(qnaBoardService.getAllQnas(),"전체조회성공"));
     }
 
     @Operation(summary = "Q&A 질문 수정", description = "QnA 게시글 ID로 질문을 수정합니다.")
     @PutMapping("/{qnaId}")
-    public ResponseEntity<ApiResponse<QnaBoardResponseDto>> updateQna(
+    public ResponseEntity<ApiResponse<ApiResponse<QnaBoardResponseDto>>> updateQna(
             @Parameter(description = "QnA 게시글 ID") @PathVariable("qnaId") Long qnaId,
             @RequestBody QnaBoardRequestDto requestDto) {
-        return ResponseEntity.ok(qnaBoardService.updateQna(qnaId, requestDto));
+        return ResponseEntity.ok(ApiResponse.success(qnaBoardService.updateQna(qnaId, requestDto),"수정성공"));
     }
 
     @Operation(summary = "Q&A 질문 삭제", description = "QnA 게시글 ID로 질문을 삭제합니다.")
     @DeleteMapping("/{qnaId}")
     public ResponseEntity<ApiResponse<Void>> deleteQna(
             @Parameter(description = "QnA 게시글 ID") @PathVariable("qnaId") Long qnaId) {
-        return ResponseEntity.ok(qnaBoardService.deleteQna(qnaId));
+        qnaBoardService.deleteQna(qnaId);
+        return ResponseEntity.ok(ApiResponse.success(null,"삭제성공"));
     }
 }
