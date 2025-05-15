@@ -9,6 +9,7 @@ import com.malnutrition.backend.domain.chatroom.chatmessage.repository.ChatMessa
 import com.malnutrition.backend.domain.chatroom.chatmessage.service.ChatService;
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.chatroom.chatroom.repository.ChatRoomRepository;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -57,9 +58,9 @@ public class ChatQueryController {
 
         try {
             ChatMessage updatedMessage = chatService.updateChatMessage(messageId, dto, userId);
-            return ResponseEntity.ok(updatedMessage);
+            return ResponseEntity.ok(ApiResponse.success(updatedMessage, "수정 성공!"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -71,7 +72,7 @@ public class ChatQueryController {
             chatService.deleteChatMessage(messageId, userId);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
     }
 }

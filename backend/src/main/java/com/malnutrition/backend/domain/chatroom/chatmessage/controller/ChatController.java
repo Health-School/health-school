@@ -33,6 +33,7 @@ public class ChatController {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messageTemplate;
+    private final ChatService chatService;
 
     @MessageMapping(value = "/chat/room/enter/{roomId}")
     public void enter(
@@ -111,6 +112,7 @@ public class ChatController {
 
         // 메시지 브로드캐스트
         messageTemplate.convertAndSend("/subscribe/leave/room/" + roomId, msg);
+
     }
 
     @MessageMapping("/chat/message/{roomId}")
