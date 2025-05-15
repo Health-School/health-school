@@ -43,7 +43,6 @@ type WebSocketError = {
 
 type User = {
   id: number;
-  username: string;
   nickname: string;
 };
 
@@ -359,6 +358,7 @@ export default function ChatRoomPage({
   useEffect(() => {
     const initializeChat = async () => {
       const user = await fetchCurrentUser();
+      console.log(user);
       if (user) {
         try {
           setLoading(true);
@@ -369,8 +369,8 @@ export default function ChatRoomPage({
 
           // 접근 권한 확인
           if (
-            !roomResponse.data.senderName.includes(user.nickname) &&
-            !roomResponse.data.receiverName.includes(user.nickname)
+            !roomResponse.data.data.senderName.includes(user.nickname) &&
+            !roomResponse.data.data.receiverName.includes(user.nickname)
           ) {
             throw new Error("이 채팅방에 접근 권한이 없습니다.");
           }
@@ -390,7 +390,7 @@ export default function ChatRoomPage({
           );
           const lastUserMessage = userMessages[userMessages.length - 1];
 
-          setChatRoom(roomResponse.data);
+          setChatRoom(roomResponse.data.data);
 
           if (!lastUserMessage || lastUserMessage.userType !== "LEAVE") {
             // 처음 입장하거나 LEAVE가 아닌 경우 전체 히스토리 표시
