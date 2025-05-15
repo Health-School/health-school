@@ -1,11 +1,10 @@
-package com.malnutrition.backend.domain.lecture.problem.entity;
+package com.malnutrition.backend.domain.lecture.report.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.springframework.jdbc.BadSqlGrammarException;
 
 @Entity
 @SuperBuilder
@@ -15,7 +14,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 @Setter
 @AllArgsConstructor
 @ToString
-public class Problem extends BaseEntity {
+public class Report extends BaseEntity {
     @Column(nullable = false)
     private String title;
     @Column(columnDefinition = "LONGTEXT", nullable = false)
