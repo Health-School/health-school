@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.admin.service;
 
+import com.malnutrition.backend.domain.admin.dto.TrainerApplicationSummaryDto;
 import com.malnutrition.backend.domain.admin.dto.TrainerVerificationRequestDto;
 import com.malnutrition.backend.domain.admin.dto.UserCertificationVerificationRequestDto;
 import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
@@ -14,6 +15,8 @@ import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +35,14 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final UserCertificationRepository userCertificationRepository;
     private final TrainerVerificationLogRepository trainerVerificationLogRepository;
+
+
+    @Transactional(readOnly = true)
+    public Page<TrainerApplicationSummaryDto> getTrainerApplications(
+            Pageable pageable,
+            TrainerApplicationStatus
+    )
+
 
 
     @Transactional
