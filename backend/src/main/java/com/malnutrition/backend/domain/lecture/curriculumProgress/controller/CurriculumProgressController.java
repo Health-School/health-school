@@ -1,21 +1,20 @@
 package com.malnutrition.backend.domain.lecture.curriculumProgress.controller;
 
+import com.malnutrition.backend.domain.lecture.curriculumProgress.dto.CurriculumProgressRequestDto;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.service.CurriculumProgressService;
 import com.malnutrition.backend.global.rq.Rq;
 import com.malnutrition.backend.global.security.security.CustomUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/curriculum-progress")
+@RequestMapping("/api/v1/curriculum-progress")
 public class CurriculumProgressController {
     private final CurriculumProgressService curriculumProgressService;
     private final Rq rq;
@@ -31,6 +30,25 @@ public class CurriculumProgressController {
         Long userId = rq.getActor().getId();
         curriculumProgressService.startProgress(userId, curriculumId);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "커리큘럼 진도 확인", description = "커리큘럼 진도확인하기")
+    @PatchMapping("/{curriculumId}")
+    public ResponseEntity<Void> updateProgress(
+            @PathVariable(name = "curriculumId") Long curriculumId,
+            @RequestBody @Valid CurriculumProgressRequestDto dto) {
+
+        if (rq.getActor() == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        curriculumProgressService.updateProgress(
+                rq.getActor().getId(),
+                curriculumId,
+                dto.getProgressRate(),
+                dto.getLastWatchedSecond()
+        );
         return ResponseEntity.ok().build();
     }
 }
