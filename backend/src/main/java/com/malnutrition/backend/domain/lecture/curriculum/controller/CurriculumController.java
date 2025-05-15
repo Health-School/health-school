@@ -23,7 +23,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/curriculums")
+@RequestMapping("/api/v1/curriculums")
 @RequiredArgsConstructor
 public class CurriculumController {
 

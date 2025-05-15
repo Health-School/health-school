@@ -43,5 +43,22 @@ public class CurriculumProgressService {
         }
     }
 
+    @Transactional
+    public void updateProgress(Long userId, Long curriculumId, int progressRate, int lastWatchedSecond) {
+        CurriculumProgress progress = curriculumProgressRepository.findByUserIdAndCurriculumId(userId, curriculumId)
+                .orElseThrow(() -> new IllegalArgumentException(""));
+
+        progress.setProgressRate(progressRate);
+        progress.setLastWatchedSecond(lastWatchedSecond);
+        progress.setLastWatchedAt(java.time.LocalDateTime.now());
+
+        if (progressRate >= 95 && progress.getStatus() != ProgressStatus.COMPLETED) {
+            progress.setStatus(ProgressStatus.COMPLETED);
+            progress.setCompletedAt(java.time.LocalDateTime.now());
+        }
+        curriculumProgressRepository.save(progress);
+    }
+
+
 
 }
