@@ -4,6 +4,8 @@ import com.malnutrition.backend.domain.chatroom.chatmessage.dto.ChatMessageRespo
 import com.malnutrition.backend.domain.chatroom.chatmessage.repository.ChatMessageRepository;
 import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomRequestDto;
 import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomResponseDto;
+import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomSummaryDto;
+import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomUpdateRequestDto;
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.chatroom.chatroom.repository.ChatRoomRepository;
 import com.malnutrition.backend.domain.chatroom.chatroom.service.ChatRoomService;
@@ -12,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,6 +73,41 @@ public class ChatRoomController {
         }
 
         return ResponseEntity.ok().body(Map.of("message", "접근 허용"));
+    }
+
+    @PutMapping("/{roomId}")
+    public ResponseEntity<?> updateChatRoomTitle(
+            @PathVariable Long roomId,
+            @RequestBody ChatRoomUpdateRequestDto dto) {
+        try {
+            ChatRoomResponseDto updatedRoom = chatRoomService.updateChatRoomTitle(roomId, dto);
+            return ResponseEntity.ok(updatedRoom);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "채팅방 제목 수정 권한이 없습니다."));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "채팅방 제목 수정 중 오류가 발생했습니다."));
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getMyChatRooms() {
+        Long userId = rq.getActor().getId();
+
+        List<ChatRoom> chatRooms = chatRoomRepository.findBySenderIdOrReceiverId(userId, userId);
+
+        List<ChatRoomSummaryDto> response = chatRooms.stream()
+                .map(chatRoom -> ChatRoomSummaryDto.from(chatRoom, userId))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
 

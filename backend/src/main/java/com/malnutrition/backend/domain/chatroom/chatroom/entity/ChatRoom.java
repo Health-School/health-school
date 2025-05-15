@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -30,7 +31,8 @@ public class ChatRoom extends BaseEntity {
     @JoinColumn(name = "receiver_id")
     User receiver;
 
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    List<ChatMessage> chatMessageList;
+//    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
+//    @JsonIgnore
+//    List<ChatMessage> chatMessageList;
 
 }

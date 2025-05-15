@@ -9,7 +9,7 @@ public class PermitUrl {
             "/api/v1/exerciseSheets/**","/api/v1/admin/machine-types/**",
             "/api/v1/admin/machines/**","/api/v1/chatrooms/**",
             "/api/chat/**", "/ws-stomp/**", "/ws/**", "/chat/**",
-            "/api/v1/users/**"
+            "/api/v1/users/**","/api/v1/chats/**"
     };
     public static final String[] GET_URLS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
