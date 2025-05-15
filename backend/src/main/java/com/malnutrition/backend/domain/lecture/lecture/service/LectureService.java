@@ -42,4 +42,10 @@ public class LectureService {
 
         return Optional.of(lectureRepository.save(lecture));
     }
+
+    @Transactional(readOnly = true)
+    public Lecture findLectureById(Long lectureId){
+        return lectureRepository.findById(lectureId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 lectureId 입니다."));
+    }
+
 }

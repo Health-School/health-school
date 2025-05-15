@@ -7,10 +7,7 @@ import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,10 +17,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "orders")
 public class Order {
     @Id
-    @Column(length = 36) // UUID는 36자입니다. 명시적으로 지정
     private String id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -33,7 +30,8 @@ public class Order {
     private String paymentKey;
 
     @Column(nullable = false)
-    private long amount;
+    private Long amount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
@@ -43,7 +41,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private TossPaymentStatus tossPaymentStatus;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String tossOrderId;
 
     @OneToOne(fetch = FetchType.EAGER)

@@ -1,6 +1,6 @@
 package com.malnutrition.backend.global.exception;
 
-import com.malnutrition.backend.global.jwt.JwtUt;
+import com.malnutrition.backend.global.ut.JwtUt;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;

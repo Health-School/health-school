@@ -2,9 +2,13 @@ package com.malnutrition.backend.domain.order.service;
 
 import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
-import com.malnutrition.backend.domain.alarm.alarm.event.AlarmEventHandler;
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
+import com.malnutrition.backend.domain.order.dto.CreateOrderResponseDto;
 import com.malnutrition.backend.domain.order.dto.OrderResponse;
+import com.malnutrition.backend.domain.order.dto.CreateAmountRequestDto;
 import com.malnutrition.backend.domain.order.entity.Order;
+import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
@@ -13,9 +17,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +29,7 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final LectureService lectureService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -79,6 +86,29 @@ public class OrderService {
         String title = trainerReply.formatTitle();
         AlarmRequestDto 시스템 = AlarmRequestDto.from(rq.getActor(),title, titleMessage,  null);
         applicationEventPublisher.publishEvent(시스템);
+    }
+
+    public CreateOrderResponseDto createOrder(CreateAmountRequestDto saveAmountRequest){
+        User actor = rq.getActor();
+        String orderId = UUID.randomUUID().toString();
+
+        Lecture lectureById = lectureService.findLectureById(saveAmountRequest.getLectureId());
+
+        Order order = Order.builder()
+                .id(orderId)
+                .user(actor)
+                .lecture(lectureById)
+                .orderStatus(OrderStatus.PENDING)
+                .requestedAt(LocalDateTime.now())
+                .amount(saveAmountRequest.getAmount())
+                .build();
+
+        orderRepository.save(order);
+        return CreateOrderResponseDto.builder()
+                .orderId(order.getId())
+                .amount(order.getAmount())
+                .build();
+
     }
 
 }
