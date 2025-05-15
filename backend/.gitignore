@@ -1,4 +1,6 @@
+.DS_Store
 HELP.md
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
@@ -39,3 +41,4 @@ out/
 ### Custom ###
 application-secret.yml
 /uploads/
+

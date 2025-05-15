@@ -18,5 +18,4 @@ public class UserCertificationRegisterRequestDto {
     @NotNull
     private LocalDate expirationDate;
 
-
 }
