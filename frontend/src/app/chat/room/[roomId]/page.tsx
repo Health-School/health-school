@@ -54,6 +54,7 @@ type TimelineMessage = {
   writerName?: string;
   timestamp: Date;
   isEditing?: boolean; // Add editing state
+  isEdited?: boolean; // Add isEdited field
 };
 
 type ChatMessage = {
@@ -251,31 +252,58 @@ export default function ChatRoomPage({
   const leaveChat = () => {
     if (!stompClient.current || !chatRoom || !currentUser) return;
 
-    // 확인 다이얼로그 표시
     const confirmLeave = window.confirm("정말로 채팅방을 나가시겠습니까?");
 
     if (confirmLeave) {
-      const leaveData = {
-        writerName: currentUser.nickname,
-        receiverName: chatRoom.receiverName,
-      };
-
       try {
+        const leaveData = {
+          writerName: currentUser.nickname,
+          receiverName: chatRoom.receiverName,
+        };
+
+        // 웹소켓이 연결되어 있는지 확인
+        if (!stompClient.current.connected) {
+          throw new Error("웹소켓 연결이 끊어졌습니다.");
+        }
+
+        // 퇴장 메시지 전송
         stompClient.current.send(
           `/publish/chat/room/leave/${roomId}`,
           { "Content-Type": "application/json" },
           JSON.stringify(leaveData)
         );
 
-        // 웹소켓 연결 해제
-        stompClient.current.disconnect(() => {
-          console.log("채팅방 나가기 완료");
-          // 채팅방 목록 페이지로 이동
-          window.location.href = "/";
-        });
+        // 퇴장 메시지가 처리될 때까지 잠시 대기 후 자동 삭제 체크
+        setTimeout(async () => {
+          try {
+            // Use fetch instead of api.delete
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chatrooms/${roomId}/auto-delete`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            );
+            const result = await response.text();
+            console.log("채팅방 자동 삭제 체크 완료:", result);
+          } catch (error) {
+            console.error("채팅방 자동 삭제 체크 실패:", error);
+          } finally {
+            // 웹소켓 연결 해제 및 페이지 이동
+            if (stompClient.current) {
+              stompClient.current.disconnect(() => {
+                console.log("채팅방 나가기 완료");
+                window.location.href = "/";
+              });
+            }
+          }
+        }, 1000); // 1초 대기
       } catch (error) {
         console.error("채팅방 나가기 실패:", error);
         alert("채팅방 나가기에 실패했습니다. 다시 시도해주세요.");
+
+        // 에러 발생 시에도 홈으로 이동
+        window.location.href = "/";
       }
     }
   };
@@ -295,7 +323,12 @@ export default function ChatRoomPage({
       setTimelineMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId
-            ? { ...msg, message: newText.trim(), isEditing: false }
+            ? {
+                ...msg,
+                message: newText.trim(),
+                isEditing: false,
+                isEdited: true,
+              } // Set isEdited to true
             : msg
         )
       );
@@ -303,6 +336,23 @@ export default function ChatRoomPage({
     } catch (error) {
       console.error("메시지 수정 실패:", error);
       alert("메시지 수정에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const deleteMessage = async (messageId: number) => {
+    if (!messageId) return;
+
+    try {
+      console.log("메시지 삭제 시도:", { messageId });
+
+      const response = await api.delete(`/api/v1/chats/${messageId}`);
+
+      console.log("메시지 삭제 응답:", response.data);
+
+      setTimelineMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+    } catch (error) {
+      console.error("메시지 삭제 실패:", error);
+      alert("메시지 삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -398,6 +448,24 @@ export default function ChatRoomPage({
     };
   }, [roomId]);
 
+  useEffect(() => {
+    const saveScrollPosition = () => {
+      localStorage.setItem(`scrollPosition-${roomId}`, "saved");
+    };
+
+    window.addEventListener("beforeunload", saveScrollPosition);
+
+    return () => {
+      window.removeEventListener("beforeunload", saveScrollPosition);
+    };
+  }, [roomId]);
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [timelineMessages]);
+
   if (loading) {
     return (
       <div className="p-4">
@@ -459,19 +527,33 @@ export default function ChatRoomPage({
                       <p className="text-sm font-medium">{msg.writerName}</p>
                       {msg.writerName === currentUser?.nickname &&
                         msg.type === "chat" && (
-                          <button
-                            onClick={() => {
-                              setTimelineMessages((prev) =>
-                                prev.map((m) =>
-                                  m === msg ? { ...m, isEditing: true } : m
-                                )
-                              );
-                              setEditingMessage(msg.message);
-                            }}
-                            className="text-xs underline hover:text-gray-300"
-                          >
-                            수정
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setTimelineMessages((prev) =>
+                                  prev.map((m) =>
+                                    m === msg ? { ...m, isEditing: true } : m
+                                  )
+                                );
+                                setEditingMessage(msg.message);
+                              }}
+                              className="text-xs underline hover:text-gray-300"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm("정말로 삭제하시겠습니까?")
+                                ) {
+                                  deleteMessage(msg.id!);
+                                }
+                              }}
+                              className="text-xs underline hover:text-gray-300"
+                            >
+                              삭제
+                            </button>
+                          </div>
                         )}
                     </div>
                   )}
@@ -505,7 +587,10 @@ export default function ChatRoomPage({
                     </div>
                   ) : (
                     <p className={msg.type === "system" ? "text-gray-600" : ""}>
-                      {msg.message}
+                      {msg.message}{" "}
+                      {msg.isEdited && (
+                        <span className="text-xs">(수정됨)</span>
+                      )}
                     </p>
                   )}
                   <p className="text-xs text-right">
