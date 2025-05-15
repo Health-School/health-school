@@ -121,11 +121,11 @@ export default function CheckoutPage() {
                   customerEmail: "customer123@gmail.com",
                   successUrl:
                     window.location.origin +
-                    "/tosspayments/success" +
+                    "/test/order/tosspayments/success" +
                     window.location.search,
                   failUrl:
                     window.location.origin +
-                    "/tosspayments/fail" +
+                    "/test/order/tosspayments/fail" +
                     window.location.search,
                 });
               } catch (error) {

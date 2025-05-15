@@ -26,6 +26,8 @@ repositories {
 dependencies {
 
 	implementation("software.amazon.awssdk:url-connection-client")
+	implementation("org.springframework.boot:spring-boot-starter-webflux") // webClient
+
 	implementation(platform("software.amazon.awssdk:bom:2.25.20")) // BOM 관리
 	implementation("software.amazon.awssdk:s3") // S3 클라이언트
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -41,6 +43,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation") // 유효성 검사
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client") // oauth2
 	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5") //sweager
+	//WebSocket
+	implementation ("org.webjars:webjars-locator-core")
+	implementation ("org.webjars:sockjs-client:1.5.1")
+	implementation ("org.webjars:stomp-websocket:2.3.3")
+	implementation ("org.springframework.boot:spring-boot-starter-websocket")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	annotationProcessor("org.projectlombok:lombok")

@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
 import com.malnutrition.backend.domain.order.dto.CreateOrderResponseDto;
 import com.malnutrition.backend.domain.order.dto.OrderResponse;
 import com.malnutrition.backend.domain.order.dto.CreateAmountRequestDto;
+import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
@@ -98,8 +99,8 @@ public class OrderService {
                 .id(orderId)
                 .user(actor)
                 .lecture(lectureById)
+                .name(lectureById.getTitle())
                 .orderStatus(OrderStatus.PENDING)
-                .requestedAt(LocalDateTime.now())
                 .amount(saveAmountRequest.getAmount())
                 .build();
 
@@ -108,7 +109,29 @@ public class OrderService {
                 .orderId(order.getId())
                 .amount(order.getAmount())
                 .build();
+    }
+
+    @Transactional
+    public void confirmOrder(TossPaymentsResponse tossPaymentsResponse){
+        String orderId = tossPaymentsResponse.getOrderId();
+        Order order = findById(orderId);
+
+        order.setPaymentKey(tossPaymentsResponse.getPaymentKey());
+        order.setOrderStatus(OrderStatus.COMPLETED);
+        order.setTotalAmount(tossPaymentsResponse.getTotalAmount());
+        order.setPaymentKey(tossPaymentsResponse.getPaymentKey());
+        order.setTossPaymentMethod(tossPaymentsResponse.getMethod());
+        order.setTossPaymentStatus(tossPaymentsResponse.getStatus());
+        order.setRequestedAt(tossPaymentsResponse.getRequestedAt().toLocalDateTime());
 
     }
+
+
+    @Transactional
+    public Order findById(String orderId){
+        return orderRepository.findById(orderId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 orderId 입니다."));
+    }
+
+
 
 }

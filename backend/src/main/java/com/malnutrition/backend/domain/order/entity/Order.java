@@ -8,6 +8,8 @@ import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,14 +25,22 @@ public class Order {
     @Id
     private String id;
 
+    private String name; // lecuture 이름
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_Id")
     private User user;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "lecture_id",nullable = false)
+    private Lecture lecture;
 
     private String paymentKey;
 
     @Column(nullable = false)
     private Long amount;
+
+    private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
@@ -41,14 +51,15 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private TossPaymentStatus tossPaymentStatus;
 
-    @Column(nullable = true)
-    private String tossOrderId;
-
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "lecture_id",nullable = false)
-    private Lecture lecture;
 
     LocalDateTime requestedAt; //결제 요청 시간
 
     LocalDateTime approvedAt; //결제 승인 시간
+
+    @CreatedDate
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    private LocalDateTime updatedDate;
+
 }
