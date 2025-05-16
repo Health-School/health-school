@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class ExerciseSheetResponseDto {
+    private Long id;
     private LocalDate exerciseDate;
     private LocalTime exerciseStartTime;
     private LocalTime exerciseEndTime;

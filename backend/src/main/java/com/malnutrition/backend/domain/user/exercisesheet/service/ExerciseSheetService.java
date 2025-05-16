@@ -83,6 +83,7 @@ public class ExerciseSheetService {
         return sheets.stream().map(sheet -> {
             List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
                     .map(mes -> new MachineExerciseSheetResponseDto(
+                            mes.getId(),
                             mes.getMachine().getName(),
                             mes.getReps(),
                             mes.getSets(),
@@ -90,6 +91,7 @@ public class ExerciseSheetService {
                     )).toList();
 
             return new ExerciseSheetResponseDto(
+                    sheet.getId(),
                     sheet.getExerciseDate(),
                     sheet.getExerciseStartTime(),
                     sheet.getExerciseEndTime(),
@@ -133,6 +135,7 @@ public class ExerciseSheetService {
 
         List<MachineExerciseSheetResponseDto> machineDtos = newMachineExercises.stream().map(mes ->
                 new MachineExerciseSheetResponseDto(
+                        mes.getId(),
                         mes.getMachine().getName(),
                         mes.getReps(),
                         mes.getSets(),
@@ -140,6 +143,7 @@ public class ExerciseSheetService {
                 )).toList();
 
         return new ExerciseSheetResponseDto(
+                sheet.getId(),
                 sheet.getExerciseDate(),
                 sheet.getExerciseStartTime(),
                 sheet.getExerciseEndTime(),
@@ -158,6 +162,10 @@ public class ExerciseSheetService {
 
         // 연관된 MachineExerciseSheet가 orphanRemoval=true 이면, 아래 한 줄로 삭제 가능
         exerciseSheetRepository.delete(sheet);
+    }
+
+    public List<ExerciseSheet> getAllExerciseSheetsByUser(Long userId) {
+        return exerciseSheetRepository.findAllByUserIdOrderByExerciseDateDesc(userId);
     }
 
 
