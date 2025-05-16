@@ -13,5 +13,6 @@ public class EnrollDto {
     private String lectureName;
     private String lectureLevel;
     private String userName;
-    private LocalDateTime startDate;
+    private LocalDateTime startDate; //강의 생성일
+    private LocalDateTime createdDate; //강의 수강 시작일
 }
