@@ -23,12 +23,14 @@ public class TodoController {
 
     @PostMapping
     public ResponseEntity<?> createTodo(@RequestBody TodoCreateDto dto) {
+        System.out.println("받은 isDone: " + dto.getIsDone());
         try {
             TodoDto saved = todoService.createTodo(dto);
             return ResponseEntity.ok(ApiResponse.success(saved, "todo 작성 성공!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail("작성 실패: " + e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.fail("예기치 못한 오류가 발생했습니다."));
         }
