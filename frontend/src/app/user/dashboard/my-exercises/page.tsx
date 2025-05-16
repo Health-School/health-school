@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import DashboardTabs from "@/components/dashboard/DashboardTabs";
 
 export default function MyExercisesPage() {
   const [currentMonth, setCurrentMonth] = useState("4월");
@@ -41,41 +42,8 @@ export default function MyExercisesPage() {
   return (
     <div className="p-6">
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          <Link
-            href="/user/dashboard/my-info"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            내 정보
-          </Link>
-          <Link
-            href="/user/dashboard/my-lecture"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            수강 강의
-          </Link>
-          <Link
-            href="/user/dashboard/my-order-list"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            결제 내역
-          </Link>
-          <Link
-            href="/user/dashboard/my-exercises"
-            className="text-green-500 border-b-2 border-green-500 py-4 px-2"
-          >
-            운동 기록 내역
-          </Link>
-          <Link
-            href="/user/dashboard/my-inquiry"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            1:1 상담
-          </Link>
-        </nav>
-      </div>
 
+      <DashboardTabs />
       {/* Calendar Header */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-4">

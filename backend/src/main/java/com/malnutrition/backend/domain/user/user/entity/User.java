@@ -26,6 +26,7 @@ public class User extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", nullable = true)
+    @ToString.Exclude
     Image profileImage;
 
     @Column(length = 255, nullable = false)
@@ -49,6 +50,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
     public User(long id, String email, String nickname) {
         this.setId(id);
