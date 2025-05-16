@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -35,7 +36,7 @@ export default function LoginPage() {
 
       // 로그인 성공 처리 (예: 리다이렉트)
       alert("로그인 성공!");
-      // window.location.href = "/"; // 필요시 홈으로 이동
+      window.location.href = "/"; // 필요시 홈으로 이동
     } catch (err) {
       alert("로그인 중 오류가 발생했습니다.");
     } finally {
@@ -110,9 +111,12 @@ export default function LoginPage() {
           </div>
           {/* 로그인 상태 유지 & 비밀번호 찾기 */}
           <div className="flex items-center justify-end mb-6">
-            <a href="#" className="text-green-500 text-base hover:underline">
+            <Link
+              href="/user/find/password"
+              className="text-green-500 text-base hover:underline"
+            >
               비밀번호 찾기
-            </a>
+            </Link>
           </div>
           {/* 로그인 버튼 */}
           <button
@@ -143,12 +147,12 @@ export default function LoginPage() {
         {/* 회원가입 안내 */}
         <div className="text-center text-base">
           아직 회원이 아니신가요?{" "}
-          <a
+          <Link
             href="/user/join"
             className="text-green-500 font-semibold hover:underline"
           >
             회원가입
-          </a>
+          </Link>
         </div>
       </div>
     </div>

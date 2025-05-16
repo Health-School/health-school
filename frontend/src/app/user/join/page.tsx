@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 export default function JoinPage() {
   const [email, setEmail] = useState("");
@@ -401,12 +402,12 @@ export default function JoinPage() {
         {/* 로그인 안내 */}
         <div className="text-center text-base">
           이미 회원이신가요?{" "}
-          <a
+          <Link
             href="/user/login"
             className="text-green-500 font-semibold hover:underline"
           >
             로그인
-          </a>
+          </Link>
         </div>
       </div>
     </div>

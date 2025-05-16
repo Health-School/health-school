@@ -25,8 +25,8 @@ export default function Header({ hideDropdownMenus = false }) {
   }
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white ">
+      <div className="max-w-[1600px] mx-auto ">
         <div className="flex justify-between items-center h-16">
           {/* 로고 */}
           <div className="flex items-center">
@@ -112,7 +112,7 @@ export default function Header({ hideDropdownMenus = false }) {
                           홈 페이지
                         </Link>
                         <Link
-                          href="/users/mypage"
+                          href="/user/dashboard/my-info"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           onClick={() => setIsDropdownOpen(false)}
                         >
