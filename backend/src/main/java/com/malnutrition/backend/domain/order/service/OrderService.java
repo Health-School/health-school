@@ -10,9 +10,12 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +82,81 @@ public class OrderService {
         String title = trainerReply.formatTitle();
         AlarmRequestDto 시스템 = AlarmRequestDto.from(rq.getActor(),title, titleMessage,  null);
         applicationEventPublisher.publishEvent(시스템);
+    }
+
+    @Transactional
+    public List<OrderResponse> getOrdersByPeriod(String period) {
+        LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0); // 내일 0시
+        LocalDateTime start;
+        User user = rq.getActor();
+
+        List<Order> orders = switch (period) {
+            case "1개월" -> {
+                start = end.minusMonths(1);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end);
+            }
+            case "3개월" -> {
+                start = end.minusMonths(3);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end);
+            }
+            case "6개월" -> {
+                start = end.minusMonths(6);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end);
+            }
+            case "전체 기간" -> orderRepository.findByUser(user);
+            default -> throw new IllegalArgumentException("유효하지 않은 기간입니다: " + period);
+        };
+
+        return orders.stream()
+                .map(order -> OrderResponse.builder()
+                        .id(order.getId())
+                        .amount(order.getAmount())
+                        .orderStatus(order.getOrderStatus().name())
+                        .tossPaymentMethod(order.getTossPaymentMethod().name())
+                        .requestAt(order.getRequestedAt())
+                        .approvedAt(order.getApprovedAt())
+                        .lectureId(order.getLecture().getId())
+                        .lectureTitle(order.getLecture().getTitle())
+                        .trainerName(order.getLecture().getTrainer().getNickname())
+                        .build())
+                .toList();
+    }
+
+    @Transactional
+    public Page<OrderResponse> getOrdersByPeriod(String period, Pageable pageable) {
+        LocalDateTime end = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime start;
+        User user = rq.getActor();
+
+        Page<Order> orders = switch (period) {
+            case "1개월" -> {
+                start = end.minusMonths(1);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+            }
+            case "3개월" -> {
+                start = end.minusMonths(3);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+            }
+            case "6개월" -> {
+                start = end.minusMonths(6);
+                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+            }
+            case "전체 기간" -> orderRepository.findByUser(user, pageable);
+            default -> throw new IllegalArgumentException("유효하지 않은 기간입니다: " + period);
+        };
+
+        return orders.map(order -> OrderResponse.builder()
+                .id(order.getId())
+                .amount(order.getAmount())
+                .orderStatus(order.getOrderStatus().name())
+                .tossPaymentMethod(order.getTossPaymentMethod().name())
+                .requestAt(order.getRequestedAt())
+                .approvedAt(order.getApprovedAt())
+                .lectureId(order.getLecture().getId())
+                .lectureTitle(order.getLecture().getTitle())
+                .trainerName(order.getLecture().getTrainer().getNickname())
+                .build()
+        );
     }
 
 }

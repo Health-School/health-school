@@ -2,8 +2,11 @@ package com.malnutrition.backend.domain.order.repository;
 
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,4 +16,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // 주문 ID로 결제 내역 조회
     Optional<Order> findById(String orderId);
+
+    // 기간 조건 (1개월, 3개월, 6개월)
+    List<Order> findAllByUserAndApprovedAtBetween(User user, LocalDateTime from, LocalDateTime to);
+
+    Page<Order> findAllByUserAndApprovedAtBetween(User user, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    Page<Order> findByUser(User user, Pageable pageable);
 }

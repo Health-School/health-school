@@ -8,6 +8,10 @@ import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +61,15 @@ public class OrderController {
             return ResponseEntity.ok(ApiResponse.success(body, "해당 결제 내역 조회 실패!"));
         }
         return ResponseEntity.ok(ApiResponse.success(orderResponse, "해당 결제 내역입니다!"));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<?> getOrderHistory(
+            @RequestParam(defaultValue = "전체 기간") String period,
+            @PageableDefault(size = 10, sort = "approvedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<OrderResponse> response = orderService.getOrdersByPeriod(period, pageable);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/alarm-event")
