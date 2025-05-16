@@ -22,12 +22,25 @@ interface Order {
   trainerName: string;
 }
 
+interface PageResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  totalElements: number;
+  totalPages: number;
+}
+
 export default function MyOrderListPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [period, setPeriod] = useState<string>("전체 기간");
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   // Fetch current user function
   const fetchCurrentUser = async () => {
@@ -49,25 +62,31 @@ export default function MyOrderListPage() {
   };
 
   // Fetch orders function
-  const fetchOrders = async () => {
+  const fetchOrders = async (selectedPeriod: string, pageNumber: number) => {
     try {
+      setLoading(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/orders/user`,
+        `${
+          process.env.NEXT_PUBLIC_API_BASE_URL
+        }/api/v1/orders/history?period=${encodeURIComponent(
+          selectedPeriod
+        )}&page=${pageNumber}&size=10&sort=approvedAt,desc`,
         {
           credentials: "include",
         }
       );
-      const data = await response.json();
-      console.log("결제 내역:", data);
-      if (data.success) {
-        setOrders(data.data);
+      const data: PageResponse<Order> = await response.json();
+
+      if (data && data.content) {
+        setOrders(data.content);
+        setTotalPages(data.totalPages);
+        setError(null);
       } else {
-        setError(data.message || "결제 내역을 불러오는데 실패했습니다.");
+        setError("결제 내역을 불러오는데 실패했습니다.");
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || "결제 내역을 불러오는데 실패했습니다."
-      );
+      console.error("결제 내역 조회 에러:", err);
+      setError("결제 내역을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -78,14 +97,14 @@ export default function MyOrderListPage() {
       setLoading(true);
       const user = await fetchCurrentUser();
       if (user) {
-        await fetchOrders();
+        await fetchOrders(period, page);
       } else {
         setLoading(false);
       }
     };
 
     initializeData();
-  }, []);
+  }, [period, page]);
 
   if (loading) {
     return (
@@ -165,13 +184,17 @@ export default function MyOrderListPage() {
         </nav>
       </div>
 
-      {/* Filter Dropdown */}
+      {/* Period Filter Dropdown */}
       <div className="flex justify-end mb-6">
-        <select className="border rounded-md px-3 py-2 text-sm">
-          <option value="all">전체 기간</option>
-          <option value="1month">1개월</option>
-          <option value="3months">3개월</option>
-          <option value="6months">6개월</option>
+        <select
+          className="border rounded-md px-3 py-2 text-sm"
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
+        >
+          <option value="전체 기간">전체 기간</option>
+          <option value="1개월">1개월</option>
+          <option value="3개월">3개월</option>
+          <option value="6개월">6개월</option>
         </select>
       </div>
 
@@ -238,6 +261,45 @@ export default function MyOrderListPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 0 && (
+        <div className="flex justify-center mt-8 space-x-2">
+          <button
+            onClick={() => setPage(Math.max(0, page - 1))}
+            disabled={page === 0}
+            className={`px-3 py-2 rounded-md ${
+              page === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+            }`}
+          >
+            이전
+          </button>
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              className={`px-3 py-2 rounded-md ${
+                page === i ? "bg-green-500 text-white" : "hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+            disabled={page === totalPages - 1}
+            className={`px-3 py-2 rounded-md ${
+              page === totalPages - 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+            }`}
+          >
+            다음
+          </button>
+        </div>
+      )}
 
       {/* Receipt Modal */}
       {selectedOrderId && (
