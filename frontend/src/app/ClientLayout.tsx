@@ -17,7 +17,7 @@ export default function ClientLayout({ children }: LayoutProps) {
   const isAdminPage = pathname.startsWith("/admin");
 
   const fetchUser = useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`, {
       method: "GET",
       credentials: "include",
     })
