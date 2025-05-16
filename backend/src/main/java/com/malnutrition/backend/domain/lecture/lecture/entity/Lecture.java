@@ -24,7 +24,7 @@ public class Lecture extends BaseEntity {
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
     @Column(nullable = false)
-    private Integer price;
+    private Long price;
 
     @Enumerated(EnumType.STRING)
     private LectureStatus lectureStatus;

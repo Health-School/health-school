@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "curriculum_progress")
 @Getter
@@ -28,5 +30,16 @@ public class CurriculumProgress extends BaseEntity {
     @Column(nullable = false)
     private ProgressStatus status;
 
-    private Integer progressRate;
+    @Column(nullable = true)
+    private Integer progressRate = 0;
+
+    @Column(nullable = true)
+    private LocalDateTime lastWatchedAt; // 마지막으로 언제 봤는지
+
+    @Column(nullable = true)
+    private Integer lastWatchedSecond = 0; // 마지막에 어디까지 봤는지
+
+    @Column(nullable = true)
+    private LocalDateTime completedAt; // 수강 완료일
+
 }

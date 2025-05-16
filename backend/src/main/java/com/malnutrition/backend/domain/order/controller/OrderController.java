@@ -1,8 +1,8 @@
 package com.malnutrition.backend.domain.order.controller;
 
-import com.malnutrition.backend.domain.order.dto.OrderResponse;
-import com.malnutrition.backend.domain.order.entity.Order;
+import com.malnutrition.backend.domain.order.dto.*;
 import com.malnutrition.backend.domain.order.service.OrderService;
+import com.malnutrition.backend.domain.order.service.TossPaymentService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
@@ -12,14 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -28,6 +26,7 @@ import java.util.Optional;
 public class OrderController {
 
     private final OrderService orderService;
+    private final TossPaymentService tossPaymentService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -50,7 +49,6 @@ public class OrderController {
         }
     }
 
-
     // 결제 내역을 주문 ID로 조회 -> 영수증으로도 이용하기에 충분(정보가 다들어가있음)
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderById(@PathVariable String orderId) {
@@ -72,8 +70,24 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/create-order")
+    public ResponseEntity<ApiResponse<CreateOrderResponseDto>> createOrder (@RequestBody CreateAmountRequestDto
+                                                                                    createAmountRequest){
+        CreateOrderResponseDto order = orderService.createOrder(createAmountRequest);
+
+        return ResponseEntity.ok(ApiResponse.success(order, "주문 생성 성공"));
+    }
+
     @PostMapping("/alarm-event")
-    public void getOrderEventMessage(){
+    public void getOrderEventMessage() {
         orderService.orderSuccessEvent();
+    }
+
+    @PostMapping("/cancel-order")
+    public ResponseEntity<ApiResponse<String>> cancelOrder (@RequestBody CancelOrderRequestDto cancelOrderRequestDto) throws
+            IOException, InterruptedException {
+        String cancelContent = tossPaymentService.requestPaymentCancel(cancelOrderRequestDto.getOrderId(), cancelOrderRequestDto.getCancelReason());
+
+        return ResponseEntity.ok(ApiResponse.success(cancelContent, "환불 성공"));
     }
 }
