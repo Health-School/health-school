@@ -345,13 +345,17 @@ export default function ChatRoomPage({
       console.log("메시지 삭제 시도:", { messageId });
 
       const response = await api.delete(`/api/v1/chats/${messageId}`);
-
-      console.log("메시지 삭제 응답:", response.data);
-
-      setTimelineMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-    } catch (error) {
+      
+      if (response.data.success) {
+        console.log("메시지 삭제 응답:", response.data);
+        setTimelineMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+        alert("메시지가 삭제되었습니다.");
+      } else {
+        throw new Error(response.data.message || "메시지 삭제에 실패했습니다.");
+      }
+    } catch (error: any) {
       console.error("메시지 삭제 실패:", error);
-      alert("메시지 삭제에 실패했습니다. 다시 시도해주세요.");
+      alert(error.message || "메시지 삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -543,13 +547,11 @@ export default function ChatRoomPage({
                             </button>
                             <button
                               onClick={() => {
-                                if (
-                                  window.confirm("정말로 삭제하시겠습니까?")
-                                ) {
+                                if (window.confirm("정말로 이 메시지를 삭제하시겠습니까?")) {
                                   deleteMessage(msg.id!);
                                 }
                               }}
-                              className="text-xs underline hover:text-gray-300"
+                              className="text-xs underline hover:text-gray-300 text-red-500"
                             >
                               삭제
                             </button>

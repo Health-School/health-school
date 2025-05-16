@@ -84,6 +84,12 @@ export default function MyInfoPage() {
           >
             1:1 상담
           </Link>
+          <Link
+            href="/user/dashboard/todo-list"
+            className="text-gray-500 hover:text-gray-700 py-4 px-2"
+          >
+            todo list
+          </Link>
         </nav>
       </div>
 
