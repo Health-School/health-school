@@ -33,13 +33,13 @@ public class TrainerApplication extends BaseEntity {
     private TrainerVerificationResult verificationResult;
 
     @Column(columnDefinition = "TEXT")
-    private String careerHistory;
+    private String careerHistory; // 경력 사항
 
     @Column(columnDefinition = "TEXT")
-    private String expertiseAreas;
+    private String expertiseAreas; // 전문 분야
 
     @Column(columnDefinition = "TEXT")
-    private String selfIntroduction;
+    private String selfIntroduction; // 자기 소개
 
     @OneToMany(mappedBy = "trainerApplication", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

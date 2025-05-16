@@ -10,6 +10,7 @@ import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,12 +37,15 @@ public class UserCertification extends BaseEntity {
     private ApproveStatus approveStatus;
     //통과 기준이 될 자격증 이름:
 
-    @Column(nullable = false)
-    private LocalDate expirationDate; //유효기간 끝
-
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "certification_image_id", nullable = false)
     private Image image; //자격증 이미지
+
+    @Column(nullable = true)
+    private LocalDate acquisitionDate; // 발급일
+
+    @Column(nullable = true)
+    private LocalDate expirationDate; //만료일
 
     @Column(columnDefinition = "TEXT") // 승인, 반려 사유 (관리자 입력)
     private String adminComment;

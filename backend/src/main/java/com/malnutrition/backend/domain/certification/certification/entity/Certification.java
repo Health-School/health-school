@@ -20,7 +20,10 @@ public class Certification extends BaseEntity {
 
 
     @Column(length = 50, nullable = false, unique = true)
-    private String name;
+    private String name; // 자격증 이름
+
+    @Column(nullable = false)
+    private String issuingInstitution; // 발급 기관
 
 
 }

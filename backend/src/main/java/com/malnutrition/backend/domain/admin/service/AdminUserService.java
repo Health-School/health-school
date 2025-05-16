@@ -1,14 +1,17 @@
 package com.malnutrition.backend.domain.admin.service;
 
-import com.malnutrition.backend.domain.admin.dto.TrainerApplicationSummaryDto;
-import com.malnutrition.backend.domain.admin.dto.TrainerVerificationRequestDto;
-import com.malnutrition.backend.domain.admin.dto.UserCertificationVerificationRequestDto;
+import com.malnutrition.backend.domain.admin.dto.*;
 import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
 import com.malnutrition.backend.domain.admin.log.entity.TrainerVerificationLog;
 import com.malnutrition.backend.domain.admin.log.repository.TrainerVerificationLogRepository;
+import com.malnutrition.backend.domain.certification.certification.entity.Certification;
 import com.malnutrition.backend.domain.certification.usercertification.entity.UserCertification;
 import com.malnutrition.backend.domain.certification.usercertification.enums.ApproveStatus;
 import com.malnutrition.backend.domain.certification.usercertification.repository.UserCertificationRepository;
+import com.malnutrition.backend.domain.image.entity.Image;
+import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.user.trainerApplication.entity.TrainerApplication;
+import com.malnutrition.backend.domain.user.trainerApplication.repository.TrainerApplicationRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
@@ -25,6 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -35,13 +42,84 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final UserCertificationRepository userCertificationRepository;
     private final TrainerVerificationLogRepository trainerVerificationLogRepository;
+    private final TrainerApplicationRepository trainerApplicationRepository;
+    private final ImageService imageService;
 
 
     @Transactional(readOnly = true)
-    public Page<TrainerApplicationSummaryDto> getTrainerApplications(
-            Pageable pageable,
-            TrainerApplicationStatus
-    )
+    public Page<TrainerApplicationSummaryDto> getTrainerApplicationsByStatus(TrainerVerificationResult verificationResult, Pageable pageable) {
+        Page<TrainerApplication> applicationPage = trainerApplicationRepository.findByVerificationResultOrderByCreatedDateDesc(verificationResult, pageable);
+
+        return applicationPage.map(application -> {
+            User applicant = application.getUser();
+            String name = application.getName();
+            return TrainerApplicationSummaryDto.builder()
+                    .applicationId(application.getId())
+                    .userId(applicant.getId())
+                    .userName(name)
+                    .userEmail(applicant.getEmail())
+                    .userPhoneNumber(applicant.getPhoneNumber())
+                    .applicationDate(application.getCreatedDate())
+                    .status(application.getVerificationResult())
+                    .build();
+        });
+
+    }
+
+    @Transactional(readOnly = true)
+    public TrainerApplicationDetailResopnseDto getTrainerApplicationDetail(Long applicationId) {
+        TrainerApplication application = trainerApplicationRepository.findByIdWithDetails(applicationId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 강사 신청 정보를 찾을 수 없습니다. ID: " + applicationId));
+
+        User applicantUser = application.getUser();
+
+        ApplicantUserInfoDto applicantUserInfoDto = ApplicantUserInfoDto.builder()
+                .userId(applicantUser.getId())
+                .name(application.getName())
+                .email(applicantUser.getEmail())
+                .phoneNumber(applicantUser.getPhoneNumber())
+                .profileImageUrl(imageService.getImageProfileUrl(applicantUser.getProfileImage()))
+                .build();
+
+        List<SubmittedCertificationResponseDto> submittedCertificationResponseDtos = (application.getSubmittedCertifications() == null)
+                ? Collections.emptyList()
+                : application.getSubmittedCertifications().stream()
+                .map(this::mapToSubmittedCertificationDto)
+                .collect(Collectors.toList());
+
+        return TrainerApplicationDetailResopnseDto.builder()
+                .applicationId(application.getId())
+                .applicantUserInfo((applicantUserInfoDto))
+                .applicationDate(application.getCreatedDate().toLocalDate())
+                .applicationStatus(application.getVerificationResult().getDescription())
+                .careerHistory(application.getCareerHistory())
+                .expertiseAreas(application.getExpertiseAreas())
+                .selfIntroduction(application.getSelfIntroduction())
+                .submittedCertifications(submittedCertificationResponseDtos)
+                .build();
+
+    }
+
+    private SubmittedCertificationResponseDto mapToSubmittedCertificationDto(UserCertification userCertification) {
+        Certification certification = userCertification.getCertification();
+        Image certificationImage = userCertification.getImage();
+
+        return SubmittedCertificationResponseDto.builder()
+                .userCertificationId(userCertification.getId())
+                .certificationName(certification != null ? certification.getName() : "정보 없음")
+                .issuingInstitution(certification != null && certification.getIssuingInstitution() != null
+                        ? certification.getIssuingInstitution() : "정보 없음")
+                .acquisitionDate(userCertification.getAcquisitionDate())
+                .expirationDate(userCertification.getExpirationDate())
+                .approveStatus(userCertification.getApproveStatus() != null ? userCertification.getApproveStatus().getDescription() : "상태 정보 없음")
+                .adminComment(userCertification.getAdminComment())
+                .certificationImageUrl(imageService.getImageProfileUrl(certificationImage))
+                .certificationFileDownloadUrl(imageService.getImageProfileUrl(certificationImage))
+                .build();
+    }
+
+
+
 
 
 
