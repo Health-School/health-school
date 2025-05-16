@@ -1,12 +1,12 @@
-package com.malnutrition.backend.domain.admin.controller;
+package com.malnutrition.backend.domain.admin.verification.controller;
 
 
-import com.malnutrition.backend.domain.admin.dto.TrainerApplicationDetailResponseDto;
-import com.malnutrition.backend.domain.admin.dto.TrainerApplicationSummaryDto;
-import com.malnutrition.backend.domain.admin.dto.TrainerVerificationRequestDto;
-import com.malnutrition.backend.domain.admin.dto.UserCertificationVerificationRequestDto;
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
-import com.malnutrition.backend.domain.admin.service.AdminUserService;
+import com.malnutrition.backend.domain.admin.verification.dto.TrainerApplicationDetailResponseDto;
+import com.malnutrition.backend.domain.admin.verification.dto.TrainerApplicationSummaryDto;
+import com.malnutrition.backend.domain.admin.verification.dto.TrainerVerificationRequestDto;
+import com.malnutrition.backend.domain.admin.verification.dto.UserCertificationVerificationRequestDto;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
+import com.malnutrition.backend.domain.admin.verification.service.AdminVerificationService;
 import com.malnutrition.backend.domain.certification.usercertification.enums.ApproveStatus;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class AdminUserController {
+public class AdminVerificationController {
 
-    private final AdminUserService adminUserService;
+    private final AdminVerificationService adminUserService;
 
 
     @Operation(
@@ -43,11 +43,11 @@ public class AdminUserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<Page<TrainerApplicationSummaryDto>>> getTrainerApplications(
             @Parameter(description = "조회할 신청 상태")
-            @RequestParam(required = false) TrainerVerificationResult result,
+            @RequestParam(required = false) TrainerVerificationStatus result,
             @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
             ) {
 
-        TrainerVerificationResult verificationResult = (result == null) ? TrainerVerificationResult.PENDING_VERIFICATION : result;
+        TrainerVerificationStatus verificationResult = (result == null) ? TrainerVerificationStatus.PENDING_VERIFICATION : result;
 
         Page<TrainerApplicationSummaryDto> applications = adminUserService.getTrainerApplicationsByStatus(verificationResult, pageable);
 
@@ -106,7 +106,7 @@ public class AdminUserController {
 
         adminUserService.decideTrainerVerification(userId, requestDto);
 
-        String message = requestDto.getResult() == TrainerVerificationResult.APPROVE_AS_TRAINER ?
+        String message = requestDto.getResult() == TrainerVerificationStatus.APPROVE_AS_TRAINER ?
                                                 "트레이너 자격 검증 결과 승인이 완료되었습니다.":
                                                 "트레이너 자격 검증 결과 요청이 반려되었습니다.";
 
