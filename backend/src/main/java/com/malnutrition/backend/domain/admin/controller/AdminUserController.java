@@ -1,6 +1,8 @@
 package com.malnutrition.backend.domain.admin.controller;
 
 
+import com.malnutrition.backend.domain.admin.dto.TrainerApplicationDetailResopnseDto;
+import com.malnutrition.backend.domain.admin.dto.TrainerApplicationSummaryDto;
 import com.malnutrition.backend.domain.admin.dto.TrainerVerificationRequestDto;
 import com.malnutrition.backend.domain.admin.dto.UserCertificationVerificationRequestDto;
 import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
@@ -13,6 +15,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +32,42 @@ import org.springframework.web.bind.annotation.*;
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
+
+
+    @Operation(
+            summary = "강사 자격 신청 목록 조회",
+            description = "관리자가 강사 자격 신청 목록을 조회합니다. 상태별 필터링 및 페이징을 지원합니다. ",
+            tags = {"Admin User API"}
+    )
+    @GetMapping("/trainer-applications")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<Page<TrainerApplicationSummaryDto>>> getTrainerApplications(
+            @Parameter(description = "조회할 신청 상태")
+            @RequestParam(required = false) TrainerVerificationResult result,
+            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
+            ) {
+
+        TrainerVerificationResult verificationResult = (result == null) ? TrainerVerificationResult.PENDING_VERIFICATION : result;
+
+        Page<TrainerApplicationSummaryDto> applications = adminUserService.getTrainerApplicationsByStatus(verificationResult, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(applications,"강사 자격 신청 목록 조회 성공"));
+    }
+
+    @Operation(
+            summary = "강사 자격 신청 상세 조회",
+            description = "관리자가 특정 강사 자격 신청 건의 상세 정보를 조회합니다.",
+            tags = {"Admin User API"}
+    )
+    @GetMapping("/trainer-applications/{applicationId}")
+    public ResponseEntity<ApiResponse<TrainerApplicationDetailResopnseDto>> getTrainerApplicationDetail(
+            @Parameter(description = "조회할 신청서의 ID")
+            @PathVariable Long applicationId) {
+        TrainerApplicationDetailResopnseDto detailResponseDto = adminUserService.getTrainerApplicationDetail(applicationId);
+        return ResponseEntity.ok(ApiResponse.success(detailResponseDto, "강사 자격 신청 상세 정보 조회 성공"));
+    }
+
+
 
     @Operation(
             summary = "사용자 자격증 검토 상태 변경",
