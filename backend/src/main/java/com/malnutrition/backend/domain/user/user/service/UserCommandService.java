@@ -21,6 +21,7 @@ public class UserCommandService {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImageUrl(null)
+                .phoneNumber(user.getPhoneNumber())
                 .build();
     }
 
