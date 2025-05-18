@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,7 +66,7 @@ public class AdminUserService {
     }
 
     @Transactional(readOnly = true)
-    public TrainerApplicationDetailResopnseDto getTrainerApplicationDetail(Long applicationId) {
+    public TrainerApplicationDetailResponseDto getTrainerApplicationDetail(Long applicationId) {
         TrainerApplication application = trainerApplicationRepository.findByIdWithDetails(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 강사 신청 정보를 찾을 수 없습니다. ID: " + applicationId));
 
@@ -87,7 +86,7 @@ public class AdminUserService {
                 .map(this::mapToSubmittedCertificationDto)
                 .collect(Collectors.toList());
 
-        return TrainerApplicationDetailResopnseDto.builder()
+        return TrainerApplicationDetailResponseDto.builder()
                 .applicationId(application.getId())
                 .applicantUserInfo((applicantUserInfoDto))
                 .applicationDate(application.getCreatedDate().toLocalDate())
@@ -104,9 +103,11 @@ public class AdminUserService {
         Certification certification = userCertification.getCertification();
         Image certificationImage = userCertification.getImage();
 
+
+
         return SubmittedCertificationResponseDto.builder()
                 .userCertificationId(userCertification.getId())
-                .certificationName(certification != null ? certification.getName() : "정보 없음")
+                .certificationName(certification != null ? certification.getCertificationCategory().getName() : "정보 없음")
                 .issuingInstitution(certification != null && certification.getIssuingInstitution() != null
                         ? certification.getIssuingInstitution() : "정보 없음")
                 .acquisitionDate(userCertification.getAcquisitionDate())

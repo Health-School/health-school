@@ -35,7 +35,6 @@ public class UserCertification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApproveStatus approveStatus;
-    //통과 기준이 될 자격증 이름:
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "certification_image_id", nullable = false)

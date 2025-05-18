@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.service;
 
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
@@ -80,6 +81,14 @@ public class LectureUserService {
         });
     }
 
+    @Transactional
+    public void registerLectureUser(Lecture lecture, User user){
+        LectureUser lectureUser = LectureUser.builder()
+                .lecture(lecture)
+                .user(user)
+                .build();
+        lectureUserRepository.save(lectureUser);
+    }
 
 
 }

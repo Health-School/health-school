@@ -4,6 +4,8 @@ import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
+import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.order.dto.CreateOrderResponseDto;
 import com.malnutrition.backend.domain.order.dto.OrderResponse;
 import com.malnutrition.backend.domain.order.dto.CreateAmountRequestDto;
@@ -33,6 +35,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final LectureService lectureService;
+    private final LectureUserService lectureUserService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -166,17 +169,18 @@ public class OrderService {
         );
     }
 
+    @Transactional
     public CreateOrderResponseDto createOrder(CreateAmountRequestDto saveAmountRequest){
         User actor = rq.getActor();
         String orderId = UUID.randomUUID().toString();
 
-        Lecture lectureById = lectureService.findLectureById(saveAmountRequest.getLectureId());
-
+        Lecture lecture = lectureService.findLectureById(saveAmountRequest.getLectureId());
+        lectureUserService.registerLectureUser(lecture, actor);
         Order order = Order.builder()
                 .id(orderId)
                 .user(actor)
-                .lecture(lectureById)
-                .name(lectureById.getTitle())
+                .lecture(lecture)
+                .name(lecture.getTitle())
                 .orderStatus(OrderStatus.PENDING)
                 .amount(saveAmountRequest.getAmount())
                 .build();

@@ -50,5 +50,4 @@ public class TrainerApplication extends BaseEntity {
         userCertification.setTrainerApplication(this);
     }
 
-
 }

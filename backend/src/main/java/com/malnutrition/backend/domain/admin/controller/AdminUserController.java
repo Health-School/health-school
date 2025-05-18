@@ -1,7 +1,7 @@
 package com.malnutrition.backend.domain.admin.controller;
 
 
-import com.malnutrition.backend.domain.admin.dto.TrainerApplicationDetailResopnseDto;
+import com.malnutrition.backend.domain.admin.dto.TrainerApplicationDetailResponseDto;
 import com.malnutrition.backend.domain.admin.dto.TrainerApplicationSummaryDto;
 import com.malnutrition.backend.domain.admin.dto.TrainerVerificationRequestDto;
 import com.malnutrition.backend.domain.admin.dto.UserCertificationVerificationRequestDto;
@@ -60,10 +60,10 @@ public class AdminUserController {
             tags = {"Admin User API"}
     )
     @GetMapping("/trainer-applications/{applicationId}")
-    public ResponseEntity<ApiResponse<TrainerApplicationDetailResopnseDto>> getTrainerApplicationDetail(
+    public ResponseEntity<ApiResponse<TrainerApplicationDetailResponseDto>> getTrainerApplicationDetail(
             @Parameter(description = "조회할 신청서의 ID")
             @PathVariable Long applicationId) {
-        TrainerApplicationDetailResopnseDto detailResponseDto = adminUserService.getTrainerApplicationDetail(applicationId);
+        TrainerApplicationDetailResponseDto detailResponseDto = adminUserService.getTrainerApplicationDetail(applicationId);
         return ResponseEntity.ok(ApiResponse.success(detailResponseDto, "강사 자격 신청 상세 정보 조회 성공"));
     }
 

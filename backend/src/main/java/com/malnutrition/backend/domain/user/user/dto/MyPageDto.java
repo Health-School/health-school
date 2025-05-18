@@ -23,6 +23,7 @@ public class MyPageDto {
         return MyPageDto.builder()
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
                 .profileImageUrl(profileImageUrl)
                 .role(user.getRole())
                 .build();
