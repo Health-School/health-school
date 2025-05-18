@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { CompatClient, Stomp } from "@stomp/stompjs";
@@ -76,9 +76,11 @@ type ChatResponseDto = {
 export default function ChatRoomPage({
   params,
 }: {
-  params: { roomId: string };
+  params: Promise<{ roomId: string }>;
 }) {
-  const roomId = Number(params.roomId);
+  const resolvedParams = use(params);
+  const roomId = Number(resolvedParams.roomId);
+
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -345,17 +347,13 @@ export default function ChatRoomPage({
       console.log("메시지 삭제 시도:", { messageId });
 
       const response = await api.delete(`/api/v1/chats/${messageId}`);
-      
-      if (response.data.success) {
-        console.log("메시지 삭제 응답:", response.data);
-        setTimelineMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-        alert("메시지가 삭제되었습니다.");
-      } else {
-        throw new Error(response.data.message || "메시지 삭제에 실패했습니다.");
-      }
-    } catch (error: any) {
+
+      console.log("메시지 삭제 응답:", response.data);
+
+      setTimelineMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+    } catch (error) {
       console.error("메시지 삭제 실패:", error);
-      alert(error.message || "메시지 삭제에 실패했습니다. 다시 시도해주세요.");
+      alert("메시지 삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -436,7 +434,7 @@ export default function ChatRoomPage({
       }
     };
 
-    if (roomId) {
+    if (!isNaN(roomId)) {
       initializeChat();
     }
 
@@ -547,11 +545,13 @@ export default function ChatRoomPage({
                             </button>
                             <button
                               onClick={() => {
-                                if (window.confirm("정말로 이 메시지를 삭제하시겠습니까?")) {
+                                if (
+                                  window.confirm("정말로 삭제하시겠습니까?")
+                                ) {
                                   deleteMessage(msg.id!);
                                 }
                               }}
-                              className="text-xs underline hover:text-gray-300 text-red-500"
+                              className="text-xs underline hover:text-gray-300"
                             >
                               삭제
                             </button>

@@ -5,6 +5,15 @@ import { useState, useEffect } from "react";
 import ExerciseRecordModal from "@/components/exercise/ExerciseRecordModal";
 import ExerciseEditModal from "@/components/exercise/ExerciseEditModal";
 
+interface Feedback {
+  id: number;
+  exerciseSheetId: number;
+  trainerId: number;
+  trainerName: string;
+  comment: string; // Changed from content to comment
+  createdAt: string;
+}
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -75,6 +84,7 @@ export default function MyExercisesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingSheet, setEditingSheet] = useState<ExerciseSheet | null>(null);
+  const [feedbacks, setFeedbacks] = useState<{ [key: number]: Feedback[] }>({});
 
   const fetchExerciseSheets = async () => {
     try {
@@ -93,6 +103,10 @@ export default function MyExercisesPage() {
 
       if (result.success) {
         setExerciseSheets(result.data);
+        // 각 운동 기록에 대한 피드백 자동 조회
+        result.data.forEach((sheet) => {
+          fetchFeedback(sheet.id);
+        });
         setError(null);
       } else {
         setError(result.message);
@@ -102,6 +116,30 @@ export default function MyExercisesPage() {
       setError("운동 기록을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFeedback = async (sheetId: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/feedbacks/sheet/${sheetId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      const result: ApiResponse<Feedback[]> = await response.json();
+
+      if (result.success) {
+        setFeedbacks((prev) => ({
+          ...prev,
+          [sheetId]: result.data,
+        }));
+      } else {
+        console.error("피드백 조회 실패:", result.message);
+      }
+    } catch (err) {
+      console.error("피드백 조회 중 오류 발생:", err);
     }
   };
 
@@ -391,6 +429,8 @@ export default function MyExercisesPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Exercise List */}
               {sheet.machineExercises.map((exercise, idx) => (
                 <div key={idx} className="mb-4 bg-white rounded-lg border p-4">
                   <div className="flex justify-between items-center mb-3">
@@ -412,6 +452,41 @@ export default function MyExercisesPage() {
                   </div>
                 </div>
               ))}
+
+              {/* Feedback Section */}
+              <div className="mt-6 border-t pt-4">
+                <h4 className="text-lg font-semibold text-gray-700 mb-3">
+                  트레이너 피드백
+                </h4>
+
+                {feedbacks[sheet.id]?.length > 0 ? (
+                  <div className="space-y-4">
+                    {feedbacks[sheet.id].map((feedback) => (
+                      <div
+                        key={feedback.id}
+                        className="bg-blue-50 rounded-lg p-4 border border-blue-100"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium text-blue-800">
+                            {feedback.trainerName} 트레이너
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(feedback.createdAt).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 whitespace-pre-line">
+                          {feedback.comment}{" "}
+                          {/* Changed from content to comment */}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">
+                    아직 등록된 피드백이 없습니다.
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
