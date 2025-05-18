@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { CompatClient, Stomp } from "@stomp/stompjs";
@@ -76,11 +76,9 @@ type ChatResponseDto = {
 export default function ChatRoomPage({
   params,
 }: {
-  params: Promise<{ roomId: string }>;
+  params: { roomId: string };
 }) {
-  const resolvedParams = use(params);
-  const roomId = Number(resolvedParams.roomId);
-
+  const roomId = Number(params.roomId);
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -434,7 +432,7 @@ export default function ChatRoomPage({
       }
     };
 
-    if (!isNaN(roomId)) {
+    if (roomId) {
       initializeChat();
     }
 
