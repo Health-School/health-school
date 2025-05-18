@@ -328,7 +328,7 @@ export default function MyInfoPage() {
                 <Link href="/user/withdrawal">회원탈퇴</Link>
               </button>
               <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
-                트레이너 신청
+                <Link href="/user/trainer-application">트레이너 신청</Link>
               </button>
             </div>
           </div>
