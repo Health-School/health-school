@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.CredentialException;
 import java.net.HttpRetryException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -82,5 +83,11 @@ public class UserController {
         User actor = rq.getActor();
         userService.deleteUser(actor.getId(), passwordRequestDto.getPassword());
         return ResponseEntity.ok(ApiResponse.success(null, "회원탈퇴 성공"));
+    }
+
+    @GetMapping("/trainers")
+    public ResponseEntity<List<User>> getTrainerUsers() {
+        List<User> trainers = userService.getTrainerUsers();
+        return ResponseEntity.ok(trainers);
     }
 }

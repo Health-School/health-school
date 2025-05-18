@@ -177,4 +177,8 @@ public class UserService {
         return userRepository.existsByProvider(provider);
     }
 
+    public List<User> getTrainerUsers() {
+        return userRepository.findByRole(Role.TRAINER);
+    }
+
 }
