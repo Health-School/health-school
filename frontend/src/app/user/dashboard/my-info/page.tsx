@@ -107,6 +107,64 @@ export default function MyInfoPage() {
     }
   };
 
+  // 닉네임 변경 함수
+  const handleNicknameChange = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/change-nickname`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ nickname: nicknameInput }),
+        }
+      );
+      if (!response.ok) throw new Error("닉네임 변경 실패");
+      setUser((u) => (u ? { ...u, nickname: nicknameInput } : u));
+      setEditNickname(false);
+      alert("닉네임이 변경되었습니다.");
+    } catch (err) {
+      alert("닉네임 변경에 실패했습니다.");
+    }
+  };
+
+  // 전화번호 포맷팅 함수
+  function formatPhoneNumber(input: string) {
+    let value = input.replace(/[^0-9]/g, "");
+    if (value.length < 4) {
+      // 그대로
+    } else if (value.length < 8) {
+      value = value.replace(/(\d{3})(\d{1,4})/, "$1-$2");
+    } else {
+      value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, "$1-$2-$3");
+    }
+    return value;
+  }
+  //핸드폰 번호 변경경
+  const handlePhoneNumberChange = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/change-phoneNumber`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phoneNumber: phoneInput }),
+        }
+      );
+      if (!response.ok) throw new Error("연락처 변경 실패");
+      setUser((u) => (u ? { ...u, phoneNumber: phoneInput } : u));
+      setEditPhone(false);
+      alert("연락처가 변경되었습니다.");
+    } catch (err) {
+      alert("연락처 변경에 실패했습니다.");
+    }
+  };
+
   return (
     <div className=" p-6">
       <DashboardTabs />
@@ -180,13 +238,7 @@ export default function MyInfoPage() {
                     </button>
                     <button
                       className="text-green-400 text-sm hover:underline"
-                      onClick={() => {
-                        // TODO: 닉네임 변경 API 연동
-                        setUser((u) =>
-                          u ? { ...u, nickname: nicknameInput } : u
-                        );
-                        setEditNickname(false);
-                      }}
+                      onClick={handleNicknameChange}
                     >
                       저장
                     </button>
@@ -218,7 +270,11 @@ export default function MyInfoPage() {
                     <input
                       type="text"
                       value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
+                      onChange={(e) =>
+                        setPhoneInput(formatPhoneNumber(e.target.value))
+                      }
+                      maxLength={13}
+                      placeholder="010-1234-5678"
                       className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-200"
                     />
                     <button
@@ -234,9 +290,11 @@ export default function MyInfoPage() {
                       className="text-green-400 text-sm hover:underline"
                       onClick={() => {
                         // TODO: 연락처 변경 API 연동
+                        handlePhoneNumberChange();
                         setUser((u) =>
                           u ? { ...u, phoneNumber: phoneInput } : u
                         );
+
                         setEditPhone(false);
                       }}
                     >

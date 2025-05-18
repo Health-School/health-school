@@ -32,5 +32,4 @@ public class CertificationController {
         return ResponseEntity.ok().body(ApiResponse.success(certificationRegisterRequestDto, "자격증 등록 성공"));
     }
 
-
 }

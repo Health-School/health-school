@@ -109,4 +109,16 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null, "회원탈퇴 성공"));
     }
 
+    @PutMapping("/change-nickname")
+    public ResponseEntity<ApiResponse<Void>> changeNickname(@RequestBody ChangeNicknameDto changeNicknameDto){
+        userService.changeNickname(changeNicknameDto.getNickname());
+        return ResponseEntity.ok().body(ApiResponse.success(null, "nickname 변경 성공"));
+    }
+
+    @PutMapping("/change-phoneNumber")
+    public ResponseEntity<ApiResponse<Void>> changePhoneNumber(@RequestBody @Valid ChangePhoneNumber changePhoneNumber){
+        userService.changePhoneNumber(changePhoneNumber.getPhoneNumber());
+        return ResponseEntity.ok().body(ApiResponse.success(null, "phoneNumber 변경 성공"));
+    }
+
 }

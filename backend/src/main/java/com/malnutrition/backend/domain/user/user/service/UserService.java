@@ -209,6 +209,14 @@ public class UserService {
         return newPassword;
     }
 
-
-
+    @Transactional
+    public void changeNickname(String nickname){
+        User actor = rq.getActor();
+        actor.setNickname(nickname);
+    }
+    @Transactional
+    public void changePhoneNumber(String phoneNumber){
+        User actor = rq.getActor();
+        actor.setPhoneNumber(phoneNumber);
+    }
 }
