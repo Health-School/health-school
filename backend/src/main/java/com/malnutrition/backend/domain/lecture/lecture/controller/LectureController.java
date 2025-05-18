@@ -24,7 +24,6 @@ public class LectureController {
     private final Rq rq;
     private final UserService userService;
 
-
     @PostMapping
     public ResponseEntity<?> addLecture(@RequestBody LectureRequestDto request) {
         // lectureLevel을 LectureLevel enum으로 변환
@@ -33,9 +32,9 @@ public class LectureController {
         User user = rq.getActor();
         log.info("user {}", user);
 
-
         // LectureRequestDto를 Lecture로 변환 후 강의 추가
         lectureService.addLecture(request, user, lectureLevel);
         return ResponseEntity.ok(ApiResponse.success(null,"강의 등록이 완료되었습니다."));
     }
+
 }

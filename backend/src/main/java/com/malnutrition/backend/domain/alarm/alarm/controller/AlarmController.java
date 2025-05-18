@@ -38,4 +38,10 @@ public class AlarmController {
         alarmService.readCheck( String.valueOf(actor.getId()), alarmId);
     }
 
+    @DeleteMapping("/{alarmId}")
+    public void delete(@PathVariable("alarmId") Long alarmId){
+        alarmService.deleteAlarm(alarmId);
+
+    }
+
 }
