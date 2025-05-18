@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class TrainerApplicationDetailResopnseDto {
+public class TrainerApplicationDetailResponseDto {
 
     private Long applicationId;
     private ApplicantUserInfoDto applicantUserInfo;
