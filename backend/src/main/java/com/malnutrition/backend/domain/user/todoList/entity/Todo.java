@@ -24,7 +24,7 @@ public class Todo extends BaseEntity {
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TodoEnum isDone;
 
     private LocalDate dueDate;

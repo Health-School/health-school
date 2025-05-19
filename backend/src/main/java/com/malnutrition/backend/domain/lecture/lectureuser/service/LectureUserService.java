@@ -14,6 +14,7 @@ import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -116,6 +117,8 @@ public class LectureUserService {
                 .build();
         lectureUserRepository.save(lectureUser);
     }
-
-
+    public LectureUser getLectureUserWithLecture(Long id) {
+        return lectureUserRepository.findWithLectureAndTrainerById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 수강 정보가 존재하지 않습니다."));
+    }
 }

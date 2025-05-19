@@ -8,19 +8,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @Builder
 public class ChatRoomResponseDto {
     private Long id;
     private String title;
     private String senderName;
     private String receiverName;
+    private Long scheduleId;
 
-    public ChatRoomResponseDto(Long id, String title, String senderName, String receiverName) {
-        this.id = id;
-        this.title = title;
-        this.senderName = senderName;
-        this.receiverName = receiverName;
-    }
 
     public static ChatRoomResponseDto from(ChatRoom chatRoom) {
         return ChatRoomResponseDto.builder()
@@ -28,6 +24,7 @@ public class ChatRoomResponseDto {
                 .title(chatRoom.getTitle())
                 .senderName(chatRoom.getSender().getNickname())
                 .receiverName(chatRoom.getReceiver().getNickname())
+                .scheduleId(chatRoom.getSchedule() != null ? chatRoom.getSchedule().getId() : null)
                 .build();
     }
 

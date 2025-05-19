@@ -53,6 +53,7 @@ public class ExerciseSheetController {
             // ExerciseSheet에서 직접 DTO 변환
             List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
                     .map(mes -> new MachineExerciseSheetResponseDto(
+                            mes.getId(),
                             mes.getMachine().getName(),
                             mes.getReps(),
                             mes.getSets(),
@@ -61,6 +62,7 @@ public class ExerciseSheetController {
                     .collect(Collectors.toList());
 
             ExerciseSheetResponseDto responseDto = new ExerciseSheetResponseDto(
+                    sheet.getId(),
                     sheet.getExerciseDate(),
                     sheet.getExerciseStartTime(),
                     sheet.getExerciseEndTime(),
@@ -86,6 +88,41 @@ public class ExerciseSheetController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 조회 중 오류가 발생했습니다."));
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllExerciseSheetsByUser() {
+        try {
+            User user = rq.getActor();  // 로그인한 사용자 정보
+            List<ExerciseSheet> sheets = exerciseSheetService.getAllExerciseSheetsByUser(user.getId());
+
+            // 각 ExerciseSheet -> DTO 변환
+            List<ExerciseSheetResponseDto> responseDtos = sheets.stream()
+                    .map(sheet -> {
+                        List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
+                                .map(mes -> new MachineExerciseSheetResponseDto(
+                                        mes.getId(),
+                                        mes.getMachine().getName(),
+                                        mes.getReps(),
+                                        mes.getSets(),
+                                        mes.getWeight()
+                                )).collect(Collectors.toList());
+
+                        return new ExerciseSheetResponseDto(
+                                sheet.getId(),
+                                sheet.getExerciseDate(),
+                                sheet.getExerciseStartTime(),
+                                sheet.getExerciseEndTime(),
+                                machineDtos
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(ApiResponse.success(responseDtos, "운동 기록 목록 조회 결과입니다."));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 목록 조회 중 오류가 발생했습니다."));
         }
     }
 

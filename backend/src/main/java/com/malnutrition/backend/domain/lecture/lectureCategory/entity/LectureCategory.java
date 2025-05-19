@@ -17,7 +17,7 @@ import lombok.Setter;
 @Table(name = "lecture_categories")
 public class LectureCategory extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String categoryName;
 
     @Column(nullable = true)

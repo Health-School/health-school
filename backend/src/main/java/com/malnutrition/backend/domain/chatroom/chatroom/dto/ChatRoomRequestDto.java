@@ -6,4 +6,5 @@ import lombok.Getter;
 public class ChatRoomRequestDto {
     private Long receiverId;
     private String title;
+    private Long scheduleId;
 }

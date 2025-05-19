@@ -30,7 +30,7 @@ public class TodoService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .dueDate(dto.getDueDate())
-                .isDone(TodoEnum.DO)
+                .isDone(dto.getIsDone())
                 .user(user)
                 .build();
 
