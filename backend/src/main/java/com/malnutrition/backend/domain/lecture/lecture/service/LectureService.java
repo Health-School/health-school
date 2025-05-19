@@ -8,7 +8,6 @@ import com.malnutrition.backend.domain.lecture.lecture.repository.LectureReposit
 import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
 import com.malnutrition.backend.domain.lecture.lectureCategory.repository.LectureCategoryRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
-import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -65,6 +64,10 @@ public class LectureService {
             throw new AccessDeniedException("자신의 강의만 수정할 수 있습니다.");
         }
 
+        LectureCategory category = lectureCategoryRepository.findByCategoryName(request.getCategoryName())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+
+        lecture.setLectureCategory(category);
         lecture.setTitle(request.getTitle());
         lecture.setContent(request.getContent());
         lecture.setPrice(request.getPrice());
@@ -86,7 +89,7 @@ public class LectureService {
     }
 
     @Transactional
-    public void transLectureStatus(Long lectureId, User user) {
+    public Lecture transLectureStatus(Long lectureId, User user) {
         Lecture lecture = findLectureById(lectureId);
 
         if (!lecture.getTrainer().getId().equals(user.getId())) {
@@ -94,5 +97,6 @@ public class LectureService {
         }
 
         lecture.setLectureStatus(LectureStatus.COMPLETED);
+        return lectureRepository.save(lecture);
     }
 }
