@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lecture.controller;
 
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureResponseDto;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
@@ -12,6 +13,11 @@ import com.malnutrition.backend.global.rq.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,5 +68,14 @@ public class LectureController {
         User user = rq.getActor();
         Lecture updatedLecture = lectureService.transLectureStatus(lectureId, user);
         return ResponseEntity.ok(ApiResponse.success(LectureResponseDto.transDto(updatedLecture), "강의 상태 변경 완료"));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getLecturesByPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<LectureDto> lectures = lectureService.getLectures(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate")));
+        return ResponseEntity.ok(ApiResponse.success(lectures, "조회 성공!"));
     }
 }

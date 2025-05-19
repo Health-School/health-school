@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lecture.entity;
 
 
+import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
@@ -32,13 +33,18 @@ public class Lecture extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private LectureLevel lectureLevel;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "trainer_id", nullable = false)
     private User trainer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
     private LectureCategory lectureCategory;
+
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "image_id")
+    @ToString.Exclude
+    Image profileImage;
 
 
     //강의 수강 기간은 무제한!!! 댓글: 그건 내맘인디요

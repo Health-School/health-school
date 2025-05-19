@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
     boolean existsByTitle(String title);
     Optional<Lecture> findByTitle(String title);
+    Page<Lecture> findAll(Pageable pageable);
 
 
 }

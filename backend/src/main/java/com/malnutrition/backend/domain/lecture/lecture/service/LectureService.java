@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lecture.service;
 
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
@@ -9,6 +10,8 @@ import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCat
 import com.malnutrition.backend.domain.lecture.lectureCategory.repository.LectureCategoryRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,5 +101,11 @@ public class LectureService {
 
         lecture.setLectureStatus(LectureStatus.COMPLETED);
         return lectureRepository.save(lecture);
+    }
+
+    @Transactional
+    public Page<LectureDto> getLectures(Pageable pageable) {
+        return lectureRepository.findAll(pageable)
+                .map(LectureDto::from);
     }
 }
