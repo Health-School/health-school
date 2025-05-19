@@ -29,6 +29,7 @@ public class Alarm extends BaseEntity {
     @Column(nullable = true)
     private String url;
 
+
     @Column(nullable = false)
     private Boolean isRead;
 

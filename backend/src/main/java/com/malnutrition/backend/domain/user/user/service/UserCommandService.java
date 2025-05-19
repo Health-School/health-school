@@ -8,6 +8,7 @@ import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.ResetPasswordDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
+import com.malnutrition.backend.global.ut.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,7 @@ public class UserCommandService {
     public ResetPasswordDto resetPassword(String email, String code){
         boolean result = emailService.verifyCode(email, code);
         if(!result) throw new IllegalArgumentException ("email 혹은 code가 잘못되었습니다.");
-        String resetPassword = emailService.generateRandomCode();
+        String resetPassword = AuthUtil.generateRandomCode();
         String newPassword = userService.resetPassword(email, resetPassword);
         return new ResetPasswordDto(newPassword);
     }

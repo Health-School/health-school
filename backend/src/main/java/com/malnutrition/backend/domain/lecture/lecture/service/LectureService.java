@@ -8,6 +8,7 @@ import com.malnutrition.backend.domain.lecture.lecture.repository.LectureReposit
 import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
 import com.malnutrition.backend.domain.lecture.lectureCategory.repository.LectureCategoryRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.domain.user.user.enums.Role;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -26,6 +27,7 @@ public class LectureService {
     @Transactional
     public Optional<Lecture> addLecture(LectureRequestDto request, User user, LectureLevel lectureLevel) {
         System.out.println("User role: " + user.getRole());
+        
         if (!user.getRole().name().equals("TRAINER")) {
             throw new AccessDeniedException("트레이너만 강의를 등록할 수 있습니다.");
         }

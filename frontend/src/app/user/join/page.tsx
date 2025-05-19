@@ -20,11 +20,10 @@ export default function JoinPage() {
   const [phoneVerifyInput, setPhoneVerifyInput] = useState("");
   const socialLoginForKakaoUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/kakao`;
   const redirectUrlAfterSocialLogin = process.env.NEXT_PUBLIC_FRONT_BASE_URL;
+
   // 이메일 인증 요청
   const handleSendEmailCode = async () => {
     try {
-      console.log;
-      ("이메일 인증 요청");
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/email/join/send`,
         {
@@ -75,22 +74,73 @@ export default function JoinPage() {
 
   // 휴대폰 인증 요청
   const handleSendPhoneCode = async () => {
-    setPhoneSent(true);
-    alert("휴대폰 인증번호가 발송되었습니다.");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/send-code`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phoneNumber }),
+        }
+      );
+      if (!response.ok) {
+        alert("휴대폰 인증번호 발송에 실패했습니다.");
+        return;
+      }
+      setPhoneSent(true);
+      alert("휴대폰 인증번호가 발송되었습니다.");
+    } catch (e) {
+      alert("휴대폰 인증 요청 중 오류가 발생했습니다.");
+    }
   };
 
   // 휴대폰 인증 확인
   const handleVerifyPhone = async () => {
-    if (phoneVerifyInput === "654321") {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/verify-code`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber,
+            code: phoneVerifyInput,
+          }),
+        }
+      );
+      if (!response.ok) {
+        alert("인증번호가 올바르지 않습니다.");
+        return;
+      }
       setPhoneVerified(true);
-      alert("휴대폰 인증이 완료되었습니다.");
-    } else {
-      alert("인증번호가 올바르지 않습니다.");
+      alert("휴대폰 인증이 완료되었습니다."); // ✅ 인증 완료 시 알림
+    } catch (e) {
+      alert("휴대폰 인증 확인 중 오류가 발생했습니다.");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!emailVerified && !phoneVerified) {
+      alert("이메일과 휴대폰 인증을 모두 완료해주세요.");
+      return;
+    }
+    if (!emailVerified) {
+      alert("이메일 인증을 완료해주세요.");
+      return;
+    }
+    if (!phoneVerified) {
+      alert("휴대폰 인증을 완료해주세요.");
+      return;
+    }
+    if (password !== passwordCheck) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/join`,
@@ -112,7 +162,7 @@ export default function JoinPage() {
         return;
       }
       alert("회원가입 완료!");
-      window.location.href = "/user/login"; // 필요시 로그인 페이지로 이동
+      window.location.href = "/user/login";
     } catch (e) {
       alert("회원가입 요청 중 오류가 발생했습니다.");
     }
@@ -162,32 +212,32 @@ export default function JoinPage() {
                 인증번호 요청
               </button>
             </div>
-            {/* 이메일 인증번호 입력칸 (아래에 항상 노출) */}
-            <div className="flex gap-2 mt-2">
-              <input
-                type="text"
-                className="flex-1 border border-gray-300 rounded-md px-2 py-2 text-sm"
-                placeholder="인증번호 입력"
-                value={emailVerifyInput}
-                onChange={(e) => setEmailVerifyInput(e.target.value)}
-                disabled={!emailSent || emailVerified}
-              />
-              <button
-                type="button"
-                className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
-                onClick={handleVerifyEmail}
-                disabled={!emailSent || emailVerified || !emailVerifyInput}
-              >
-                확인
-              </button>
-              {emailVerified && (
-                <div className="flex items-center">
-                  <span className="text-green-500 text-sm font-semibold ml-2">
-                    인증완료
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* 이메일 인증번호 입력칸: 인증번호 요청 후에만 노출 */}
+            {emailSent && !emailVerified && (
+              <div className="flex gap-2 mt-2">
+                <input
+                  type="text"
+                  className="flex-1 border border-gray-300 rounded-md px-2 py-2 text-sm"
+                  placeholder="인증번호 입력"
+                  value={emailVerifyInput}
+                  onChange={(e) => setEmailVerifyInput(e.target.value)}
+                  disabled={emailVerified}
+                />
+                <button
+                  type="button"
+                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
+                  onClick={handleVerifyEmail}
+                  disabled={emailVerified || !emailVerifyInput}
+                >
+                  확인
+                </button>
+              </div>
+            )}
+            {emailVerified && (
+              <span className="text-green-500 text-sm font-semibold ml-2">
+                인증완료
+              </span>
+            )}
           </div>
           {/* 비밀번호 */}
           <div className="mb-4">
@@ -245,31 +295,6 @@ export default function JoinPage() {
               />
             </div>
           </div>
-          {/* 이름 */}
-          {/* <div className="mb-4">
-            <label className="block text-sm font-semibold mb-1" htmlFor="name">
-              이름
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                  <path
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z"
-                    fill="#BDBDBD"
-                  />
-                </svg>
-              </span>
-              <input
-                id="name"
-                type="text"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500"
-                placeholder="이름을 입력하세요"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-          </div> */}
           {/* 닉네임 */}
           <div className="mb-4">
             <label
@@ -344,11 +369,13 @@ export default function JoinPage() {
                   placeholder="인증번호 입력"
                   value={phoneVerifyInput}
                   onChange={(e) => setPhoneVerifyInput(e.target.value)}
+                  disabled={phoneVerified}
                 />
                 <button
                   type="button"
                   className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
                   onClick={handleVerifyPhone}
+                  disabled={phoneVerified || !phoneVerifyInput}
                 >
                   확인
                 </button>
@@ -360,20 +387,6 @@ export default function JoinPage() {
               </span>
             )}
           </div>
-          {/* 인증번호 */}
-          {/* <div className="mb-4">
-            <label className="block text-sm font-semibold mb-1" htmlFor="phoneCode">
-              인증번호
-            </label>
-            <input
-              id="phoneCode"
-              type="text"
-              className="w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500"
-              placeholder="인증번호를 입력하세요"
-              value={phoneCode}
-              onChange={e => setPhoneCode(e.target.value)}
-            />
-          </div> */}
           {/* 회원가입 버튼 */}
           <button
             type="submit"

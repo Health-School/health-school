@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.user.email.service;
 
 
+import com.malnutrition.backend.global.ut.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,7 +23,7 @@ public class EmailService {
 
     public void sendVerificationEmail(String email) {
         try {
-            String code = generateRandomCode();
+            String code = AuthUtil.generateRandomCode();
             storeCodeInRedis(email, code);
 
             SimpleMailMessage message = new SimpleMailMessage();
@@ -48,7 +49,4 @@ public class EmailService {
         return code.equals(savedCode);
     }
 
-    public String generateRandomCode() {
-        return String.valueOf((int)(Math.random() * 899999) + 100000); // 6자리 숫자
-    }
 }
