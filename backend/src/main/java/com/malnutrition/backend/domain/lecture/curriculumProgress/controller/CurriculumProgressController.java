@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.lecture.curriculumProgress.controller;
 
 import com.malnutrition.backend.domain.lecture.curriculumProgress.dto.CurriculumProgressRequestDto;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.service.CurriculumProgressService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import com.malnutrition.backend.global.security.security.CustomUserDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,7 @@ public class CurriculumProgressController {
 
     @Operation(summary = "커리큘럼 진도 확인", description = "커리큘럼 진도확인하기")
     @PatchMapping("/{curriculumId}")
-    public ResponseEntity<Void> updateProgress(
+    public ResponseEntity<?> updateProgress(
             @PathVariable(name = "curriculumId") Long curriculumId,
             @RequestBody @Valid CurriculumProgressRequestDto dto) {
 
@@ -49,6 +50,6 @@ public class CurriculumProgressController {
                 dto.getProgressRate(),
                 dto.getLastWatchedSecond()
         );
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success(null, "성공"));
     }
 }

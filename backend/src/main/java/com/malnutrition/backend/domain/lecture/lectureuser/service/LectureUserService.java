@@ -1,6 +1,11 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.service;
 
+import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumRepository;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.ProgressStatus;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
+
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
@@ -27,11 +32,16 @@ public class LectureUserService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final Rq rq;
+    private final CurriculumRepository curriculumRepository; //
+    private final CurriculumProgressRepository curriculumProgressRepository;
+
+
 
     public List<EnrollDto> getEnrolledLecturesByUser(User user) {
 
         List<LectureUser> lectureUsers = lectureUserRepository.findByUser(user);
         List<Order> orderList = orderRepository.findByUser(user);
+
 
         return lectureUsers.stream()
                 .map(lu -> {
@@ -41,6 +51,14 @@ public class LectureUserService {
                             .findFirst()
                             .orElse(null);
 
+                    int total = curriculumRepository.countByLecture(lu.getLecture()); // 커리큘럼(영상) 갯수 세기
+                    int completedVideo = curriculumProgressRepository.findByUserAndLecture(user, lu.getLecture()).stream()
+                            .filter(curriculumProgress -> curriculumProgress.getStatus() == ProgressStatus.COMPLETED)
+                            .map(curriculumProgress -> curriculumProgress.getCurriculum().getId())
+                            .collect(Collectors.toSet()).size(); // 중복 제거
+
+                    int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
+
                     return new EnrollDto(
                             lu.getLecture().getId(),
                             lu.getLecture().getTrainer().getNickname(),
@@ -48,7 +66,9 @@ public class LectureUserService {
                             lu.getLecture().getLectureLevel().getDescription(),
                             user.getNickname(),
                             matchedOrder != null ? matchedOrder.getApprovedAt() : null,
+                            progressRate,
                             lu.getCreatedDate()
+
                     );
                 })
                 .collect(Collectors.toList());
