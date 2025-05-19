@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Admin User API", description = "관리자용 사용자 관리 API")
+@Tag(name = "Admin Verification API", description = "관리자용 사용자 인증 요청 검증 API")
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class AdminVerificationController {
     @Operation(
             summary = "강사 자격 신청 목록 조회",
             description = "관리자가 강사 자격 신청 목록을 조회합니다. 상태별 필터링 및 페이징을 지원합니다. ",
-            tags = {"Admin User API"}
+            tags = {"Admin Verification API"}
     )
     @GetMapping("/trainer-applications")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -57,7 +57,7 @@ public class AdminVerificationController {
     @Operation(
             summary = "강사 자격 신청 상세 조회",
             description = "관리자가 특정 강사 자격 신청 건의 상세 정보를 조회합니다.",
-            tags = {"Admin User API"}
+            tags = {"Admin Verification API"}
     )
     @GetMapping("/trainer-applications/{applicationId}")
     public ResponseEntity<ApiResponse<TrainerApplicationDetailResponseDto>> getTrainerApplicationDetail(
@@ -72,7 +72,7 @@ public class AdminVerificationController {
     @Operation(
             summary = "사용자 자격증 검토 상태 변경",
             description = "관리자가 특정 사용자 자격증의 검토 상태(예: 승인, 반려)와 사유를 업데이트합니다.",
-            tags = {"Admin User Management"}
+            tags = {"Admin Verification API"}
     )
     @PatchMapping("/certifications/{certificationId}/status")
     public ResponseEntity<ApiResponse<Void>> updateUserCertificationStatus(
@@ -97,7 +97,7 @@ public class AdminVerificationController {
     @Operation(
             summary = "트레이너 자격 검증 및 결정",
             description = "관리자가 특정 사용자의 트레이너 자격을 최종적으로 승인하거나 반려합니다.",
-            tags = {"Admin User Management"}
+            tags = {"Admin Verification API"}
     )
     @PutMapping("/{userId}/trainer-verification")
     public ResponseEntity<ApiResponse<Void>> decideTrainerVerification(

@@ -26,4 +26,10 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     Page<Order> findByUser(User user, Pageable pageable);
 
     long countByOrderStatusAndApprovedAtBetween(OrderStatus orderStatus, LocalDateTime startTime, LocalDateTime endTime);
+
+    List<Order> findAllByOrderStatusAndApprovedAtBetween(
+            OrderStatus orderStatus,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
 }
