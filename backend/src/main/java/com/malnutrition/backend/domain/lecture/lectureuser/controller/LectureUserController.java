@@ -3,7 +3,9 @@ package com.malnutrition.backend.domain.lecture.lectureuser.controller;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.List;
 public class LectureUserController {
     private final Rq rq;
     private final LectureUserService lectureUserService;
+
     @GetMapping("/my-lectures")
     public ResponseEntity<?> getMyLectures() {
         User user = rq.getActor(); // 현재 로그인한 사용자
@@ -31,4 +34,7 @@ public class LectureUserController {
         List<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user);
         return ResponseEntity.ok(lectures);
     }
+
+
+
 }

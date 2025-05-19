@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.lecture.lecture.entity;
 
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
+import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -35,8 +36,12 @@ public class Lecture extends BaseEntity {
     @JoinColumn(name = "trainer_id", nullable = false)
     private User trainer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private LectureCategory LectureCategory;
 
-    //강의 수강 기간은 무제한!!!
+
+    //강의 수강 기간은 무제한!!! 댓글: 그건 내맘인디요
 
 
 }

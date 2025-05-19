@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.curriculum.repository;
 
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +18,5 @@ public interface CurriculumRepository extends JpaRepository<Curriculum,Long> {
 """)
     Optional<Curriculum> findWithLectureAndUserById(@Param("id") Long id);
 
+    int countByLecture(Lecture lecture);
 }

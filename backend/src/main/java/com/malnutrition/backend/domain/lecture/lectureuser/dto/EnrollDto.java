@@ -14,4 +14,6 @@ public class EnrollDto {
     private String lectureLevel;
     private String userName;
     private LocalDateTime startDate;
+
+    private int progressRate; // 진행률 퍼센트로 나타내기 위해
 }
