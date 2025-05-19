@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { CompatClient, Stomp } from "@stomp/stompjs";
+import { time } from "console";
 
 // Add axios instance configuration
 const api = axios.create({
@@ -76,9 +77,10 @@ type ChatResponseDto = {
 export default function ChatRoomPage({
   params,
 }: {
-  params: { roomId: string };
+  params: Promise<{ roomId: string }>;
 }) {
-  const roomId = Number(params.roomId);
+  const resolvedParams = use(params);
+  const roomId2 = Number(resolvedParams.roomId);
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,7 +145,7 @@ export default function ChatRoomPage({
           console.log("STOMP 연결 성공");
           console.log("현재 사용자:", user);
 
-          const subscriptionPath = `/subscribe/enter/room/${roomId}`;
+          const subscriptionPath = `/subscribe/enter/room/${roomId2}`;
           console.log("구독 시도:", subscriptionPath);
 
           const subscription = client.subscribe(subscriptionPath, (message) => {
@@ -166,7 +168,7 @@ export default function ChatRoomPage({
 
           console.log("구독 완료:", subscription);
 
-          client.subscribe(`/subscribe/leave/room/${roomId}`, (message) => {
+          client.subscribe(`/subscribe/leave/room/${roomId2}`, (message) => {
             try {
               console.log("퇴장 메시지 원본:", message.body);
               setTimelineMessages((prev) => [
@@ -182,7 +184,7 @@ export default function ChatRoomPage({
             }
           });
 
-          client.subscribe(`/subscribe/chat/room/${roomId}`, (message) => {
+          client.subscribe(`/subscribe/chat/room/${roomId2}`, (message) => {
             try {
               const chatMessage = JSON.parse(message.body);
               setTimelineMessages((prev) => [
@@ -208,7 +210,7 @@ export default function ChatRoomPage({
           console.log("전송할 입장 데이터:", enterData);
 
           client.send(
-            `/publish/chat/room/enter/${roomId}`,
+            `/publish/chat/room/enter/${roomId2}`,
             headers,
             JSON.stringify(enterData)
           );
@@ -227,6 +229,10 @@ export default function ChatRoomPage({
   };
 
   const sendMessage = () => {
+    timelineMessages.forEach((msg) => {
+      console.log("timeLine:::" + JSON.stringify(timelineMessages));
+    });
+
     if (!stompClient.current || !chatRoom || !currentUser || !newMessage.trim())
       return;
 
@@ -238,10 +244,23 @@ export default function ChatRoomPage({
 
     try {
       stompClient.current.send(
-        `/publish/chat/message/${roomId}`,
+        `/publish/chat/message/${roomId2}`,
         { "Content-Type": "application/json" },
         JSON.stringify(messageData)
       );
+
+      setTimelineMessages((prev) => [
+        ...prev,
+        {
+          type: "chat",
+          message: newMessage.trim(),
+          writerName: currentUser.nickname,
+          timestamp: new Date(),
+        },
+      ]);
+      timelineMessages.forEach((msg) => {
+        console.log("timeLine22:::" + JSON.stringify(timelineMessages));
+      });
       setNewMessage("");
     } catch (error) {
       console.error("메시지 전송 실패:", error);
@@ -267,7 +286,7 @@ export default function ChatRoomPage({
 
         // 퇴장 메시지 전송
         stompClient.current.send(
-          `/publish/chat/room/leave/${roomId}`,
+          `/publish/chat/room/leave/${roomId2}`,
           { "Content-Type": "application/json" },
           JSON.stringify(leaveData)
         );
@@ -277,7 +296,7 @@ export default function ChatRoomPage({
           try {
             // Use fetch instead of api.delete
             const response = await fetch(
-              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chatrooms/${roomId}/auto-delete`,
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chatrooms/${roomId2}/auto-delete`,
               {
                 method: "DELETE",
                 credentials: "include",
@@ -339,6 +358,7 @@ export default function ChatRoomPage({
   };
 
   const deleteMessage = async (messageId: number) => {
+    console.log("메시지 삭제 시도 시작:", messageId);
     if (!messageId) return;
 
     try {
@@ -358,14 +378,13 @@ export default function ChatRoomPage({
   useEffect(() => {
     const initializeChat = async () => {
       const user = await fetchCurrentUser();
-      console.log(user);
       if (user) {
         try {
           setLoading(true);
-          console.log("채팅방 접근 권한 확인:", roomId);
+          console.log("채팅방 접근 권한 확인:", roomId2);
 
           // 채팅방 정보 조회
-          const roomResponse = await api.get(`/api/v1/chatrooms/${roomId}`);
+          const roomResponse = await api.get(`/api/v1/chatrooms/${roomId2}`);
 
           // 접근 권한 확인
           if (
@@ -379,7 +398,7 @@ export default function ChatRoomPage({
 
           // 채팅 히스토리 조회
           const historyResponse = await api.get(
-            `/api/v1/chats/room/${roomId}/messages`
+            `/api/v1/chats/room/${roomId2}/messages`
           );
           const chatHistory = historyResponse.data;
           console.log("채팅 히스토리:", chatHistory);
@@ -432,7 +451,7 @@ export default function ChatRoomPage({
       }
     };
 
-    if (roomId) {
+    if (roomId2) {
       initializeChat();
     }
 
@@ -446,11 +465,11 @@ export default function ChatRoomPage({
         }
       }
     };
-  }, [roomId]);
+  }, [roomId2]);
 
   useEffect(() => {
     const saveScrollPosition = () => {
-      localStorage.setItem(`scrollPosition-${roomId}`, "saved");
+      localStorage.setItem(`scrollPosition-${roomId2}`, "saved");
     };
 
     window.addEventListener("beforeunload", saveScrollPosition);
@@ -458,7 +477,7 @@ export default function ChatRoomPage({
     return () => {
       window.removeEventListener("beforeunload", saveScrollPosition);
     };
-  }, [roomId]);
+  }, [roomId2]);
 
   useEffect(() => {
     if (messageEndRef.current) {
