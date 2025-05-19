@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumUpdateRe
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
 import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumRepository;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
@@ -71,6 +72,11 @@ public class CurriculumService {
                 .sequence(sequence)
                 .s3path(s3path)
                 .build();
+
+        if (lecture.getLectureStatus() == LectureStatus.PLANNED) {
+            lecture.setLectureStatus(LectureStatus.ONGOING);
+            lectureRepository.save(lecture);
+        }
 
         try {
             return curriculumRepository.save(curriculum);

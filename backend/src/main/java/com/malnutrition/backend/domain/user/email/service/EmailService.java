@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.user.user.service;
+package com.malnutrition.backend.domain.user.email.service;
 
 
 import lombok.RequiredArgsConstructor;

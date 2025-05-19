@@ -36,6 +36,9 @@ public class Rq {
         if (contextUser.getUserStatus() == UserStatus.BANNED) {
             throw new AccessDeniedException("정지된 회원입니다."); // 403 에러 발생
         }
+        else if (contextUser.getUserStatus() == UserStatus.DELETED) {
+            throw new AccessDeniedException("삭제된 회원입니다."); // 403 에러 발생
+        }
 
         UserDetails securityUser = new SecurityUser(
                 contextUser.getId(),

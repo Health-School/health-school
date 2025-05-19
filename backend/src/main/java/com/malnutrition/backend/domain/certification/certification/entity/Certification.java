@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.certification.certification.entity;
 
 
+import com.malnutrition.backend.domain.certification.category.entitiy.CertificationCategory;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,8 +20,12 @@ import lombok.experimental.SuperBuilder;
 public class Certification extends BaseEntity {
 
 
-    @Column(length = 50, nullable = false, unique = true)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "certification_category_id", nullable = false)
+    private CertificationCategory certificationCategory;
+
+    @Column(nullable = false)
+    private String issuingInstitution; // 발급 기관
 
 
 }

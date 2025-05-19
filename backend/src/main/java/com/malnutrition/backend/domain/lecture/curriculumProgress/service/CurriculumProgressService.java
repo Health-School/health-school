@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CurriculumProgressService {
     private final CurriculumProgressRepository curriculumProgressRepository;
-    private final Rq rq;
     private final UserRepository userRepository;
     private final CurriculumRepository curriculumRepository;
 

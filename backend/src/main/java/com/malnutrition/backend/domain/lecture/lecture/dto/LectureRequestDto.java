@@ -17,5 +17,6 @@ public class LectureRequestDto {
     private String lectureLevel; // 강의 수준 (초급, 중급, 고급 등)
     private String lectureStatus; // 강의 상태 (OPEN, CLOSED 등)
 
+    private String categoryName;
     // 추가적으로 필요한 필드가 있다면 여기에 더 추가하시면 됩니다.
 }

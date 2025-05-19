@@ -3,7 +3,9 @@ package com.malnutrition.backend.domain.lecture.lectureuser.controller;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ import java.util.List;
 public class LectureUserController {
     private final Rq rq;
     private final LectureUserService lectureUserService;
+
     @GetMapping("/my-lectures")
     public ResponseEntity<?> getMyLectures(
             @RequestParam(defaultValue = "latest") String sort,
@@ -41,6 +44,7 @@ public class LectureUserController {
         Page<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user, pageable);
         return ResponseEntity.ok(lectures);
     }
+
 
     // 정렬 기준에 따라 Sort 객체 반환
     private Sort getSortBy(String sort) {

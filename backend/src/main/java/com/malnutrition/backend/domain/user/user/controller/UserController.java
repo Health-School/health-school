@@ -1,10 +1,7 @@
 package com.malnutrition.backend.domain.user.user.controller;
 
 
-import com.malnutrition.backend.domain.user.user.dto.LoginRequestDto;
-import com.malnutrition.backend.domain.user.user.dto.MeUserResponseDto;
-import com.malnutrition.backend.domain.user.user.dto.PasswordRequestDto;
-import com.malnutrition.backend.domain.user.user.dto.UserJoinRequestDto;
+import com.malnutrition.backend.domain.user.user.dto.*;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.service.UserCommandService;
 import com.malnutrition.backend.domain.user.user.service.UserService;
@@ -16,13 +13,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.CredentialException;
 import java.net.HttpRetryException;
 import java.util.List;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -78,8 +76,37 @@ public class UserController {
         MeUserResponseDto me = userCommandService.getMeUserResponseDto(user.getId());
         return ResponseEntity.ok(ApiResponse.success(me,"인가 성공"));
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<ResetPasswordDto>> resetPassword(@RequestBody Map<String, String> body){
+        String email = body.get("email");
+        String code = body.get("code");
+        ResetPasswordDto resetPasswordDto = userCommandService.resetPassword (email, code);
+        return ResponseEntity.ok(ApiResponse.success(resetPasswordDto, "비밀번호 초기화 성공"));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(@RequestBody ChangePasswordDto changePasswordDto){
+        String newPassword = changePasswordDto.getNewPassword();
+        String confirmPassword = changePasswordDto.getConfirmPassword();
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+        }
+        User actor = rq.getActor();
+        String currentPassword = changePasswordDto.getCurrentPassword();
+        userService.resetPassword(actor.getEmail(), currentPassword,newPassword);
+        return ResponseEntity.ok(ApiResponse.success(null,"비밀번호 변경 성공"));
+    }
+
+    @GetMapping("/me/mypage")
+    public ResponseEntity<ApiResponse<MyPageDto>> getMyPage(){
+
+        MyPageDto myPageDto = userCommandService.getMyPageDto(rq.getActor().getId());
+        return ResponseEntity.ok(ApiResponse.success(myPageDto, "myPageDto 생성 성공"));
+    }
+
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deleteMyAccount(@RequestBody PasswordRequestDto passwordRequestDto){
+    public ResponseEntity<ApiResponse<Void>> withdrawalUser(@RequestBody PasswordRequestDto passwordRequestDto){
         User actor = rq.getActor();
         userService.deleteUser(actor.getId(), passwordRequestDto.getPassword());
         return ResponseEntity.ok(ApiResponse.success(null, "회원탈퇴 성공"));
@@ -90,4 +117,17 @@ public class UserController {
         List<User> trainers = userService.getTrainerUsers();
         return ResponseEntity.ok(trainers);
     }
+
+    @PutMapping("/change-nickname")
+    public ResponseEntity<ApiResponse<Void>> changeNickname(@RequestBody ChangeNicknameDto changeNicknameDto){
+        userService.changeNickname(changeNicknameDto.getNickname());
+        return ResponseEntity.ok().body(ApiResponse.success(null, "nickname 변경 성공"));
+    }
+
+    @PutMapping("/change-phoneNumber")
+    public ResponseEntity<ApiResponse<Void>> changePhoneNumber(@RequestBody @Valid ChangePhoneNumber changePhoneNumber){
+        userService.changePhoneNumber(changePhoneNumber.getPhoneNumber());
+        return ResponseEntity.ok().body(ApiResponse.success(null, "phoneNumber 변경 성공"));
+    }
+
 }
