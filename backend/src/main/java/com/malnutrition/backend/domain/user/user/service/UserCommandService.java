@@ -30,6 +30,7 @@ public class UserCommandService {
                 .nickname(user.getNickname())
                 .phoneNumber(user.getPhoneNumber())
                 .profileImageUrl(imageProfileUrl)
+                .roleName(user.getRole().name())
                 .build();
     }
     @Transactional
