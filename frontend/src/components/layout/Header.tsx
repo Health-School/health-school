@@ -125,7 +125,7 @@ export default function Header({ hideDropdownMenus = false }) {
                                 마이 대시보드
                               </Link>
                               <Link
-                                href="/trainer/dashboard"
+                                href="/trainer/dashboard/my-lectures"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                 onClick={() => setIsDropdownOpen(false)}
                               >
