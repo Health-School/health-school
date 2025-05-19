@@ -26,7 +26,7 @@ import java.util.List;
 @ToString
 public class User extends BaseEntity {
 
-    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id", nullable = true)
     @ToString.Exclude
     Image profileImage;
@@ -56,14 +56,14 @@ public class User extends BaseEntity {
     private UserStatus userStatus;
 
     // 사용자의 트레이너 신청 목록 (이력)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     @ToString.Exclude
 
     private List<TrainerApplication> trainerApplications = new ArrayList<>();
 
     // 사용자의 자격증 제출 내역
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     @ToString.Exclude
     private List<UserCertification> userCertifications = new ArrayList<>();

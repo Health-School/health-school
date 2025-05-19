@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class ScheduleDto {
     private Long id;
+    private Long userId;
     private String userName;
     private String trainerName;
     private LocalDate desiredDate;
@@ -23,6 +24,7 @@ public class ScheduleDto {
     public static ScheduleDto fromEntity(Schedule schedule) {
         return new ScheduleDto(
                 schedule.getId(),
+                schedule.getUser().getId(),
                 schedule.getUser().getNickname(),    // 혹은 getName()
                 schedule.getTrainer().getNickname(), // 혹은 getName()
                 schedule.getDesiredDate(),
