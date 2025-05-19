@@ -110,7 +110,14 @@ export default function LoginPage() {
             </div>
           </div>
           {/* 로그인 상태 유지 & 비밀번호 찾기 */}
-          <div className="flex items-center justify-end mb-6">
+
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/user/find/id"
+              className="text-green-500 text-base hover:underline"
+            >
+              아이디 찾기
+            </Link>
             <Link
               href="/user/find/password"
               className="text-green-500 text-base hover:underline"

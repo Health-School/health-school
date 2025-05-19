@@ -40,7 +40,7 @@ public class User extends BaseEntity {
     @Column(length = 50, nullable = false, unique = true)
     private String nickname;
 
-    @Column(length = 50, nullable = true)
+    @Column(length = 50, nullable = true, unique = true)
     private String phoneNumber;
 
     @Column(length = 255)

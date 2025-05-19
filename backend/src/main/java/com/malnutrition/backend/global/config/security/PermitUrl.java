@@ -20,7 +20,8 @@ public class PermitUrl {
     public static final String[] POST_URLS = {
             "/api/v1/users/join", "/api/v1/users/login",
             "/api/v1/email/password/send", "/api/v1/email/verify",
-            "/api/v1/email/join/send","/api/v1/sms/send-code", "/api/v1/sms/verify-code"
+            "/api/v1/email/join/send","/api/v1/sms/join/send-code", "/api/v1/sms/join/verify-code",
+            "/api/v1/sms/find-email/verify-code", "/api/v1/sms/find-email/send-code"
     };
 
     public static final String[] PUT_URLS = {

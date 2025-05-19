@@ -3,6 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
+// 전화번호 포맷팅 함수
+function formatPhoneNumber(input: string) {
+  let value = input.replace(/[^0-9]/g, "");
+  if (value.length < 4) {
+    // 그대로
+  } else if (value.length < 8) {
+    value = value.replace(/(\d{3})(\d{1,4})/, "$1-$2");
+  } else {
+    value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, "$1-$2-$3");
+  }
+  return value;
+}
+
 export default function JoinPage() {
   const [email, setEmail] = useState("");
   const [emailCode, setEmailCode] = useState("");
@@ -76,13 +89,13 @@ export default function JoinPage() {
   const handleSendPhoneCode = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/send-code`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/join/send-code`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ phoneNumber }),
+          body: JSON.stringify({ phoneNumber: phoneNumber.replace(/-/g, "") }), // 하이픈 제거
         }
       );
       if (!response.ok) {
@@ -100,14 +113,14 @@ export default function JoinPage() {
   const handleVerifyPhone = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/verify-code`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/join/verify-code`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            phoneNumber,
+            phoneNumber: phoneNumber.replace(/-/g, ""), // 하이픈 제거
             code: phoneVerifyInput,
           }),
         }
@@ -153,7 +166,7 @@ export default function JoinPage() {
             email,
             password,
             nickname,
-            phoneNumber,
+            phoneNumber: phoneNumber.replace(/-/g, ""), // 하이픈 제거
           }),
         }
       );
@@ -347,7 +360,9 @@ export default function JoinPage() {
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500"
                   placeholder="휴대폰 번호를 입력하세요"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) =>
+                    setPhoneNumber(formatPhoneNumber(e.target.value))
+                  }
                   required
                   disabled={phoneVerified}
                 />
