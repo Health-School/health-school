@@ -9,6 +9,8 @@ import com.malnutrition.backend.domain.counseling.schedule.service.ScheduleServi
 import com.malnutrition.backend.global.rp.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,8 +79,11 @@ public class ScheduleController {
 
     //user 기준 조회 기능
     @GetMapping
-    public ResponseEntity<?> getSchedulesByUser() {
-        List<ScheduleDto> schedules = scheduleService.getSchedulesByUser();
+    public ResponseEntity<?> getSchedulesByUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ScheduleDto> schedules = scheduleService.getSchedulesByUser(PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(schedules, "조회 성공!"));
     }
 

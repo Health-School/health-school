@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MachineExerciseSheetResponseDto {
+    private Long id;
     private String machineName;
     private int reps;
     private int sets;

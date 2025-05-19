@@ -3,6 +3,8 @@ package com.malnutrition.backend.domain.counseling.schedule.repository;
 import com.malnutrition.backend.domain.counseling.schedule.entity.Schedule;
 import com.malnutrition.backend.domain.counseling.schedule.enums.ApprovalStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -31,4 +33,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByTrainerIdAndDesiredDate(Long trainerId, LocalDate desiredDate);
 
     List<Schedule> findByUserIdAndDesiredDate(Long userId, LocalDate desiredDate);
+
+    Page<Schedule> findByUserId(Long userId, Pageable pageable);
 }

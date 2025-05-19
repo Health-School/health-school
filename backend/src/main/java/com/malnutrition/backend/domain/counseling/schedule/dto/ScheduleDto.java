@@ -18,6 +18,7 @@ public class ScheduleDto {
     private LocalTime startTime;
     private LocalTime endTime;
     private ApprovalStatus approvalStatus;
+    private String rejectedReason;
 
     public static ScheduleDto fromEntity(Schedule schedule) {
         return new ScheduleDto(
@@ -27,7 +28,8 @@ public class ScheduleDto {
                 schedule.getDesiredDate(),
                 schedule.getStartTime(),
                 schedule.getEndTime(),
-                schedule.getApprovalStatus()
+                schedule.getApprovalStatus(),
+                schedule.getRejectionReason()
         );
     }
 }

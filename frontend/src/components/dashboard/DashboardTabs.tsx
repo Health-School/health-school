@@ -7,6 +7,7 @@ const tabs = [
   { href: "/user/dashboard/my-order-list", label: "결제 내역" },
   { href: "/user/dashboard/my-exercises", label: "운동 기록 내역" },
   { href: "/user/dashboard/my-inquiry", label: "1:1 상담" },
+  { href: "/user/dashboard/todo-list", label: "todo list" },
 ];
 
 export default function DashboardTabs() {
