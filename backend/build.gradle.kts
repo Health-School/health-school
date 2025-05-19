@@ -27,7 +27,7 @@ dependencies {
 
 	implementation("software.amazon.awssdk:url-connection-client")
 	implementation("org.springframework.boot:spring-boot-starter-webflux") // webClient
-
+	implementation ("net.nurigo:sdk:4.3.0") // 최신버전은 coolsms docs 참고
 	implementation(platform("software.amazon.awssdk:bom:2.25.20")) // BOM 관리
 	implementation("software.amazon.awssdk:s3") // S3 클라이언트
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")

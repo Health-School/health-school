@@ -88,6 +88,12 @@ public class LectureUserService {
                     .filter(o -> o.getLecture().getId().equals(lu.getLecture().getId()))
                     .findFirst()
                     .orElse(null);
+            int total = curriculumRepository.countByLecture(lu.getLecture()); // 커리큘럼(영상) 갯수 세기
+            int completedVideo = curriculumProgressRepository.findByUserAndLecture(user, lu.getLecture()).stream()
+                    .filter(curriculumProgress -> curriculumProgress.getStatus() == ProgressStatus.COMPLETED)
+                    .map(curriculumProgress -> curriculumProgress.getCurriculum().getId())
+                    .collect(Collectors.toSet()).size(); // 중복 제거
+            int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
 
             return new EnrollDto(
                     lu.getLecture().getId(),
@@ -96,6 +102,7 @@ public class LectureUserService {
                     lu.getLecture().getLectureLevel().getDescription(),
                     user.getNickname(),
                     matchedOrder != null ? matchedOrder.getApprovedAt() : null,
+                    progressRate,
                     lu.getCreatedDate()
             );
         });

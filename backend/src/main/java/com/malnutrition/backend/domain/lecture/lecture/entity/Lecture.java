@@ -38,7 +38,7 @@ public class Lecture extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    private LectureCategory LectureCategory;
+    private LectureCategory lectureCategory;
 
 
     //강의 수강 기간은 무제한!!! 댓글: 그건 내맘인디요
