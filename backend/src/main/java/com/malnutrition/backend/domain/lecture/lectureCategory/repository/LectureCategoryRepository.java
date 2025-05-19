@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface LectureCategoryRepository extends JpaRepository<LectureCategory, Long> {
-    Optional<LectureCategory> findByName(String name);
+    Optional<LectureCategory> findByCategoryName(String name);
 }

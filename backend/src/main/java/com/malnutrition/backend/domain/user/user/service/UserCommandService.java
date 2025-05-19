@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.user.user.service;
 
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.user.email.service.EmailService;
 import com.malnutrition.backend.domain.user.user.dto.MeUserResponseDto;
 import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.ResetPasswordDto;

@@ -18,7 +18,7 @@ import lombok.Setter;
 public class LectureCategory extends BaseEntity {
 
     @Column(nullable = false, unique = true)
-    private String CategoryName;
+    private String categoryName;
 
     @Column(nullable = true)
     private String description; //설명

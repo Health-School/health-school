@@ -35,14 +35,14 @@ public class LectureService {
             throw new IllegalArgumentException("이미 존재하는 강의 제목입니다.");
         }
 
-        LectureCategory lectureCategory = lectureCategoryRepository.findByName(request.getCategoryName())
+        LectureCategory lectureCategory = lectureCategoryRepository.findByCategoryName(request.getCategoryName())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
 
         Lecture lecture = Lecture.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .price(request.getPrice())
-                .LectureCategory(lectureCategory)  // 카테고리 추가했음요를레이요
+                .lectureCategory(lectureCategory)  // 카테고리 추가했음요를레이요
                 .lectureLevel(lectureLevel)
                 .lectureStatus(LectureStatus.PLANNED) // 기본값 설정
                 .trainer(user)
