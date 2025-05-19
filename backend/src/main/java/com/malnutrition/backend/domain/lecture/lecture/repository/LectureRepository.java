@@ -13,4 +13,5 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     boolean existsByTitle(String title);
     Optional<Lecture> findByTitle(String title);
 
+
 }
