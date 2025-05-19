@@ -181,6 +181,10 @@ public class UserService {
         return userRepository.existsByProvider(provider);
     }
 
+    public List<User> getTrainerUsers() {
+        return userRepository.findByRole(Role.TRAINER);
+    }
+
     @Transactional
     public void resetPassword(String email, String currentPassword, String newPassword) {
         if (!StringUtils.hasText(currentPassword) || !StringUtils.hasText(newPassword)) {

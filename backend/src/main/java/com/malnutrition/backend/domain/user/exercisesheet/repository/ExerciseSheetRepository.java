@@ -16,5 +16,6 @@ public interface ExerciseSheetRepository extends JpaRepository<ExerciseSheet, Lo
     @Query("SELECT es FROM ExerciseSheet es WHERE es.user.id = :userId AND es.exerciseDate = :exerciseDate ORDER BY es.exerciseDate DESC")
     List<ExerciseSheet> findByUserIdAndExerciseDateDesc(@Param("userId") Long userId, @Param("exerciseDate") LocalDate exerciseDate);
 
+    List<ExerciseSheet> findAllByUserIdOrderByExerciseDateDesc(Long userId);
 }
 

@@ -11,6 +11,6 @@ public class MeUserResponseDto {
     Long id;
     String email;
     String nickname;
-
+    String phoneNumber;
     String profileImageUrl;
 }

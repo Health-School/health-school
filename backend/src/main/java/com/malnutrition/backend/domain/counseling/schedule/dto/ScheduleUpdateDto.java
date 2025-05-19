@@ -11,6 +11,7 @@ import java.time.LocalTime;
 @Setter
 @AllArgsConstructor
 public class ScheduleUpdateDto {
+    private String trainerName;
     private LocalDate desiredDate;  // 원하는 날짜
     private LocalTime startTime;    // 시작 시간
     private LocalTime endTime;      // 종료 시간

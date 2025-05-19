@@ -78,6 +78,12 @@ public class ChatRoomController {
         return ResponseEntity.ok().body(ApiResponse.success( null,"접근 허용"));
     }
 
+    @GetMapping("/schedule/{scheduleId}")
+    public ResponseEntity<ChatRoomResponseDto> getChatRoomByScheduleId(@PathVariable Long scheduleId) {
+        ChatRoomResponseDto response = chatRoomService.getChatRoomByScheduleId(scheduleId);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{roomId}")
     public ResponseEntity<?> updateChatRoomTitle(
             @PathVariable Long roomId,

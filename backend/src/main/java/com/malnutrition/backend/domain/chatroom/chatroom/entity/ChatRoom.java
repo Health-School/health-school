@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.chatroom.chatroom.entity;
 
 import com.malnutrition.backend.domain.chatroom.chatmessage.entity.ChatMessage;
+import com.malnutrition.backend.domain.counseling.schedule.entity.Schedule;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -31,8 +32,8 @@ public class ChatRoom extends BaseEntity {
     @JoinColumn(name = "receiver_id")
     User receiver;
 
-//    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
-//    @JsonIgnore
-//    List<ChatMessage> chatMessageList;
+    @OneToOne
+    @JoinColumn(name = "schedule_id")
+    Schedule schedule;
 
 }

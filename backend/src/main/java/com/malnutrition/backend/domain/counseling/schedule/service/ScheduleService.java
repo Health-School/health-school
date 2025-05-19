@@ -9,14 +9,19 @@ import com.malnutrition.backend.domain.counseling.schedule.enums.ApprovalStatus;
 import com.malnutrition.backend.domain.counseling.schedule.repository.ScheduleRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,10 +99,13 @@ public class ScheduleService {
             throw new SecurityException("자신의 스케줄만 수정할 수 있습니다.");
         }
 
+        Optional<User> trainer = userRepository.findByNickname(dto.getTrainerName());
+
         // 수정된 값 반영
         schedule.setDesiredDate(dto.getDesiredDate());
         schedule.setStartTime(dto.getStartTime());
         schedule.setEndTime(dto.getEndTime());
+        schedule.setTrainer(trainer.get());
 
         // 수정된 스케줄 저장
         Schedule updatedSchedule = scheduleRepository.save(schedule);
@@ -169,6 +177,14 @@ public class ScheduleService {
         return schedules.stream()
                 .map(ScheduleDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Page<ScheduleDto> getSchedulesByUser(Pageable pageable) {
+        // 예: 로그인한 사용자 ID를 가져오는 방식 (SecurityContext에서 가져오는 경우)
+        Long userId = rq.getActor().getId(); // 예시
+        return scheduleRepository.findByUserId(userId, pageable)
+                .map(schedule -> ScheduleDto.fromEntity(schedule));
     }
 
     @Transactional(readOnly = true)
