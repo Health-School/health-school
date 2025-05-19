@@ -228,11 +228,26 @@ export default function ChatRoomPage({
     }
   };
 
-  const sendMessage = () => {
-    timelineMessages.forEach((msg) => {
-      console.log("timeLine:::" + JSON.stringify(timelineMessages));
-    });
+  // 메시지 새로고침을 위한 함수 추가
+  const refreshMessages = async () => {
+    try {
+      const response = await api.get(`/api/v1/chats/room/${roomId2}/messages`);
+      const messages = response.data.map((msg: ChatResponseDto) => ({
+        id: msg.id,
+        type: msg.userType === "TALK" ? "chat" : "system",
+        message: msg.message,
+        writerName: msg.userType === "TALK" ? msg.writerName : undefined,
+        timestamp: new Date(msg.createdDate),
+        isEditing: false,
+        isEdited: false,
+      }));
+      setTimelineMessages(messages);
+    } catch (error) {
+      console.error("메시지 새로고침 실패:", error);
+    }
+  };
 
+  const sendMessage = async () => {
     if (!stompClient.current || !chatRoom || !currentUser || !newMessage.trim())
       return;
 
@@ -249,19 +264,12 @@ export default function ChatRoomPage({
         JSON.stringify(messageData)
       );
 
-      setTimelineMessages((prev) => [
-        ...prev,
-        {
-          type: "chat",
-          message: newMessage.trim(),
-          writerName: currentUser.nickname,
-          timestamp: new Date(),
-        },
-      ]);
-      timelineMessages.forEach((msg) => {
-        console.log("timeLine22:::" + JSON.stringify(timelineMessages));
-      });
-      setNewMessage("");
+      setNewMessage(""); // 입력 필드 초기화
+
+      // 잠시 대기 후 메시지 목록 새로고침
+      setTimeout(async () => {
+        await refreshMessages();
+      }, 100);
     } catch (error) {
       console.error("메시지 전송 실패:", error);
     }
