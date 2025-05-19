@@ -7,6 +7,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "comments")
 @Getter
@@ -20,10 +23,18 @@ public class Comment extends BaseEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "qnaboard_id",nullable = false)  // FK 이름을 명시적
+    @JoinColumn(name = "qnaboard_id", nullable = false)
     private QnaBoard qnaBoard;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",nullable = false)  // FK 이름을 명시적
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // 대댓글 기능: 자기 자신 참조
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> childComments = new ArrayList<>();
 }
