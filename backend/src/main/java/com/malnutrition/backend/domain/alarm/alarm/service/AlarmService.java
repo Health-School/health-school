@@ -151,6 +151,7 @@ public class AlarmService {
                 .build();
     }
 
-
-
+    public void deleteAlarm(Long alarmId){
+        alarmRepository.deleteById(alarmId);
+    }
 }

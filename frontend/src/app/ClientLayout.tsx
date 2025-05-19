@@ -17,7 +17,7 @@ export default function ClientLayout({ children }: LayoutProps) {
   const isAdminPage = pathname.startsWith("/admin");
 
   const fetchUser = useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`, {
       method: "GET",
       credentials: "include",
     })
@@ -56,12 +56,14 @@ export default function ClientLayout({ children }: LayoutProps) {
   };
   return (
     <LoginUserContext value={loginUserContextValue}>
-      <main>
-        <Header />
-        {children}
-
+      <div className="flex flex-col min-h-screen">
+        <main className="container mx-auto px-2 py-8 flex-1">
+          <Header />
+          {children}
+        </main>
+        {/* 푸터는 전체 폭 */}
         <Footer />
-      </main>
+      </div>
     </LoginUserContext>
   );
 }

@@ -1,5 +1,8 @@
 package com.malnutrition.backend.domain.user.user.service;
 
+import com.malnutrition.backend.domain.image.entity.Image;
+import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.UserJoinRequestDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
@@ -28,6 +31,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
+    private final ImageService imageService;
     private final Rq rq;
 
 
@@ -72,7 +76,7 @@ public class UserService {
         User user = userOptional.get();
 
         if(user.getProvider().equals(password)){
-            userRepository.deleteById(id);
+            user.setUserStatus(UserStatus.DELETED);
             return;
         }
         if(!StringUtils.hasText(password)){
@@ -80,7 +84,7 @@ public class UserService {
         }
         String encodedPassword = user.getPassword();
         if(passwordEncoder.matches(password, encodedPassword)){
-            userRepository.deleteById(id);
+            user.setUserStatus(UserStatus.DELETED);
         }else{
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
@@ -177,4 +181,42 @@ public class UserService {
         return userRepository.existsByProvider(provider);
     }
 
+    @Transactional
+    public void resetPassword(String email, String currentPassword, String newPassword) {
+        if (!StringUtils.hasText(currentPassword) || !StringUtils.hasText(newPassword)) {
+            throw new IllegalArgumentException("비밀번호는 필수 입력입니다.");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 email입니다."));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("기존 비밀번호와 새 비밀번호가 같습니다.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public String resetPassword(String email, String newPassword){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 email입니다."));
+        String encode = passwordEncoder.encode(newPassword);
+        user.setPassword(encode);
+        return newPassword;
+    }
+
+    @Transactional
+    public void changeNickname(String nickname){
+        User actor = rq.getActor();
+        actor.setNickname(nickname);
+    }
+    @Transactional
+    public void changePhoneNumber(String phoneNumber){
+        User actor = rq.getActor();
+        actor.setPhoneNumber(phoneNumber);
+    }
 }

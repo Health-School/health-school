@@ -56,7 +56,7 @@ export function useLoginUser() {
   const isLogin = loginUser.id !== 0;
 
   const logout = (callback: () => void) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/logout`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/logout`, {
       method: "DELETE",
       credentials: "include",
     }).then(() => {

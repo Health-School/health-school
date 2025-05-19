@@ -1,6 +1,8 @@
 package com.malnutrition.backend.domain.user.user.entity;
 
+import com.malnutrition.backend.domain.certification.usercertification.entity.UserCertification;
 import com.malnutrition.backend.domain.image.entity.Image;
+import com.malnutrition.backend.domain.user.trainerApplication.entity.TrainerApplication;
 import com.malnutrition.backend.domain.user.user.enums.Role;
 import com.malnutrition.backend.domain.user.user.enums.UserStatus;
 import com.malnutrition.backend.global.jpa.BaseEntity;
@@ -26,6 +28,7 @@ public class User extends BaseEntity {
 
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", nullable = true)
+    @ToString.Exclude
     Image profileImage;
 
     @Column(length = 255, nullable = false)
@@ -49,7 +52,23 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
+
+    // 사용자의 트레이너 신청 목록 (이력)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+
+    private List<TrainerApplication> trainerApplications = new ArrayList<>();
+
+    // 사용자의 자격증 제출 내역
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    private List<UserCertification> userCertifications = new ArrayList<>();
+
+
     public User(long id, String email, String nickname) {
         this.setId(id);
         this.email = email;
@@ -63,5 +82,15 @@ public class User extends BaseEntity {
                 .stream()
                 .map((name) -> new SimpleGrantedAuthority("ROLE_" + name))
                 .toList();
+    }
+
+    public void addTrainerApplication(TrainerApplication application) {
+        this.trainerApplications.add(application);
+        application.setUser(this);
+    }
+
+    public void addUserCertification(UserCertification userCertification) {
+        this.userCertifications.add(userCertification);
+        userCertification.setUser(this);
     }
 }

@@ -8,9 +8,15 @@ import com.malnutrition.backend.global.rq.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -24,17 +30,29 @@ public class LectureUserController {
     private final LectureUserService lectureUserService;
 
     @GetMapping("/my-lectures")
-    public ResponseEntity<?> getMyLectures() {
-        User user = rq.getActor(); // 현재 로그인한 사용자
+    public ResponseEntity<?> getMyLectures(
+            @RequestParam(defaultValue = "latest") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        log.info("user {}", user);
+        User user = rq.getActor();
         if (user == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
-        List<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user);
+
+        Pageable pageable = PageRequest.of(page, size, getSortBy(sort));
+        Page<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user, pageable);
         return ResponseEntity.ok(lectures);
     }
 
 
-
+    // 정렬 기준에 따라 Sort 객체 반환
+    private Sort getSortBy(String sort) {
+        return switch (sort) {
+            case "progress" -> Sort.by(Sort.Direction.DESC, "progress"); // 진행률 필드명 맞춰서 변경 필요
+            case "name" -> Sort.by(Sort.Direction.ASC, "lecture.title"); // 강의 이름 기준 오름차순
+            case "latest" -> Sort.by(Sort.Direction.DESC, "createdDate"); // 최신순(생성일 기준) 기본값
+            default -> Sort.by(Sort.Direction.DESC, "createdDate");
+        };
+    }
 }

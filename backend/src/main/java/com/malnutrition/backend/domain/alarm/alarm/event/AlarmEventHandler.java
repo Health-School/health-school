@@ -19,7 +19,7 @@ public class AlarmEventHandler {
     public void handleAlarmMessageSend(AlarmRequestDto alarmMessageRequestDto) {
         log.info("event listener");
         log.info("alarmMessageRequestDto {}",  alarmMessageRequestDto);
-        alarmService.send( alarmMessageRequestDto);
+        alarmService.send(alarmMessageRequestDto);
     }
 
 }

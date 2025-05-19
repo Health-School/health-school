@@ -1,0 +1,152 @@
+// filepath: src/components/alarm/AlarmBell.tsx
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import AlarmSidebar from "./AlarmSidebar";
+import { EventSourcePolyfill } from "event-source-polyfill";
+
+interface AlarmResponseDto {
+  id: number;
+  message: string;
+  url: string;
+  title: string;
+  read: boolean;
+  createdAt: string;
+}
+
+enum EventType {
+  ALARM = "ALARM",
+  DUMMY = "DUMMY",
+}
+
+export default function AlarmBell() {
+  const [alarms, setAlarms] = useState<AlarmResponseDto[]>([]);
+  const [open, setOpen] = useState(false);
+
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const lastEventIdRef = useRef<string | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+
+  // SSE 연결 함수
+  const connectToSSE = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const eventSource = new EventSourcePolyfill(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`,
+      {
+        withCredentials: true,
+        headers: lastEventIdRef.current
+          ? { "Last-Event-ID": lastEventIdRef.current }
+          : {},
+      }
+    );
+
+    eventSourceRef.current = eventSource;
+
+    eventSource.onopen = () => {
+      console.log("✅ SSE 연결 성공");
+
+      reconnectAttemptsRef.current = 0;
+    };
+
+    eventSource.addEventListener(EventType.ALARM, {
+      handleEvent(event) {
+        try {
+          const data: AlarmResponseDto = JSON.parse(
+            (event as MessageEvent).data
+          );
+          console.log("📥 [ALARM] 수신:", data);
+          setAlarms((prev) => [...prev, data]);
+          if ((event as MessageEvent).lastEventId) {
+            lastEventIdRef.current = (event as MessageEvent).lastEventId;
+          }
+        } catch (e) {
+          // 파싱 실패
+        }
+      },
+    });
+
+    eventSource.addEventListener(EventType.DUMMY, {
+      handleEvent(event) {
+        // DUMMY 이벤트 무시
+        console.log("💤 [DUMMY] 수신됨 (무시):", (event as MessageEvent).data);
+      },
+    });
+
+    eventSource.onerror = (err) => {
+      eventSource.close();
+      const reconnectDelay = Math.min(
+        1000 * Math.pow(2, reconnectAttemptsRef.current),
+        30000
+      );
+      if (reconnectAttemptsRef.current < 5) {
+        reconnectTimeoutRef.current = setTimeout(() => {
+          reconnectAttemptsRef.current++;
+          connectToSSE();
+        }, reconnectDelay);
+      }
+    };
+  };
+
+  useEffect(() => {
+    connectToSSE();
+    return () => {
+      if (eventSourceRef.current) eventSourceRef.current.close();
+      if (reconnectTimeoutRef.current)
+        clearTimeout(reconnectTimeoutRef.current);
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  // 읽지 않은 알림 개수
+  const unreadCount = alarms.filter((a) => !a.read).length;
+
+  // 알림 읽음 처리 (예시: 클릭 시 read true로 변경)
+  const handleRead = (id: number) => {
+    setAlarms((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, read: true } : a))
+    );
+    // TODO: 서버에 읽음 처리 요청 필요시 추가
+  };
+  const handleDelete = (id: number) => {
+    setAlarms((prev) => prev.filter((alarm) => alarm.id !== id));
+  };
+  return (
+    <>
+      <button
+        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors mx-1"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="알림"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={26}
+          height={26}
+          fill="none"
+          viewBox="0 0 24 24"
+          className="text-gray-600"
+        >
+          <path
+            d="M12 2a7 7 0 0 0-7 7v3.586l-.707.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707l-.707-.707V9a7 7 0 0 0-7-7Zm0 18a3 3 0 0 1-3-3h6a3 3 0 0 1-3 3Z"
+            fill="currentColor"
+          />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+      <AlarmSidebar
+        open={open}
+        onClose={() => setOpen(false)}
+        alarms={alarms}
+        onRead={handleRead}
+        onDelete={handleDelete} // ✅ 추가
+      />
+    </>
+  );
+}
