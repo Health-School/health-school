@@ -340,9 +340,12 @@ export default function ChatRoomPage({
     try {
       console.log("메시지 수정 시도:", { messageId, newText });
 
-      const response = await api.put(`/api/v1/chats/${messageId}`, {
-        message: newText.trim(),
-      });
+      const response = await api.put(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/chats/${messageId}`,
+        {
+          message: newText.trim(),
+        }
+      );
 
       console.log("메시지 수정 응답:", response.data);
 

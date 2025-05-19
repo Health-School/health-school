@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Add this import
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 interface LectureStats {
@@ -46,7 +47,8 @@ interface ApiResponse<T> {
 }
 
 export default function MyLecturesPage() {
-  const router = useRouter(); // Add router
+  const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("내 정보");
   const [stats] = useState<LectureStats>({
     totalStudents: 105,
@@ -95,20 +97,33 @@ export default function MyLecturesPage() {
     fetchLectures();
   }, []);
 
+  const tabs = [
+    { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
+    { name: "정산 내역", href: "/trainer/dashboard/settlements" },
+    { name: "수강생 관리", href: "/trainer/dashboard/students" },
+    { name: "상담 일정", href: "/trainer/dashboard/consultations" },
+    { name: "운동 기구 신청", href: "/trainer/dashboard/equipments" },
+    { name: "MY 자격증 관리", href: "/trainer/dashboard/certificates" },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* 탭 메뉴 */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="flex space-x-8">
-          <button className="text-green-500 border-b-2 border-green-500 py-4 px-2 font-semibold">
-            강의 관리
-          </button>
-          <button className="text-gray-500 border-transparent border-b-2 py-4 px-1 font-medium">
-            결제 내역
-          </button>
-          <button className="text-gray-500 border-transparent border-b-2 py-4 px-1 font-medium">
-            문의 기록
-          </button>
+          {tabs.map((tab) => (
+            <Link
+              key={tab.name}
+              href={tab.href}
+              className={`${
+                pathname === tab.href
+                  ? "text-green-500 border-b-2 border-green-500 font-semibold"
+                  : "text-gray-500 border-transparent border-b-2 font-medium"
+              } py-4 px-2 hover:text-green-700 transition-colors`}
+            >
+              {tab.name}
+            </Link>
+          ))}
         </nav>
       </div>
 
