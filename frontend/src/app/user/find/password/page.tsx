@@ -91,7 +91,7 @@ export default function FindPasswordPage() {
       }
       const data = await response.json();
       alert("비밀번호 초기화 성공: " + data.data.password);
-      router.push("/users/login");
+      router.push("/user/login");
     } catch (err) {
       alert("비밀번호 초기화에 실패했습니다.");
     }

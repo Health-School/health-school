@@ -223,4 +223,18 @@ public class UserService {
         User actor = rq.getActor();
         actor.setPhoneNumber(phoneNumber);
     }
+
+    // userService 가 없다면...
+    @Transactional(readOnly = true)
+    public boolean existsByPhoneNumber(String phoneNumber){
+        return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Transactional(readOnly = true)
+    public String findEmailByPhoneNumber(String phoneNumber){
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핸드폰 번호입니다.")).getEmail();
+    }
+
+
 }

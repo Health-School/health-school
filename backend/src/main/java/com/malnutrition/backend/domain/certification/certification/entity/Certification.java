@@ -24,7 +24,7 @@ public class Certification extends BaseEntity {
     @JoinColumn(name = "certification_category_id", nullable = false)
     private CertificationCategory certificationCategory;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String issuingInstitution; // 발급 기관
 
 

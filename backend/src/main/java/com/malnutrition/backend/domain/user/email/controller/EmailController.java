@@ -1,8 +1,8 @@
 package com.malnutrition.backend.domain.user.email.controller;
 
 
-import com.malnutrition.backend.domain.user.user.dto.EmailVerificationDto;
-import com.malnutrition.backend.domain.user.user.dto.UserEmailDto;
+import com.malnutrition.backend.domain.user.email.dto.EmailVerificationDto;
+import com.malnutrition.backend.domain.user.email.dto.UserEmailDto;
 import com.malnutrition.backend.domain.user.email.service.EmailService;
 import com.malnutrition.backend.domain.user.user.service.UserService;
 import com.malnutrition.backend.global.rp.ApiResponse;
