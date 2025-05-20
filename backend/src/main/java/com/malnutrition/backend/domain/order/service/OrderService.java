@@ -6,12 +6,10 @@ import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
-import com.malnutrition.backend.domain.order.dto.CreateOrderResponseDto;
-import com.malnutrition.backend.domain.order.dto.OrderResponse;
-import com.malnutrition.backend.domain.order.dto.CreateAmountRequestDto;
-import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
+import com.malnutrition.backend.domain.order.dto.*;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
+import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
@@ -211,6 +209,24 @@ public class OrderService {
     @Transactional
     public Order findById(String orderId){
         return orderRepository.findById(orderId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 orderId 입니다."));
+    }
+
+    public Page<SettlementOrderDto> getTrainerSettlementOrders(User trainer, Pageable pageable) {
+        return orderRepository
+                .findByLectureTrainerAndTossPaymentStatus(trainer, TossPaymentStatus.DONE, pageable)
+                .map(SettlementOrderDto::from);
+    }
+
+    public Long getTotal(User trainer) {
+        return Optional.ofNullable(orderRepository.getTotalSettlementAmount(trainer)).orElse(0L);
+    }
+
+    public Long getMonthly(User trainer, int year, int month) {
+        return Optional.ofNullable(orderRepository.getMonthlySettlementAmount(trainer, year, month)).orElse(0L);
+    }
+
+    public Long getYearly(User trainer, int year) {
+        return Optional.ofNullable(orderRepository.getYearlySettlementAmount(trainer, year)).orElse(0L);
     }
 
 

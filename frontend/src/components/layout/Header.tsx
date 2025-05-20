@@ -11,7 +11,7 @@ export default function Header({ hideDropdownMenus = false }) {
   const router = useRouter();
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
-
+  console.log("loginUser:::" + JSON.stringify(loginUser));
   const handleSearchClick = () => {
     router.push("/search");
   };
@@ -120,13 +120,33 @@ export default function Header({ hideDropdownMenus = false }) {
                           >
                             홈 페이지
                           </Link>
-                          <Link
-                            href="/user/dashboard/my-info"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            마이 대쉬보드
-                          </Link>
+                          {/* 트레이너인 경우 두 개의 대시보드 메뉴 표시 */}
+                          {loginUser.roleName === "TRAINER" ? (
+                            <>
+                              <Link
+                                href="/user/dashboard/my-info"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                onClick={() => setIsDropdownOpen(false)}
+                              >
+                                마이 대시보드
+                              </Link>
+                              <Link
+                                href="/trainer/dashboard/my-lectures"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                onClick={() => setIsDropdownOpen(false)}
+                              >
+                                트레이너 대시보드
+                              </Link>
+                            </>
+                          ) : (
+                            <Link
+                              href="/user/dashboard/my-info"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              마이 대시보드
+                            </Link>
+                          )}
                           <Link
                             href={`/lecture`}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

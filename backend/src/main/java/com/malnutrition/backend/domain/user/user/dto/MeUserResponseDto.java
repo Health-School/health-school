@@ -13,4 +13,5 @@ public class MeUserResponseDto {
     String nickname;
     String phoneNumber;
     String profileImageUrl;
+    String roleName;
 }

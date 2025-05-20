@@ -6,6 +6,7 @@ type User = {
   email: string;
   nickname: string;
   profileImageUrl: string | null;
+  roleName?: string; // 추가된 속성
 };
 // 전역적으로 관리하기 위해 사용
 export const LoginUserContext = createContext<{
@@ -30,6 +31,7 @@ function createEmptyUser(): User {
     email: "",
     nickname: "",
     profileImageUrl: null, // null을 허용하도록 수정
+    roleName: undefined, // role 속성 추가
   };
 }
 

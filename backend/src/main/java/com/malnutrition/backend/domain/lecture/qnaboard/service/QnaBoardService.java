@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.lecture.qnaboard.service;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 //import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
+import com.malnutrition.backend.domain.lecture.qnaboard.dto.LectureQnaGroupDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardRequestDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardResponseDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.entity.QnaBoard;
@@ -11,10 +12,13 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -105,5 +109,17 @@ public class QnaBoardService {
                 .createdDate(qna.getCreatedDate())
                 .updatedDate(qna.getUpdatedDate())
                 .build();
+    }
+
+    @Transactional
+    public Page<QnaBoardResponseDto> getQnaBoardsByTrainer(Long trainerId, Pageable pageable) {
+        return qnaBoardRepository.findAllByTrainerId(trainerId, pageable)
+                .map(QnaBoardResponseDto::from);
+    }
+
+    @Transactional
+    public Page<QnaBoardResponseDto> getQnaByLectureId(Long lectureId, Long trainerId, Pageable pageable) {
+        Page<QnaBoard> qnaBoards = qnaBoardRepository.findByLectureIdAndTrainerId(lectureId, trainerId, pageable);
+        return qnaBoards.map(QnaBoardResponseDto::from);
     }
 }

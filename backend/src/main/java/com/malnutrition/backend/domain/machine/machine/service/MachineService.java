@@ -14,6 +14,8 @@ import com.malnutrition.backend.domain.machine.machinetype.repository.MachineTyp
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,6 +152,22 @@ public class MachineService {
         }
 
         return new MachineDto(machine.getId(), machine.getName(), machine.getMachineType().getName(), machine.isApproved());
+    }
+    @Transactional(readOnly = true)
+    public Page<MachineResponseDto> getMachinesByTypeId(Long machineTypeId, Pageable pageable) {
+        return machineRepository.findAllByMachineTypeId(machineTypeId, pageable)
+                .map(MachineResponseDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MachineResponseDto> getMachinesByBodyIdAndTypeId(Long bodyId, Long machineTypeId, Pageable pageable) {
+        return machineRepository.findAllByMachineBodiesBodyIdAndMachineTypeId(bodyId, machineTypeId, pageable)
+                .map(MachineResponseDto::from);
+    }
+    @Transactional(readOnly = true)
+    public Page<MachineResponseDto> getMachinesByBodyId(Long bodyId, Pageable pageable) {
+        return machineRepository.findAllByMachineBodiesBodyId(bodyId, pageable)
+                .map(MachineResponseDto::from);
     }
 
 

@@ -1,5 +1,4 @@
 package com.malnutrition.backend.domain.lecture.lecture.controller;
-
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
@@ -17,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

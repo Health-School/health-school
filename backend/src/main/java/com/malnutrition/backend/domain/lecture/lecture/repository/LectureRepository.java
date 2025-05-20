@@ -11,12 +11,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
     boolean existsByTitle(String title);
     Optional<Lecture> findByTitle(String title);
+    Page<Lecture> findAll(Pageable pageable);
+
+    List<Lecture> findByTrainerId(Long trainerId);
 
     @Query(value = """
     SELECT l FROM Lecture l
