@@ -1,7 +1,7 @@
 package com.malnutrition.backend.domain.user.trainerApplication.repository;
 
 
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import com.malnutrition.backend.domain.user.trainerApplication.entity.TrainerApplication;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
@@ -22,7 +22,7 @@ public interface TrainerApplicationRepository extends JpaRepository<TrainerAppli
     Optional<TrainerApplication> findTopByUserOrderByCreatedDateDesc(User user);
 
     // 특정 조건의 신청 목록만 조회
-    Page<TrainerApplication> findByVerificationResultOrderByCreatedDateDesc(TrainerVerificationResult verificationResult, Pageable pageable);
+    Page<TrainerApplication> findByVerificationResultOrderByCreatedDateDesc(TrainerVerificationStatus verificationResult, Pageable pageable);
 
 
     @Query("SELECT DISTINCT ta FROM TrainerApplication ta " +

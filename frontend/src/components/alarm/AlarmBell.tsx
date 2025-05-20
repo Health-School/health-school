@@ -4,6 +4,8 @@
 import { useEffect, useRef, useState } from "react";
 import AlarmSidebar from "./AlarmSidebar";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { useRouter } from "next/navigation";
+import { useGlobalLoginUser } from "@/stores/auth/loginUser";
 
 interface AlarmResponseDto {
   id: number;
@@ -28,6 +30,8 @@ export default function AlarmBell() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
 
+  const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
+    useGlobalLoginUser();
   // SSE 연결 함수
   const connectToSSE = () => {
     if (eventSourceRef.current) {
@@ -92,6 +96,7 @@ export default function AlarmBell() {
   };
 
   useEffect(() => {
+    if (!isLogin) return; // 로그인한 경우에만 SSE 연결
     connectToSSE();
     return () => {
       if (eventSourceRef.current) eventSourceRef.current.close();
@@ -99,7 +104,7 @@ export default function AlarmBell() {
         clearTimeout(reconnectTimeoutRef.current);
     };
     // eslint-disable-next-line
-  }, []);
+  }, [isLogin]);
 
   // 읽지 않은 알림 개수
   const unreadCount = alarms.filter((a) => !a.read).length;
@@ -117,7 +122,7 @@ export default function AlarmBell() {
   return (
     <>
       <button
-        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors mx-1"
+        className="relative p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors mx-1"
         onClick={() => setOpen((prev) => !prev)}
         aria-label="알림"
       >

@@ -51,7 +51,7 @@ public class CurriculumProgressService {
         progress.setLastWatchedSecond(lastWatchedSecond);
         progress.setLastWatchedAt(java.time.LocalDateTime.now());
 
-        if (progressRate >= 95 && progress.getStatus() != ProgressStatus.COMPLETED) {
+        if (progressRate >= 90 && progress.getStatus() != ProgressStatus.COMPLETED) {
             progress.setStatus(ProgressStatus.COMPLETED);
             progress.setCompletedAt(java.time.LocalDateTime.now());
         }

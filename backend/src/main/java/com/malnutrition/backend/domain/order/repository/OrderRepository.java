@@ -1,7 +1,11 @@
 package com.malnutrition.backend.domain.order.repository;
 
 import com.malnutrition.backend.domain.order.entity.Order;
+<<<<<<< HEAD
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
+=======
+import com.malnutrition.backend.domain.order.enums.OrderStatus;
+>>>>>>> cbb9fc83c6e37d57ae3b2d150f16a274399d3a8b
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,4 +47,12 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     // 연간 정산 금액
     @Query("SELECT SUM(o.amount) FROM Order o WHERE o.lecture.trainer = :trainer AND o.tossPaymentStatus = 'DONE' AND FUNCTION('YEAR', o.approvedAt) = :year")
     Long getYearlySettlementAmount(User trainer, int year);
+    long countByOrderStatusAndApprovedAtBetween(OrderStatus orderStatus, LocalDateTime startTime, LocalDateTime endTime);
+
+    List<Order> findAllByOrderStatusAndApprovedAtBetween(
+            OrderStatus orderStatus,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
+
 }

@@ -8,6 +8,7 @@ import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.ResetPasswordDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
+import com.malnutrition.backend.global.ut.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class UserCommandService {
     @Transactional(readOnly = true)
     public MeUserResponseDto getMeUserResponseDto(Long userId){
         User user = userService.findByIdWithProfileImage(userId);
-        String imageProfileUrl = imageService.getImageProfileUrl(user.getProfileImage());
+        String imageProfileUrl = imageService.getImageUrl(user.getProfileImage());
         return MeUserResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -37,7 +38,7 @@ public class UserCommandService {
     public ResetPasswordDto resetPassword(String email, String code){
         boolean result = emailService.verifyCode(email, code);
         if(!result) throw new IllegalArgumentException ("email 혹은 code가 잘못되었습니다.");
-        String resetPassword = emailService.generateRandomCode();
+        String resetPassword = AuthUtil.generateRandomCode();
         String newPassword = userService.resetPassword(email, resetPassword);
         return new ResetPasswordDto(newPassword);
     }
@@ -47,7 +48,7 @@ public class UserCommandService {
         User user = userService.findByIdWithProfileImage(userId);
 
         Image profileImage = user.getProfileImage();
-        String imageProfileUrl = imageService.getImageProfileUrl(profileImage);
+        String imageProfileUrl = imageService.getImageUrl(profileImage);
         return MyPageDto.from(user, imageProfileUrl);
     }
 }

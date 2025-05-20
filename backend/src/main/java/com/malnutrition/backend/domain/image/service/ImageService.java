@@ -2,11 +2,8 @@ package com.malnutrition.backend.domain.image.service;
 
 import com.malnutrition.backend.domain.image.config.ImageProperties;
 import com.malnutrition.backend.domain.image.dto.ImageFileInfo;
-import com.malnutrition.backend.domain.image.dto.ImageResponseDto;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.repository.ImageRepository;
-import com.malnutrition.backend.domain.user.user.entity.User;
-import com.malnutrition.backend.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -182,7 +179,7 @@ public class ImageService {
     }
 
     @Transactional(readOnly = true)
-    public  String getImageProfileUrl(Image image){
+    public  String getImageUrl(Image image){
         boolean useS3 = imageProperties.isUseS3();
         if(Objects.isNull(image)) return null;
         String profileUrl;

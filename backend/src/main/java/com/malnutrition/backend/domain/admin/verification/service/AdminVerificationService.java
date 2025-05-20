@@ -1,7 +1,7 @@
-package com.malnutrition.backend.domain.admin.service;
+package com.malnutrition.backend.domain.admin.verification.service;
 
-import com.malnutrition.backend.domain.admin.dto.*;
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
+import com.malnutrition.backend.domain.admin.verification.dto.*;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import com.malnutrition.backend.domain.admin.log.entity.TrainerVerificationLog;
 import com.malnutrition.backend.domain.admin.log.repository.TrainerVerificationLogRepository;
 import com.malnutrition.backend.domain.certification.certification.entity.Certification;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AdminUserService {
+public class AdminVerificationService {
 
     private final UserRepository userRepository;
     private final UserCertificationRepository userCertificationRepository;
@@ -46,7 +46,7 @@ public class AdminUserService {
 
 
     @Transactional(readOnly = true)
-    public Page<TrainerApplicationSummaryDto> getTrainerApplicationsByStatus(TrainerVerificationResult verificationResult, Pageable pageable) {
+    public Page<TrainerApplicationSummaryDto> getTrainerApplicationsByStatus(TrainerVerificationStatus verificationResult, Pageable pageable) {
         Page<TrainerApplication> applicationPage = trainerApplicationRepository.findByVerificationResultOrderByCreatedDateDesc(verificationResult, pageable);
 
         return applicationPage.map(application -> {
@@ -77,7 +77,7 @@ public class AdminUserService {
                 .name(application.getName())
                 .email(applicantUser.getEmail())
                 .phoneNumber(applicantUser.getPhoneNumber())
-                .profileImageUrl(imageService.getImageProfileUrl(applicantUser.getProfileImage()))
+                .profileImageUrl(imageService.getImageUrl(applicantUser.getProfileImage()))
                 .build();
 
         List<SubmittedCertificationResponseDto> submittedCertificationResponseDtos = (application.getSubmittedCertifications() == null)
@@ -114,8 +114,8 @@ public class AdminUserService {
                 .expirationDate(userCertification.getExpirationDate())
                 .approveStatus(userCertification.getApproveStatus() != null ? userCertification.getApproveStatus().getDescription() : "상태 정보 없음")
                 .adminComment(userCertification.getAdminComment())
-                .certificationImageUrl(imageService.getImageProfileUrl(certificationImage))
-                .certificationFileDownloadUrl(imageService.getImageProfileUrl(certificationImage))
+                .certificationImageUrl(imageService.getImageUrl(certificationImage))
+                .certificationFileDownloadUrl(imageService.getImageUrl(certificationImage))
                 .build();
     }
 
@@ -148,7 +148,7 @@ public class AdminUserService {
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + userId + "에 해당하는 사용자를 찾을 수 없습니다."));
 
-        TrainerVerificationResult result = requestDto.getResult();
+        TrainerVerificationStatus result = requestDto.getResult();
         String reason = requestDto.getReason();
 
         User adminUser = getCurrentAdminUser();
@@ -158,7 +158,7 @@ public class AdminUserService {
             reasonForLog = reason;
         } else {
             // 입력된 사유가 없을 경우
-            reasonForLog = (result == TrainerVerificationResult.APPROVE_AS_TRAINER)
+            reasonForLog = (result == TrainerVerificationStatus.APPROVE_AS_TRAINER)
                     ? "자격 요건 충족으로 트레이너 자격이 승인되었습니다."
                     : "트레이너 자격 요건이 충족되지 않았거나 기타 사유로 반려되었습니다";
         }
@@ -166,7 +166,7 @@ public class AdminUserService {
         Role oldRole = targetUser.getRole(); // 현재 역할 기록
         Role newRole = oldRole;
 
-        if(result == TrainerVerificationResult.APPROVE_AS_TRAINER) {
+        if(result == TrainerVerificationStatus.APPROVE_AS_TRAINER) {
             if (oldRole != Role.TRAINER) {
                 targetUser.setRole(Role.TRAINER); // 역할을 TRAINER로 변경
                 newRole = Role.TRAINER;

@@ -4,6 +4,9 @@ import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 public class LectureDto {
@@ -14,16 +17,23 @@ public class LectureDto {
     private String lectureStatus;
     private String lectureLevel;
     private String trainerName;
+    private String coverImageUrl;
+    private String category;
+    private LocalDateTime createdAt;
 
-    public static LectureDto from(Lecture lecture) {
+    public static LectureDto from(Lecture lecture, String coverImageUrl) {
         return LectureDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
                 .content(lecture.getContent())
                 .price(lecture.getPrice())
-                .lectureStatus(lecture.getLectureStatus().name())
-                .lectureLevel(lecture.getLectureLevel().name())
+                .lectureStatus(lecture.getLectureStatus().getDescription())
+                .lectureLevel(lecture.getLectureLevel().getDescription())
                 .trainerName(lecture.getTrainer().getNickname()) // getUsername은 User 엔티티에 맞게 수정
+                .category(lecture.getLectureCategory().getCategoryName())
+                .coverImageUrl(coverImageUrl)
+                .createdAt(lecture.getCreatedDate())
                 .build();
     }
 }
+

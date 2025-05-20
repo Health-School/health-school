@@ -142,7 +142,8 @@ export default function MyInfoPage() {
     }
     return value;
   }
-  //핸드폰 번호 변경경
+
+  //핸드폰 번호 변경
   const handlePhoneNumberChange = async () => {
     try {
       const response = await fetch(
@@ -153,7 +154,7 @@ export default function MyInfoPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ phoneNumber: phoneInput }),
+          body: JSON.stringify({ phoneNumber: phoneInput.replace(/-/g, "") }), // 하이픈 제거해서 전송
         }
       );
       if (!response.ok) throw new Error("연락처 변경 실패");
@@ -247,7 +248,7 @@ export default function MyInfoPage() {
                   <>
                     <span className="text-gray-700">{user?.nickname}</span>
                     <button
-                      className="text-green-400 text-sm hover:underline"
+                      className="text-green-400 text-sm cursor-pointer hover:underline"
                       onClick={() => setEditNickname(true)}
                     >
                       수정
@@ -305,7 +306,7 @@ export default function MyInfoPage() {
                   <>
                     <span className="text-gray-900">{user?.phoneNumber}</span>
                     <button
-                      className="text-green-400 text-sm hover:underline"
+                      className="text-green-400 text-sm  cursor-pointer hover:underline"
                       onClick={() => setEditPhone(true)}
                     >
                       수정

@@ -172,6 +172,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Image findProfileImageByUserId(Long id){
+        return userRepository.findProfileImageByUserId(id).orElse(null);
+
+    }
+
+    @Transactional(readOnly = true)
     public List<User> findAllByProfileImageId(Long imageId){
         return userRepository.findAllByProfileImageId(imageId);
     }
@@ -223,4 +229,18 @@ public class UserService {
         User actor = rq.getActor();
         actor.setPhoneNumber(phoneNumber);
     }
+
+    // userService 가 없다면...
+    @Transactional(readOnly = true)
+    public boolean existsByPhoneNumber(String phoneNumber){
+        return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    @Transactional(readOnly = true)
+    public String findEmailByPhoneNumber(String phoneNumber){
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 핸드폰 번호입니다.")).getEmail();
+    }
+
+
 }

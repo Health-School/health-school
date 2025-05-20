@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.user.user.dto;
+package com.malnutrition.backend.domain.user.email.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

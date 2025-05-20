@@ -41,13 +41,12 @@ public class Lecture extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private LectureCategory lectureCategory;
 
+
+    //강의 수강 기간은 무제한!!! 댓글: 그건 내맘인디요
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id")
     @ToString.Exclude
-    Image profileImage;
-
-
-    //강의 수강 기간은 무제한!!! 댓글: 그건 내맘인디요
+    Image coverImage ;
 
 
 }

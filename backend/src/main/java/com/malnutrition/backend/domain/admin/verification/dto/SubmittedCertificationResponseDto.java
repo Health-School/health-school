@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.admin.dto;
+package com.malnutrition.backend.domain.admin.verification.dto;
 
 import lombok.Builder;
 import lombok.Getter;

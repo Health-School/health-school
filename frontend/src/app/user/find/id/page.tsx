@@ -1,13 +1,26 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+// 전화번호 포맷팅 함수
+function formatPhoneNumber(input: string) {
+  let value = input.replace(/[^0-9]/g, "");
+  if (value.length < 4) {
+    // 그대로
+  } else if (value.length < 8) {
+    value = value.replace(/(\d{3})(\d{1,4})/, "$1-$2");
+  } else {
+    value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, "$1-$2-$3");
+  }
+  return value;
+}
 
 export default function FindIdPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [authCode, setAuthCode] = useState("");
   const [isAuthCodeSent, setIsAuthCodeSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-
+  const router = useRouter();
   // 인증번호 요청
   const handleSendAuthCode = async () => {
     if (!phoneNumber) {
@@ -16,13 +29,13 @@ export default function FindIdPage() {
     }
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/phone/id/send`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/find-email/send-code`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ phoneNumber }),
+          body: JSON.stringify({ phoneNumber: phoneNumber.replace(/-/g, "") }), // 하이픈 제거해서 전송
         }
       );
       if (!response.ok) {
@@ -30,6 +43,7 @@ export default function FindIdPage() {
       }
       alert("인증 코드가 휴대폰으로 전송되었습니다.");
       setIsAuthCodeSent(true);
+      router.push("/user/login"); // 인증 코드 발송 후 로그인 페이지로 리다이렉트
     } catch (err) {
       alert("인증 코드 발송에 실패했습니다. 다시 시도해주세요.");
     }
@@ -43,14 +57,14 @@ export default function FindIdPage() {
     }
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/phone/id/verify`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/sms/find-email/verify-code`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            phoneNumber,
+            phoneNumber: phoneNumber.replace(/-/g, ""), // 하이픈 제거해서 전송
             code: authCode,
           }),
         }
@@ -70,7 +84,7 @@ export default function FindIdPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto my-8 p-6 bg-white rounded-lg shadow-sm">
+    <div className="max-w-md mx-auto my-24 p-6  bg-white rounded-lg shadow-sm">
       <h1 className="text-2xl font-bold text-center mb-8 text-green-600">
         아이디 찾기
       </h1>
@@ -87,11 +101,12 @@ export default function FindIdPage() {
             type="text"
             id="phoneNumber"
             value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
             className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
-            placeholder="휴대폰 번호를 입력하세요"
+            placeholder="010-1234-5678"
             required
             disabled={isVerified}
+            maxLength={13}
           />
           <button
             type="button"
@@ -117,7 +132,7 @@ export default function FindIdPage() {
             id="authCode"
             value={authCode}
             onChange={(e) => setAuthCode(e.target.value)}
-            className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
+            className="flex-1 p-2 border  border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-300"
             placeholder="인증코드를 입력하세요"
             required
             disabled={!isAuthCodeSent || isVerified}

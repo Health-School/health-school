@@ -1,7 +1,7 @@
 package com.malnutrition.backend.domain.user.trainerApplication.dto;
 
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
 import com.malnutrition.backend.domain.user.trainerApplication.entity.TrainerApplication;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +29,7 @@ public class TrainerApplicationRequestDto {
                 .careerHistory(trainerApplicationRequestDto.careerHistory)
                 .selfIntroduction(trainerApplicationRequestDto.selfIntroduction)
                 .expertiseAreas(trainerApplicationRequestDto.expertiseAreas)
-                .verificationResult(TrainerVerificationResult.PENDING_VERIFICATION)
+                .verificationResult(TrainerVerificationStatus.PENDING_VERIFICATION)
                 .build();
 
     }

@@ -60,7 +60,7 @@ public class ProfileImageService {
             return ImageResponseDto.builder()
                     .id(savedImage.getId())
                     .originalName(savedImage.getOriginalName())
-                    .imageUrl(imageService.getImageProfileUrl(savedImage))
+                    .imageUrl(imageService.getImageUrl(savedImage))
                     .build();
 
         } catch (IOException e) {
@@ -108,7 +108,7 @@ public class ProfileImageService {
             return ImageResponseDto.builder()
                     .id(savedImage.getId())
                     .originalName(savedImage.getOriginalName())
-                    .imageUrl(imageService.getImageProfileUrl(savedImage))
+                    .imageUrl(imageService.getImageUrl(savedImage))
                     .build();
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 중 오류 발생", e);
