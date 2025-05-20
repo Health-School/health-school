@@ -18,7 +18,8 @@ public class PermitUrl {
             "/api/v1/images/view/*", "/api/v1/email/join/send",
             "/api/v1/lectures/**", "/api/v1/lecture_categories/**",
             "/api/v1/lectureUsers/**", "/api/v1/curriculums/**",
-            "/api/v1/curriculum-progress/**"
+            "/api/v1/curriculum-progress/**",
+            "/api/v1/lecture_categories"
     };
 
     public static final String[] POST_URLS = {

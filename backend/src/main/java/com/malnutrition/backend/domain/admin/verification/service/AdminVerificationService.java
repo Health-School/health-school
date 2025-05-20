@@ -77,7 +77,7 @@ public class AdminVerificationService {
                 .name(application.getName())
                 .email(applicantUser.getEmail())
                 .phoneNumber(applicantUser.getPhoneNumber())
-                .profileImageUrl(imageService.getImageProfileUrl(applicantUser.getProfileImage()))
+                .profileImageUrl(imageService.getImageUrl(applicantUser.getProfileImage()))
                 .build();
 
         List<SubmittedCertificationResponseDto> submittedCertificationResponseDtos = (application.getSubmittedCertifications() == null)
@@ -114,8 +114,8 @@ public class AdminVerificationService {
                 .expirationDate(userCertification.getExpirationDate())
                 .approveStatus(userCertification.getApproveStatus() != null ? userCertification.getApproveStatus().getDescription() : "상태 정보 없음")
                 .adminComment(userCertification.getAdminComment())
-                .certificationImageUrl(imageService.getImageProfileUrl(certificationImage))
-                .certificationFileDownloadUrl(imageService.getImageProfileUrl(certificationImage))
+                .certificationImageUrl(imageService.getImageUrl(certificationImage))
+                .certificationFileDownloadUrl(imageService.getImageUrl(certificationImage))
                 .build();
     }
 
