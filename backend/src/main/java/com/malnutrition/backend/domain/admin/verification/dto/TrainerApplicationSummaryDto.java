@@ -1,6 +1,6 @@
-package com.malnutrition.backend.domain.admin.dto;
+package com.malnutrition.backend.domain.admin.verification.dto;
 
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,6 +16,6 @@ public class TrainerApplicationSummaryDto {
     private String userEmail;
     private String userPhoneNumber;
     private LocalDateTime applicationDate;
-    private TrainerVerificationResult status;
+    private TrainerVerificationStatus status;
 
 }

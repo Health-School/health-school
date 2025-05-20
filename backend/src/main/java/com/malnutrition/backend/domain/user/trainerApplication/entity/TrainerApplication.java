@@ -1,6 +1,6 @@
 package com.malnutrition.backend.domain.user.trainerApplication.entity;
 
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import com.malnutrition.backend.domain.certification.usercertification.entity.UserCertification;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class TrainerApplication extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TrainerVerificationResult verificationResult;
+    private TrainerVerificationStatus verificationResult;
 
     @Column(columnDefinition = "TEXT")
     private String careerHistory; // 경력 사항

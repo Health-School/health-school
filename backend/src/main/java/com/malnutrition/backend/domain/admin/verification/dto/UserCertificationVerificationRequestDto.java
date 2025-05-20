@@ -1,4 +1,4 @@
-package com.malnutrition.backend.domain.admin.dto;
+package com.malnutrition.backend.domain.admin.verification.dto;
 
 import com.malnutrition.backend.domain.certification.usercertification.enums.ApproveStatus;
 import jakarta.validation.constraints.NotNull;

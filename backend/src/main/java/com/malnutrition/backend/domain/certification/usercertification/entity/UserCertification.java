@@ -44,7 +44,7 @@ public class UserCertification extends BaseEntity {
     private LocalDate acquisitionDate; // 발급일
 
     @Column(nullable = true)
-    private LocalDate expirationDate; //만료일
+    private LocalDate expirationDate; // 만료일
 
     @Column(columnDefinition = "TEXT") // 승인, 반려 사유 (관리자 입력)
     private String adminComment;
