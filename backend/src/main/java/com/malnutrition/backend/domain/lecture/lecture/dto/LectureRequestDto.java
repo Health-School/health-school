@@ -1,9 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lecture.dto;
 
-<<<<<<< HEAD
-=======
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
->>>>>>> cbb9fc83c6e37d57ae3b2d150f16a274399d3a8b
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
