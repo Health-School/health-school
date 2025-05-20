@@ -1,13 +1,19 @@
 package com.malnutrition.backend.domain.lecture.qnaboard.controller;
 
+import com.malnutrition.backend.domain.lecture.qnaboard.dto.LectureQnaGroupDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardRequestDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardResponseDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.service.QnaBoardService;
 import com.malnutrition.backend.global.rp.ApiResponse;
+import com.malnutrition.backend.global.rq.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +26,7 @@ import java.util.List;
 public class QnaBoardController {
 
     private final QnaBoardService qnaBoardService;
+    private final Rq rq;
 
     @Operation(summary = "Q&A 질문 생성", description = "사용자 ID를 기반으로 Q&A 질문을 등록합니다.")
     @PostMapping
@@ -60,5 +67,28 @@ public class QnaBoardController {
             @Parameter(description = "QnA 게시글 ID") @PathVariable("qnaId") Long qnaId) {
         qnaBoardService.deleteQna(qnaId);
         return ResponseEntity.ok(ApiResponse.success(null,"삭제성공"));
+    }
+
+    @GetMapping("/trainer")
+    public ResponseEntity<?> getQnaBoardsByTrainer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long trainerId = rq.getActor().getId();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<QnaBoardResponseDto> result = qnaBoardService.getQnaBoardsByTrainer(trainerId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(result, "트레이너의 QnA 조회 성공"));
+    }
+
+    @GetMapping("/trainer/qna")
+    public ResponseEntity<?> getQnaByLectureId(
+            @RequestParam Long lectureId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long trainerId =rq.getActor().getId();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<QnaBoardResponseDto> result = qnaBoardService.getQnaByLectureId(lectureId, trainerId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(result, "QnA 목록 조회 성공"));
     }
 }

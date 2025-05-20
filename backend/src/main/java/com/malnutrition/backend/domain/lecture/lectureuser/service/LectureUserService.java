@@ -123,11 +123,9 @@ public class LectureUserService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 수강 정보가 존재하지 않습니다."));
     }
 
-    @Transactional
     public Page<UserResponseDto> getStudentsByTrainerId(Long trainerId, Pageable pageable) {
-        Page<LectureUser> lectureUsers = lectureUserRepository.findAllByLectureTrainerId(trainerId, pageable);
-
-        // LectureUser -> UserResponseDto 변환 후 반환
-        return lectureUsers.map(lu -> UserResponseDto.from(lu.getUser()));
+        Page<User> users = lectureUserRepository.findDistinctUsersByLectureTrainerId(trainerId, pageable);
+        return users.map(UserResponseDto::from);
     }
+
 }
