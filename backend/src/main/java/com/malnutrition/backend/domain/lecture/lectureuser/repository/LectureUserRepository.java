@@ -30,4 +30,6 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     @Query("SELECT DISTINCT lu.user FROM LectureUser lu " +
             "WHERE lu.lecture.trainer.id = :trainerId")
     Page<User> findDistinctUsersByLectureTrainerId(@Param("trainerId") Long trainerId, Pageable pageable);
+
+    List<LectureUser> findByLectureIdIn(List<Long> lectureIds);
 }

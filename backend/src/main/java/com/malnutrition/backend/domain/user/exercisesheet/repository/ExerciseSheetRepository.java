@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.user.exercisesheet.repository;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +19,10 @@ public interface ExerciseSheetRepository extends JpaRepository<ExerciseSheet, Lo
     List<ExerciseSheet> findByUserIdAndExerciseDateDesc(@Param("userId") Long userId, @Param("exerciseDate") LocalDate exerciseDate);
 
     List<ExerciseSheet> findAllByUserIdOrderByExerciseDateDesc(Long userId);
+
+    @Query("SELECT e FROM ExerciseSheet e WHERE e.user.id IN :userIds")
+    Page<ExerciseSheet> findByUserIds(@Param("userIds") List<Long> userIds, Pageable pageable);
+
+
 }
 

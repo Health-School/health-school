@@ -1,19 +1,21 @@
 package com.malnutrition.backend.domain.user.exercisesheet.service;
 
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.machine.machine.entity.Machine;
 import com.malnutrition.backend.domain.machine.machine.repository.MachineRepository;
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.entity.MachineExerciseSheet;
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.repository.MachineExerciseSheetRepository;
-import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetCreateDto;
-import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetResponseDto;
-import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseSheetCreateDto;
-import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseSheetResponseDto;
+import com.malnutrition.backend.domain.user.exercisesheet.dto.*;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
 import com.malnutrition.backend.domain.user.exercisesheet.repository.ExerciseSheetRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,8 @@ public class ExerciseSheetService {
     private final UserRepository userRepository;
     private final MachineRepository machineRepository;
     private final MachineExerciseSheetRepository machineExerciseSheetRepository;
+    private final LectureRepository lectureRepository;
+    private final LectureUserRepository lectureUserRepository;
     private final Rq rq;  // 로그인한 사용자 정보
 
     @Transactional
@@ -84,6 +88,8 @@ public class ExerciseSheetService {
             List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
                     .map(mes -> new MachineExerciseSheetResponseDto(
                             mes.getId(),
+                            mes.getExerciseSheet().getUser().getId(),
+                            mes.getExerciseSheet().getUser().getNickname(),
                             mes.getMachine().getName(),
                             mes.getReps(),
                             mes.getSets(),
@@ -136,6 +142,8 @@ public class ExerciseSheetService {
         List<MachineExerciseSheetResponseDto> machineDtos = newMachineExercises.stream().map(mes ->
                 new MachineExerciseSheetResponseDto(
                         mes.getId(),
+                        mes.getExerciseSheet().getUser().getId(),
+                        mes.getExerciseSheet().getUser().getNickname(),
                         mes.getMachine().getName(),
                         mes.getReps(),
                         mes.getSets(),
@@ -166,6 +174,36 @@ public class ExerciseSheetService {
 
     public List<ExerciseSheet> getAllExerciseSheetsByUser(Long userId) {
         return exerciseSheetRepository.findAllByUserIdOrderByExerciseDateDesc(userId);
+    }
+
+    @Transactional
+    public Page<ExerciseSheetRespDto> getAllStudentsExerciseSheets(Long trainerId, Pageable pageable) {
+        // 1. 트레이너가 개설한 강의 목록
+        List<Long> lectureIds = lectureRepository.findByTrainerId(trainerId)
+                .stream().map(Lecture::getId).toList();
+
+        if (lectureIds.isEmpty()) {
+            return Page.empty(); // 강의가 없으면 빈 페이지 반환
+        }
+
+        // 2. 그 강의를 수강 중인 수강생 ID 목록 (중복 제거)
+        List<Long> studentIds = lectureUserRepository.findByLectureIdIn(lectureIds)
+                .stream().map(lectureUser -> lectureUser.getUser().getId())
+                .distinct()
+                .toList();
+
+        if (studentIds.isEmpty()) {
+            return Page.empty(); // 수강생 없으면 빈 페이지 반환
+        }
+
+        // 3. 운동 기록 조회
+        return exerciseSheetRepository.findByUserIds(studentIds, pageable)
+                .map(ExerciseSheetRespDto::from);
+    }
+
+    @Transactional
+    public ExerciseSheet getExerciseSheetById(Long id) {
+        return exerciseSheetRepository.findById(id).orElse(null);
     }
 
 

@@ -7,6 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MachineExerciseSheetResponseDto {
     private Long id;
+    private Long writerId;
+    private String writerName;
     private String machineName;
     private int reps;
     private int sets;
