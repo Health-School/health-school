@@ -1,20 +1,50 @@
-// app/providers.tsx
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { fetchLectureDetail } from "@/api/lecture";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+
+interface LectureResponseDto {
+  id: number;
+  title: string;
+  content: string;
+  price: number;
+  lectureLevel: string;
+  lectureLevelDescription: string;
+  lectureStatus: string;
+  lectureStatusDescription: string;
+}
+
+async function fetchLectureDetail(
+  lectureId: number
+): Promise<LectureResponseDto> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureId}`
+  );
+  if (!res.ok) throw new Error("강의 정보를 불러오지 못했습니다.");
+  const data = await res.json();
+  return data.data; // ApiResponse.success의 data 필드
+}
 
 export default function LectureDetailPage() {
   const params = useParams();
   const lectureId = Number(params.lectureId);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["lectureDetail", lectureId],
-    queryFn: () => fetchLectureDetail(lectureId),
-    enabled: !!lectureId,
-  });
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lectureId) return;
+    setIsLoading(true);
+    fetchLectureDetail(lectureId)
+      .then((res) => {
+        setData(res);
+        setError(null);
+      })
+      .catch(() => setError("강의 정보를 불러올 수 없습니다."))
+      .finally(() => setIsLoading(false));
+  }, [lectureId]);
 
   if (isLoading) return <div>로딩 중...</div>;
   if (error || !data) return <div>강의 정보를 불러올 수 없습니다.</div>;
@@ -40,13 +70,12 @@ export default function LectureDetailPage() {
             <span>{data.lectureLevelDescription}</span>
             <span>·</span>
             <span>{data.lectureStatusDescription}</span>
-            {/* 필요시 추가 정보 */}
           </div>
 
           {/* 트레이너 정보 */}
           <div className="bg-white rounded-lg p-4 shadow mb-6 flex items-center gap-4">
             <Image
-              src="/trainer.jpg" // 트레이너 이미지 경로
+              src="/trainer.jpg"
               alt="트레이너"
               width={48}
               height={48}
@@ -90,7 +119,9 @@ export default function LectureDetailPage() {
 
           {/* 강의 수강 시 제공되는 자료 */}
           <section className="mb-8">
-            <h2 className="font-bold text-lg mb-2">강의 수강 시 제공되는 자료</h2>
+            <h2 className="font-bold text-lg mb-2">
+              강의 수강 시 제공되는 자료
+            </h2>
             <ul className="list-disc pl-5 text-gray-700 space-y-1">
               <li>주간 운동 계획표 PDF</li>
               <li>운동 기록 템플릿 Excel</li>
@@ -106,11 +137,19 @@ export default function LectureDetailPage() {
             <div className="text-2xl font-bold text-green-600 mb-2">
               ₩{data.price?.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-400 line-through mb-2">₩160,000</div>
+            <div className="text-sm text-gray-400 line-through mb-2">
+              ₩160,000
+            </div>
             <div className="text-xs text-red-500 mb-4">20% 할인</div>
-            <button className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold">수강하기</button>
-            <button className="w-full border border-green-600 text-green-600 py-2 rounded mb-2">장바구니에 담기</button>
-            <button className="w-full border text-gray-600 py-2 rounded">찜하기</button>
+            <button className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold">
+              수강하기
+            </button>
+            <button className="w-full border border-green-600 text-green-600 py-2 rounded mb-2">
+              장바구니에 담기
+            </button>
+            <button className="w-full border text-gray-600 py-2 rounded">
+              찜하기
+            </button>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold mb-2">강의 정보</h3>
@@ -130,10 +169,10 @@ export default function LectureDetailPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between">
           <div>
             <div className="font-bold text-lg mb-2">헬스쿨</div>
-            <div className="text-sm mb-2">최고의 강의로 피트니스와 건강한 삶을 응원하겠습니다.</div>
-            <div className="flex gap-2">
-              {/* SNS 아이콘 등 */}
+            <div className="text-sm mb-2">
+              최고의 강의로 피트니스와 건강한 삶을 응원하겠습니다.
             </div>
+            <div className="flex gap-2">{/* SNS 아이콘 등 */}</div>
           </div>
           <div>
             <div className="font-bold mb-2">카테고리</div>
@@ -145,11 +184,18 @@ export default function LectureDetailPage() {
           </div>
           <div>
             <div className="font-bold mb-2">구독하기</div>
-            <input className="p-2 rounded text-black" placeholder="이메일 주소" />
-            <button className="ml-2 bg-green-600 text-white px-4 py-2 rounded">구독</button>
+            <input
+              className="p-2 rounded text-black"
+              placeholder="이메일 주소"
+            />
+            <button className="ml-2 bg-green-600 text-white px-4 py-2 rounded">
+              구독
+            </button>
           </div>
         </div>
-        <div className="text-center text-xs text-gray-500 mt-8">© 2025 헬스쿨. All rights reserved.</div>
+        <div className="text-center text-xs text-gray-500 mt-8">
+          © 2025 헬스쿨. All rights reserved.
+        </div>
       </footer>
     </div>
   );

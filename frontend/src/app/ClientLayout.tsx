@@ -8,7 +8,7 @@ import { LoginUserContext, useLoginUser } from "@/stores/auth/loginUser";
 import { usePathname } from "next/navigation";
 
 // ✅ 추가
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -19,7 +19,6 @@ export default function ClientLayout({ children }: LayoutProps) {
   const isAdminPage = pathname.startsWith("/admin");
 
   // ✅ QueryClient 추가
-  const [queryClient] = useState(() => new QueryClient());
 
   const {
     loginUser,
@@ -63,16 +62,14 @@ export default function ClientLayout({ children }: LayoutProps) {
 
   return (
     // ✅ QueryClientProvider로 전체 감싸기
-    <QueryClientProvider client={queryClient}>
-      <LoginUserContext value={loginUserContextValue}>
-        <div className="flex flex-col min-h-screen">
-          <main className="container mx-auto px-2 py-8 flex-1">
-            <Header />
-            {children}
-          </main>
-          <Footer />
-        </div>
-      </LoginUserContext>
-    </QueryClientProvider>
+    <LoginUserContext value={loginUserContextValue}>
+      <div className="flex flex-col min-h-screen">
+        <main className="container mx-auto px-2 py-8 flex-1">
+          <Header />
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </LoginUserContext>
   );
 }
