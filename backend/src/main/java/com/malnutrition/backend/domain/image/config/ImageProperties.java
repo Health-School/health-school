@@ -17,6 +17,11 @@ public class ImageProperties {
     @Value("${image.certification.upload_path}")
     private String certificationUploadPath;
 
+    @Value("${image.lecture.upload_path}")
+    private String lectureUploadPath;
+
     @Value("${image.view_url}")
     private String viewUrl;
+
+
 }

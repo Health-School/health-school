@@ -24,7 +24,7 @@ public class UserCommandService {
     @Transactional(readOnly = true)
     public MeUserResponseDto getMeUserResponseDto(Long userId){
         User user = userService.findByIdWithProfileImage(userId);
-        String imageProfileUrl = imageService.getImageProfileUrl(user.getProfileImage());
+        String imageProfileUrl = imageService.getImageUrl(user.getProfileImage());
         return MeUserResponseDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -47,7 +47,7 @@ public class UserCommandService {
         User user = userService.findByIdWithProfileImage(userId);
 
         Image profileImage = user.getProfileImage();
-        String imageProfileUrl = imageService.getImageProfileUrl(profileImage);
+        String imageProfileUrl = imageService.getImageUrl(profileImage);
         return MyPageDto.from(user, imageProfileUrl);
     }
 }
