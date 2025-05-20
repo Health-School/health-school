@@ -56,6 +56,10 @@ export default function EquipmentsPage() {
   const [selectedBodies, setSelectedBodies] = useState<number[]>([]);
   const [bodyParts, setBodyParts] = useState<BodyDto[]>([]);
   const [machineTypes, setMachineTypes] = useState<MachineTypeDto[]>([]);
+  const [selectedBodyFilter, setSelectedBodyFilter] = useState<number>(0);
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const tabs = [
     { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
@@ -133,11 +137,49 @@ export default function EquipmentsPage() {
     }
   };
 
+  // Add fetchFilteredMachines function
+  const fetchFilteredMachines = async () => {
+    try {
+      let url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/machines`;
+
+      if (selectedBodyFilter && selectedTypeFilter) {
+        url = `${url}/by-body-and-type?bodyId=${selectedBodyFilter}&typeId=${selectedTypeFilter}`;
+      } else if (selectedBodyFilter) {
+        url = `${url}/by-body?bodyId=${selectedBodyFilter}`;
+      } else if (selectedTypeFilter) {
+        url = `${url}/by-type?typeId=${selectedTypeFilter}`;
+      }
+
+      url += `&page=${currentPage}&size=10`;
+
+      const response = await fetch(url, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("운동 기구 조회에 실패했습니다.");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setMachines(result.data.content);
+        setTotalPages(result.data.totalPages);
+      }
+    } catch (error) {
+      console.error("운동 기구 조회 오류:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMachines();
     fetchBodyParts();
     fetchMachineTypes();
   }, []);
+
+  // Update useEffect to handle filters
+  useEffect(() => {
+    fetchFilteredMachines();
+  }, [selectedBodyFilter, selectedTypeFilter, currentPage]);
 
   // Add register function
   const handleRegister = async () => {
@@ -225,6 +267,46 @@ export default function EquipmentsPage() {
           </button>
         </div>
 
+        {/* Add search filters */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow-md">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                운동 부위
+              </label>
+              <select
+                value={selectedBodyFilter}
+                onChange={(e) => setSelectedBodyFilter(Number(e.target.value))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value={0}>전체</option>
+                {bodyParts.map((part) => (
+                  <option key={part.id} value={part.id}>
+                    {part.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                기구 타입
+              </label>
+              <select
+                value={selectedTypeFilter}
+                onChange={(e) => setSelectedTypeFilter(Number(e.target.value))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value={0}>전체</option>
+                {machineTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div className="overflow-x-auto shadow-md rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -294,6 +376,41 @@ export default function EquipmentsPage() {
             운동 기구가 없습니다.
           </div>
         )}
+
+        {/* Add pagination */}
+        <div className="mt-4 flex justify-center">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+              disabled={currentPage === 0}
+              className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
+            >
+              이전
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i)}
+                className={`px-3 py-1 rounded text-sm ${
+                  currentPage === i
+                    ? "bg-green-500 text-white"
+                    : "border border-gray-300"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+              }
+              disabled={currentPage === totalPages - 1}
+              className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
+            >
+              다음
+            </button>
+          </nav>
+        </div>
 
         {/* Add Modal */}
         {isModalOpen && (
