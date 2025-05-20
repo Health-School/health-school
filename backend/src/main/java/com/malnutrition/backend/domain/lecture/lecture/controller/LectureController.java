@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lecture.controller;
 
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureResponseDto;
@@ -34,6 +35,15 @@ public class LectureController {
     private final LectureService lectureService;
     private final Rq rq;
     private final UserService userService;
+
+    @Operation(summary = "특정 강의 조회", description = "새로운 강의를 추가합니다.")
+    @GetMapping("/{lectureId}")
+    public ResponseEntity<ApiResponse<LectureDetailDto>> getLecture(@PathVariable("lectureId") Long lectureId) {
+
+        LectureDetailDto lecture = lectureService.getLecture(lectureId);
+        return ResponseEntity.ok(ApiResponse.success(lecture, "강의 추가 완료"));
+    }
+
 
     @Operation(summary = "강의 추가", description = "새로운 강의를 추가합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식
@@ -78,8 +88,6 @@ public class LectureController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) LectureLevel lectureLevel
     ) {
-
-
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<LectureDto> lectures = lectureService.getLectures(pageRequest, category, lectureLevel);
         return ResponseEntity.ok(ApiResponse.success(lectures, "조회 성공!"));

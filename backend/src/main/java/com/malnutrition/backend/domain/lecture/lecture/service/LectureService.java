@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.lecture.lecture.service;
 import com.malnutrition.backend.domain.image.config.ImageProperties;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
@@ -11,16 +12,25 @@ import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
 import com.malnutrition.backend.domain.lecture.lectureCategory.repository.LectureCategoryRepository;
+import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
+import com.malnutrition.backend.domain.lecture.like.repository.LikeRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 
+import com.malnutrition.backend.domain.user.user.repository.UserRepository;
+import com.malnutrition.backend.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Collections;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +40,49 @@ public class LectureService {
     private final LectureCategoryRepository lectureCategoryRepository;
     private final ImageService imageService;
     private final ImageProperties imageProperties;
+    private final LikeRepository likeRepository;
+    private final UserService userService;
+
+    @Transactional(readOnly = true)
+    public LectureDetailDto getLecture(Long lectureId){
+        Lecture lecture = lectureRepository.findByIdWithAllDetails(lectureId).
+                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 lectureId 입니다."));
+        //
+
+        Double averageScore = likeRepository.findAverageScoreByLectureId(lectureId);
+
+        if(!Objects.isNull(averageScore)){
+            averageScore = Math.round(averageScore * 10) / 10.0;
+        }else{
+            averageScore = 0.0;
+        }
+        Image coverImage = lecture.getCoverImage();
+        String coverImageUrl = null;
+        if(!Objects.isNull(coverImage)){
+            coverImageUrl = imageService.getImageUrl(coverImage);
+        }
+        User trainer = lecture.getTrainer();
+        String trainerProfileImageUrl = null;
+
+        Image trainerImage = userService.findProfileImageByUserId(trainer.getId());
+
+        if(!Objects.isNull(trainerImage)) trainerProfileImageUrl = imageService.getImageUrl(trainerImage);
+
+        return LectureDetailDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .content(lecture.getContent())
+                .price(lecture.getPrice())
+                .lectureStatus(lecture.getLectureStatus().getDescription())
+                .lectureLevel(lecture.getLectureLevel().getDescription())
+                .trainerName(trainer.getNickname())
+                .categoryName(lecture.getLectureCategory().getCategoryName())
+                .coverImageUrl(coverImageUrl)
+                .trainerProfileImageUrl(trainerProfileImageUrl)
+                .averageScore(averageScore)
+                .createdAt(lecture.getCreatedDate())
+                .build();
+    }
 
 
     @Transactional

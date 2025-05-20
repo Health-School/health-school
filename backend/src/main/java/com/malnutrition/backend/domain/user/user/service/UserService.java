@@ -172,6 +172,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Image findProfileImageByUserId(Long id){
+        return userRepository.findProfileImageByUserId(id).orElse(null);
+
+    }
+
+    @Transactional(readOnly = true)
     public List<User> findAllByProfileImageId(Long imageId){
         return userRepository.findAllByProfileImageId(imageId);
     }

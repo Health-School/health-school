@@ -122,7 +122,7 @@ export default function AlarmBell() {
   return (
     <>
       <button
-        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors mx-1"
+        className="relative p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors mx-1"
         onClick={() => setOpen((prev) => !prev)}
         aria-label="알림"
       >

@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.user.user.repository;
 
 
+import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
 import org.eclipse.angus.mail.imap.protocol.BODY;
@@ -23,6 +24,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     boolean existsByNickname(String nickname);
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.profileImage WHERE u.id = :id")
     Optional<User> findByIdWithProfileImage(@Param("id") Long id);
+
+    @Query("SELECT u.profileImage FROM User u WHERE u.id = :id")
+    Optional<Image> findProfileImageByUserId(@Param("id") Long id);
 
     List<User> findAllByProfileImageId(Long id);
 
