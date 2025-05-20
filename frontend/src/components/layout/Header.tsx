@@ -27,7 +27,7 @@ export default function Header({ hideDropdownMenus = false }) {
   return (
     <nav className="bg-white ">
       <div className="max-w-[1600px] mx-auto ">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center ">
           {/* 로고 */}
           <div className="flex items-center">
             <Link href="/">
@@ -38,6 +38,12 @@ export default function Header({ hideDropdownMenus = false }) {
                 height={50}
                 className="cursor-pointer"
               />
+            </Link>
+            <Link
+              href="/lecture"
+              className="ml-6 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
+            >
+              강의
             </Link>
           </div>
           {/* 우측 메뉴 */}
