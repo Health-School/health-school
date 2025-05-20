@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.controller;
 
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
+import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
@@ -54,5 +55,18 @@ public class LectureUserController {
             case "latest" -> Sort.by(Sort.Direction.DESC, "createdDate"); // 최신순(생성일 기준) 기본값
             default -> Sort.by(Sort.Direction.DESC, "createdDate");
         };
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<?> getStudentsByTrainer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long trainerId = rq.getActor().getId();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<UserResponseDto> students = lectureUserService.getStudentsByTrainerId(trainerId, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(students, "수강생 목록 조회 성공"));
     }
 }

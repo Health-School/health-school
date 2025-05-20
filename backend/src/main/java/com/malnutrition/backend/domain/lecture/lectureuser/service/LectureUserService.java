@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.Cur
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
+import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.order.entity.Order;
@@ -120,5 +121,13 @@ public class LectureUserService {
     public LectureUser getLectureUserWithLecture(Long id) {
         return lectureUserRepository.findWithLectureAndTrainerById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 수강 정보가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public Page<UserResponseDto> getStudentsByTrainerId(Long trainerId, Pageable pageable) {
+        Page<LectureUser> lectureUsers = lectureUserRepository.findAllByLectureTrainerId(trainerId, pageable);
+
+        // LectureUser -> UserResponseDto 변환 후 반환
+        return lectureUsers.map(lu -> UserResponseDto.from(lu.getUser()));
     }
 }

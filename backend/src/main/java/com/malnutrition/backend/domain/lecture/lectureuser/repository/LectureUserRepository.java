@@ -22,4 +22,8 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     WHERE lu.id = :id
 """)
     Optional<LectureUser> findWithLectureAndTrainerById(@Param("id") Long id);
+
+    @Query("SELECT lu FROM LectureUser lu " +
+            "WHERE lu.lecture.trainer.id = :trainerId")
+    Page<LectureUser> findAllByLectureTrainerId(@Param("trainerId") Long trainerId, Pageable pageable);
 }
