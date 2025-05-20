@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -17,9 +17,13 @@ interface QnA {
   id: number;
   title: string;
   content: string;
-  createdAt: string;
-  studentName: string;
-  status: "WAITING" | "ANSWERED";
+  lectureId: number;
+  lectureTitle: string;
+  userId: number;
+  username: string;
+  openStatus: "OPEN" | "CLOSED";
+  createdDate: string;
+  updatedDate: string;
 }
 
 interface WorkoutLog {
@@ -30,6 +34,12 @@ interface WorkoutLog {
     name: string;
     sets: { weight: number; reps: number }[];
   }[];
+}
+
+// Add Lecture interface
+interface Lecture {
+  id: number;
+  title: string;
 }
 
 // Update ApiResponse interface to match the actual API response
@@ -67,6 +77,8 @@ interface ApiResponse<T> {
 }
 
 export default function StudentsPage() {
+  // Add router
+  const router = useRouter();
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<"students" | "qna" | "logs">(
     "students"
@@ -74,11 +86,25 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [qnas, setQnas] = useState<QnA[]>([]);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+  // Add state for lectures
+  const [lectures, setLectures] = useState<Lecture[]>([]);
 
   // Add pagination states
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Add new state for expanded QnA
+  const [expandedQnaId, setExpandedQnaId] = useState<number | null>(null);
+
+  // Add new state for selected lecture
+  const [selectedLectureId, setSelectedLectureId] = useState<number | null>(
+    null
+  );
+  const [lectureQnas, setLectureQnas] = useState<QnA[]>([]);
+
+  // Add new state for search
+  const [searchTerm, setSearchTerm] = useState("");
 
   const tabs = [
     { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
@@ -92,7 +118,7 @@ export default function StudentsPage() {
   const contentTabs = [
     { key: "students", name: "수강생 목록" },
     { key: "qna", name: "QnA 목록" },
-    { key: "logs", name: "운동 기록" },
+    { key: "logs", name: "수강생 운동 기록" },
   ];
 
   // Fetch data functions
@@ -123,15 +149,21 @@ export default function StudentsPage() {
     }
   };
 
-  const fetchQnAs = async () => {
+  const fetchQnAs = async (page: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/qnas`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/qna/trainer?page=${page}&size=10`,
         { credentials: "include" }
       );
-      if (response.ok) {
-        const data = await response.json();
-        setQnas(data.data);
+
+      if (!response.ok) {
+        throw new Error("QnA 목록 조회에 실패했습니다.");
+      }
+
+      const result: ApiResponse<QnA> = await response.json();
+      if (result.success) {
+        setQnas(result.data.content);
+        setTotalPages(result.data.totalPages);
       }
     } catch (error) {
       console.error("QnA 목록 조회 실패:", error);
@@ -153,19 +185,98 @@ export default function StudentsPage() {
     }
   };
 
+  // Add function to fetch QnAs by lecture ID
+  const fetchLectureQnAs = async (lectureId: number, page: number) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/qna/trainer/qna?lectureId=${lectureId}&page=${page}&size=10`,
+        { credentials: "include" }
+      );
+
+      if (!response.ok) {
+        throw new Error("강의 QnA 목록 조회에 실패했습니다.");
+      }
+
+      const result: ApiResponse<QnA> = await response.json();
+      if (result.success) {
+        setLectureQnas(result.data.content);
+        setTotalPages(result.data.totalPages);
+      }
+    } catch (error) {
+      console.error("강의 QnA 목록 조회 실패:", error);
+    }
+  };
+
+  // Add function to fetch lectures
+  const fetchLectures = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures`,
+        { credentials: "include" }
+      );
+
+      if (!response.ok) {
+        throw new Error("강의 목록 조회에 실패했습니다.");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setLectures(result.data.content);
+      }
+    } catch (error) {
+      console.error("강의 목록 조회 실패:", error);
+    }
+  };
+
   useEffect(() => {
     switch (activeTab) {
       case "students":
         fetchStudents(currentPage);
         break;
       case "qna":
-        fetchQnAs();
+        if (selectedLectureId !== null) {
+          fetchLectureQnAs(selectedLectureId, currentPage);
+        } else {
+          fetchQnAs(currentPage);
+        }
         break;
       case "logs":
         fetchWorkoutLogs();
         break;
     }
-  }, [activeTab, currentPage]);
+  }, [activeTab, currentPage, selectedLectureId]);
+
+  // Add useEffect to fetch lectures when QnA tab is active
+  useEffect(() => {
+    if (activeTab === "qna") {
+      fetchLectures();
+    }
+  }, [activeTab]);
+
+  // Update handleLectureClick function
+  const handleLectureClick = async (lectureId: number) => {
+    setSelectedLectureId(lectureId);
+    await fetchLectureQnAs(lectureId, 0);
+    setCurrentPage(0);
+  };
+
+  // Add back button function
+  const handleBack = () => {
+    setSelectedLectureId(null);
+    setLectureQnas([]);
+    fetchQnAs(0);
+    setCurrentPage(0);
+  };
+
+  // Add search handler
+  const handleSearch = () => {
+    setCurrentPage(0);
+    if (selectedLectureId) {
+      fetchLectureQnAs(selectedLectureId, 0);
+    } else {
+      fetchQnAs(0);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -297,34 +408,219 @@ export default function StudentsPage() {
         )}
 
         {activeTab === "qna" && (
-          <div className="space-y-4">
-            {qnas.map((qna) => (
-              <div
-                key={qna.id}
-                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{qna.title}</h3>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      qna.status === "WAITING"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-green-100 text-green-800"
+          <>
+            {/* Replace existing search bar with lecture selector */}
+            <div className="mb-6">
+              <div className="flex gap-4">
+                <select
+                  value={selectedLectureId || ""}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    if (id) {
+                      handleLectureClick(id);
+                    } else {
+                      handleBack();
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">전체 강의 보기</option>
+                  {lectures.map((lecture) => (
+                    <option key={lecture.id} value={lecture.id}>
+                      {lecture.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {selectedLectureId ? (
+              // Show lecture specific QnAs
+              <div className="space-y-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">강의 QnA 목록</h2>
+                  <button
+                    onClick={handleBack}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    ← 전체 QnA 목록으로 돌아가기
+                  </button>
+                </div>
+                {lectureQnas.map((qna) => (
+                  <div
+                    key={qna.id}
+                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="mb-2">
+                      <div
+                        onClick={() => handleLectureClick(qna.lectureId)}
+                        className="text-sm text-red-500 mb-1 cursor-pointer hover:underline"
+                      >
+                        "{qna.lectureTitle}" 강의에 질문이 추가되었습니다!
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium">{qna.title}</h3>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            qna.openStatus === "OPEN"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {qna.openStatus === "OPEN" ? "공개" : "비공개"}
+                        </span>
+                      </div>
+                    </div>
+                    {expandedQnaId === qna.id && (
+                      <div className="text-sm mb-2 mt-2">
+                        <p className="text-gray-600 p-3 bg-gray-50 rounded mb-2">
+                          {qna.content}
+                        </p>
+                        <button
+                          onClick={() => handleLectureClick(qna.lectureId)}
+                          className="text-green-600 hover:text-green-700 text-xs underline"
+                        >
+                          해당 강의 QnA 게시판으로 이동
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                      <div className="flex items-center space-x-2">
+                        <span>{qna.username}</span>
+                        <span>·</span>
+                        <span>
+                          {format(
+                            new Date(qna.createdDate),
+                            "yyyy.MM.dd HH:mm"
+                          )}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() =>
+                          setExpandedQnaId(
+                            expandedQnaId === qna.id ? null : qna.id
+                          )
+                        }
+                        className="text-green-600 hover:text-green-700 text-sm"
+                      >
+                        {expandedQnaId === qna.id ? "접기" : "자세히 보기"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Filter QnAs by lecture title
+              <div className="space-y-4">
+                {qnas
+                  .filter((qna) =>
+                    qna.lectureTitle
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                  )
+                  .map((qna) => (
+                    <div
+                      key={qna.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="mb-2">
+                        <div
+                          onClick={() => handleLectureClick(qna.lectureId)}
+                          className="text-sm text-red-500 mb-1 cursor-pointer hover:underline"
+                        >
+                          "{qna.lectureTitle}" 강의에 질문이 추가되었습니다!
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium">{qna.title}</h3>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              qna.openStatus === "OPEN"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {qna.openStatus === "OPEN" ? "공개" : "비공개"}
+                          </span>
+                        </div>
+                      </div>
+                      {expandedQnaId === qna.id && (
+                        <div className="text-sm mb-2 mt-2">
+                          <p className="text-gray-600 p-3 bg-gray-50 rounded mb-2">
+                            {qna.content}
+                          </p>
+                          <button
+                            onClick={() => handleLectureClick(qna.lectureId)}
+                            className="text-green-600 hover:text-green-700 text-xs underline"
+                          >
+                            해당 강의 QnA 게시판으로 이동
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center text-xs text-gray-500">
+                        <div className="flex items-center space-x-2">
+                          <span>{qna.username}</span>
+                          <span>·</span>
+                          <span>
+                            {format(
+                              new Date(qna.createdDate),
+                              "yyyy.MM.dd HH:mm"
+                            )}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setExpandedQnaId(
+                              expandedQnaId === qna.id ? null : qna.id
+                            )
+                          }
+                          className="text-green-600 hover:text-green-700 text-sm"
+                        >
+                          {expandedQnaId === qna.id ? "접기" : "자세히 보기"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            <div className="mt-6 flex justify-center">
+              <nav className="flex items-center space-x-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(0, prev - 1))
+                  }
+                  disabled={currentPage === 0 || isLoading}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
+                >
+                  이전
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i)}
+                    disabled={isLoading}
+                    className={`px-3 py-1 rounded text-sm ${
+                      currentPage === i
+                        ? "bg-green-500 text-white"
+                        : "border border-gray-300"
                     }`}
                   >
-                    {qna.status === "WAITING" ? "답변 대기" : "답변 완료"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-2">{qna.content}</p>
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{qna.studentName}</span>
-                  <span>
-                    {format(new Date(qna.createdAt), "yyyy.MM.dd HH:mm")}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+                  }
+                  disabled={currentPage === totalPages - 1 || isLoading}
+                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
+                >
+                  다음
+                </button>
+              </nav>
+            </div>
+          </>
         )}
 
         {activeTab === "logs" && (
