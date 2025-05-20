@@ -107,7 +107,7 @@ export default function Header({ hideDropdownMenus = false }) {
                   </div>
                   {isDropdownOpen && (
                     <div
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200"
+                      className="fixed right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-[9999] border border-gray-200"
                       tabIndex={0}
                       onBlur={() => setIsDropdownOpen(false)}
                     >
@@ -128,7 +128,7 @@ export default function Header({ hideDropdownMenus = false }) {
                             마이 대쉬보드
                           </Link>
                           <Link
-                            href={`/${loginUser.nickname}`}
+                            href={`/lecture`}
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                             onClick={() => setIsDropdownOpen(false)}
                           >

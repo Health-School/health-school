@@ -40,5 +40,13 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     );
     long countByCreatedDateBefore(LocalDateTime localDateTime);
 
+    @Query("""
+    SELECT l FROM Lecture l
+    JOIN FETCH l.trainer
+    JOIN FETCH l.lectureCategory
+    JOIN FETCH l.coverImage
+    WHERE l.id = :id
+    """)
+    Optional<Lecture> findByIdWithAllDetails(@Param("id") Long id);
 
 }

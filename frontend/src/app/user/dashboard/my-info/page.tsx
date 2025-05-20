@@ -248,7 +248,7 @@ export default function MyInfoPage() {
                   <>
                     <span className="text-gray-700">{user?.nickname}</span>
                     <button
-                      className="text-green-400 text-sm hover:underline"
+                      className="text-green-400 text-sm cursor-pointer hover:underline"
                       onClick={() => setEditNickname(true)}
                     >
                       수정
@@ -306,7 +306,7 @@ export default function MyInfoPage() {
                   <>
                     <span className="text-gray-900">{user?.phoneNumber}</span>
                     <button
-                      className="text-green-400 text-sm hover:underline"
+                      className="text-green-400 text-sm  cursor-pointer hover:underline"
                       onClick={() => setEditPhone(true)}
                     >
                       수정

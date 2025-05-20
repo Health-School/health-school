@@ -24,4 +24,6 @@ public class Like extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lecture_id",nullable = false)  // FK 이름을 명시적으로 지정
     private Lecture lecture;
+
+    private Integer score; //0~5 점의 점수를 갖는다.
 }

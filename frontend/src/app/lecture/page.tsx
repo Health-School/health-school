@@ -129,7 +129,7 @@ export default function LecturePage() {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold border cursor-pointer ${
                 selectedCategory === cat.categoryName
                   ? "bg-green-100 text-green-700 border-green-400"
                   : "bg-white text-gray-700 border-gray-200"
@@ -142,7 +142,7 @@ export default function LecturePage() {
           <div ref={levelRef} className="relative ml-2">
             <button
               onClick={() => setLevelDropdownOpen((v) => !v)}
-              className="border px-4 py-2 rounded-full text-gray-700 flex items-center gap-2 bg-white"
+              className="border px-4 py-2 rounded-full cursor-pointer text-gray-700 flex items-center gap-2 bg-white"
             >
               난이도
               <svg
@@ -202,7 +202,10 @@ export default function LecturePage() {
           {lectures.map((lecture) => (
             <div
               key={lecture.id}
-              className="bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col relative group hover:shadow-lg transition"
+              className="bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col relative group cursor-pointer hover:shadow-lg transition"
+              onClick={() => {
+                router.push(`/lecture/${lecture.id}`);
+              }}
             >
               <div className="relative w-full h-36 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                 {lecture.coverImageUrl ? (
@@ -249,15 +252,15 @@ export default function LecturePage() {
         {/* 페이지네이션 (예시) */}
         <div className="flex justify-center mt-10 gap-2">
           <button
-            className="px-3 py-1 rounded border"
+            className="px-3 py-1 rounded border cursor-pointer"
             disabled={page === 0}
             onClick={() => setPage((p) => Math.max(0, p - 1))}
           >
             이전
           </button>
-          <span className="px-3 py-1">{page + 1}</span>
+          <span className="px-3 py-1 cursor-pointer">{page + 1}</span>
           <button
-            className="px-3 py-1 rounded border"
+            className="px-3 py-1 rounded border cursor-pointer"
             onClick={() => setPage((p) => p + 1)}
           >
             다음
