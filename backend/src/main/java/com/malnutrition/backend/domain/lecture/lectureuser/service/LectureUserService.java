@@ -121,4 +121,6 @@ public class LectureUserService {
         return lectureUserRepository.findWithLectureAndTrainerById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 수강 정보가 존재하지 않습니다."));
     }
+
+
 }
