@@ -19,7 +19,8 @@ public class PermitUrl {
             "/api/v1/lectures/**", "/api/v1/lecture_categories/**",
             "/api/v1/lectureUsers/**", "/api/v1/curriculums/**",
             "/api/v1/curriculum-progress/**",
-            "/api/v1/lecture_categories"
+            "/api/v1/lecture_categories",
+            "/api/v1/reports","/api/v1/reports/*"
     };
 
     public static final String[] POST_URLS = {
@@ -28,15 +29,18 @@ public class PermitUrl {
             "/api/v1/email/join/send","/api/v1/sms/join/send-code", "/api/v1/sms/join/verify-code",
             "/api/v1/sms/find-email/verify-code", "/api/v1/sms/find-email/send-code",
             "/api/v1/lectures", "/api/v1/lecture_categories", "/api/v1/lectureUsers",
-            "/api/v1/curriculums", "/api/v1/curriculum-progress"
+            "/api/v1/curriculums", "/api/v1/curriculum-progress",
+            "/api/v1/reports/*"
     };
 
     public static final String[] PUT_URLS = {
             // PUT 메서드에 해당하는 경로를 여기에 추가
+            "/api/v1/reports/*"
     };
 
     public static final String[] DELETE_URLS = {
             // DELETE 메서드에 해당하는 경로를 여기에 추가
+            "/api/v1/reports/*"
     };
 
 
