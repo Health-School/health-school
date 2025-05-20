@@ -1,6 +1,6 @@
 package com.malnutrition.backend.domain.admin.log.entity;
 
-import com.malnutrition.backend.domain.admin.enums.TrainerVerificationResult;
+import com.malnutrition.backend.domain.user.trainerApplication.enums.TrainerVerificationStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -27,7 +27,7 @@ public class TrainerVerificationLog extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TrainerVerificationResult decision;
+    private TrainerVerificationStatus decision;
 
     @Column(columnDefinition = "TEXT")
     private String reason;
