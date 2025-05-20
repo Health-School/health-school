@@ -1,10 +1,12 @@
 package com.malnutrition.backend.domain.order.repository;
 
 import com.malnutrition.backend.domain.order.entity.Order;
+import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,4 +25,22 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     Page<Order> findAllByUserAndApprovedAtBetween(User user, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
     Page<Order> findByUser(User user, Pageable pageable);
+
+    Page<Order> findByLectureTrainerAndTossPaymentStatus(
+            User trainer,
+            TossPaymentStatus tossPaymentStatus,
+            Pageable pageable
+    );
+
+    // 전체 정산 금액
+    @Query("SELECT SUM(o.amount) FROM Order o WHERE o.lecture.trainer = :trainer AND o.tossPaymentStatus = 'DONE'")
+    Long getTotalSettlementAmount(User trainer);
+
+    // 월간 정산 금액
+    @Query("SELECT SUM(o.amount) FROM Order o WHERE o.lecture.trainer = :trainer AND o.tossPaymentStatus = 'DONE' AND FUNCTION('MONTH', o.approvedAt) = :month AND FUNCTION('YEAR', o.approvedAt) = :year")
+    Long getMonthlySettlementAmount(User trainer, int year, int month);
+
+    // 연간 정산 금액
+    @Query("SELECT SUM(o.amount) FROM Order o WHERE o.lecture.trainer = :trainer AND o.tossPaymentStatus = 'DONE' AND FUNCTION('YEAR', o.approvedAt) = :year")
+    Long getYearlySettlementAmount(User trainer, int year);
 }
