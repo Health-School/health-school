@@ -31,7 +31,7 @@ public class Order {
     @JoinColumn(name = "user_Id")
     private User user;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "lecture_id",nullable = false)
     private Lecture lecture;
 

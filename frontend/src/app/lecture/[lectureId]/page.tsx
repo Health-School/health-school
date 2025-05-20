@@ -3,6 +3,13 @@
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// TossPaymentsModal 컴포넌트 동적 import (SSR 비활성화)
+const TossPaymentsModal = dynamic(
+  () => import("../../../components/payments/TossPaymentsModal"),
+  { ssr: false }
+);
 
 interface LectureResponseDto {
   id: number;
@@ -45,6 +52,7 @@ export default function LectureDetailPage() {
   const [data, setData] = useState<LectureResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showTossModal, setShowTossModal] = useState(false);
 
   useEffect(() => {
     if (!lectureId) return;
@@ -168,7 +176,10 @@ export default function LectureDetailPage() {
             <div className="text-xs text-yellow-500 mb-2">
               평점: {data.averageScore?.toFixed(1) ?? "-"}
             </div>
-            <button className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer">
+            <button
+              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer"
+              onClick={() => setShowTossModal(true)}
+            >
               수강하기
             </button>
             <button className="w-full border border-green-600 text-green-600 py-2 rounded mb-2">
@@ -190,6 +201,26 @@ export default function LectureDetailPage() {
           </div>
         </aside>
       </div>
+
+      {/* TossPayments 모달 */}
+      {showTossModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
+              onClick={() => setShowTossModal(false)}
+            >
+              ×
+            </button>
+            <TossPaymentsModal
+              lectureId={data.id}
+              amount={data.price}
+              lectureTitle={data.title}
+              onClose={() => setShowTossModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
