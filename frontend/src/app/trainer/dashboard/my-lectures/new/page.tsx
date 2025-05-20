@@ -32,6 +32,8 @@ export default function NewLecturePage() {
     lectureStatus: "PLANNED",
     categoryName: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -48,10 +50,17 @@ export default function NewLecturePage() {
           throw new Error("카테고리 조회에 실패했습니다.");
         }
 
-        const data = await response.json();
-        setCategories(data);
+        const result = await response.json();
+        // Check if the response has the expected structure
+        if (result.success && Array.isArray(result.data)) {
+          setCategories(result.data);
+        } else {
+          console.error("Invalid categories data structure:", result);
+          setCategories([]);
+        }
       } catch (error) {
         console.error("카테고리 조회 오류:", error);
+        setCategories([]);
       }
     };
 
@@ -65,18 +74,67 @@ export default function NewLecturePage() {
     { value: "ADVANCED" as LectureLevel, label: "고급" },
   ];
 
+  // Add handleEditorChange function
+  const handleEditorChange = (content: string) => {
+    setLecture({ ...lecture, content });
+  };
+
+  const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    handleImageFile(file);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageFile(file);
+    }
+  };
+
+  const handleImageFile = (file: File) => {
+    // Check file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("파일 크기는 2MB를 초과할 수 없습니다.");
+      return;
+    }
+
+    // Check file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      alert("jpg, jpeg, png, gif 파일만 업로드 가능합니다.");
+      return;
+    }
+
+    setImageFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  // Update handleSubmit function to use FormData
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!imageFile) {
+      alert("강의 이미지를 업로드해주세요.");
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append("lectureImage", imageFile);
+      formData.append(
+        "lectureRequestDto",
+        new Blob([JSON.stringify(lecture)], {
+          type: "application/json",
+        })
+      );
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
-          body: JSON.stringify(lecture),
+          body: formData,
         }
       );
 
@@ -89,11 +147,6 @@ export default function NewLecturePage() {
       console.error("강의 등록 오류:", error);
       alert("강의 등록에 실패했습니다.");
     }
-  };
-
-  // Add handleEditorChange function
-  const handleEditorChange = (content: string) => {
-    setLecture({ ...lecture, content });
   };
 
   return (
@@ -240,28 +293,64 @@ export default function NewLecturePage() {
 
         <div>
           <h2 className="text-lg font-medium mb-4">썸네일 이미지</h2>
-          <div className="border-2 border-dashed rounded-lg p-8 text-center">
-            <div className="flex flex-col items-center">
-              <svg
-                className="w-12 h-12 text-gray-400 mb-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          <div
+            className="border-2 border-dashed rounded-lg p-8 text-center"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleImageDrop}
+          >
+            {previewUrl ? (
+              <div className="relative">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="max-h-48 mx-auto"
                 />
-              </svg>
-              <p className="text-sm text-gray-500">
-                이미지를 드래그하여 업로드하세요
-              </p>
-              <p className="text-xs text-gray-400">
-                (최대 2MB / jpg,jpeg,png,gif)
-              </p>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setPreviewUrl("");
+                  }}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                  id="imageUpload"
+                />
+                <label
+                  htmlFor="imageUpload"
+                  className="cursor-pointer"
+                >
+                  <svg
+                    className="w-12 h-12 text-gray-400 mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <p className="text-sm text-gray-500">
+                    이미지를 드래그하거나 클릭하여 업로드하세요
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    (최대 2MB / jpg,jpeg,png,gif)
+                  </p>
+                </label>
+              </div>
+            )}
           </div>
         </div>
 

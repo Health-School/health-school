@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import removeMarkdown from "remove-markdown";
 import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 interface LectureStats {
@@ -254,15 +255,16 @@ export default function MyLecturesPage() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{lecture.title}</h3>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                  {lecture.content}
+                  {removeMarkdown(lecture.content)}
                 </p>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {lecture.lectureLevel === "BEGINNER"
+                    {lecture.lectureLevel}
+                    {/* {lecture.lectureLevel === "BEGINNER"
                       ? "초급"
                       : lecture.lectureLevel === "INTERMEDIATE"
                       ? "중급"
-                      : "고급"}
+                      : "고급"} */}
                   </span>
                   <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
                     {lecture.lectureStatus === "OPEN" ? "운영중" : "준비중"}
