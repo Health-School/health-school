@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Editor } from "@tinymce/tinymce-react";
 
 type LectureLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
@@ -90,6 +91,11 @@ export default function NewLecturePage() {
     }
   };
 
+  // Add handleEditorChange function
+  const handleEditorChange = (content: string) => {
+    setLecture({ ...lecture, content });
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-8">
       <div className="flex items-center mb-8">
@@ -125,14 +131,41 @@ export default function NewLecturePage() {
               <label className="block text-sm mb-1">
                 강의 내용 <span className="text-red-500">*</span>
               </label>
-              <textarea
+              <Editor
+                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                init={{
+                  height: 400,
+                  menubar: false,
+                  plugins: [
+                    "advlist",
+                    "autolink",
+                    "lists",
+                    "link",
+                    "image",
+                    "charmap",
+                    "preview",
+                    "anchor",
+                    "searchreplace",
+                    "visualblocks",
+                    "code",
+                    "fullscreen",
+                    "insertdatetime",
+                    "media",
+                    "table",
+                    "code",
+                    "help",
+                    "wordcount",
+                  ],
+                  toolbar:
+                    "undo redo | blocks | " +
+                    "bold italic forecolor | alignleft aligncenter " +
+                    "alignright alignjustify | bullist numlist outdent indent | " +
+                    "removeformat | help",
+                  content_style:
+                    "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                }}
                 value={lecture.content}
-                onChange={(e) =>
-                  setLecture({ ...lecture, content: e.target.value })
-                }
-                placeholder="강의에 대한 상세 설명을 입력하세요"
-                className="w-full p-3 border rounded-md h-32"
-                required
+                onEditorChange={handleEditorChange}
               />
             </div>
 

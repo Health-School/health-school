@@ -548,8 +548,8 @@ export default function ChatRoomPage({
                     msg.type === "system"
                       ? "bg-gray-100 text-center"
                       : msg.writerName === currentUser?.nickname
-                      ? "ml-auto bg-blue-500 text-white max-w-[80%]"
-                      : "bg-gray-200 max-w-[80%]"
+                      ? "ml-auto bg-blue-500 text-white max-w-[30%]"
+                      : "bg-gray-200 max-w-[30%]"
                   }`}
                 >
                   {msg.type === "chat" && (
