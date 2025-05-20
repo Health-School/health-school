@@ -1,11 +1,11 @@
 package com.malnutrition.backend.domain.order.repository;
 
 import com.malnutrition.backend.domain.order.entity.Order;
-<<<<<<< HEAD
+
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
-=======
+
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
->>>>>>> cbb9fc83c6e37d57ae3b2d150f16a274399d3a8b
+
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
