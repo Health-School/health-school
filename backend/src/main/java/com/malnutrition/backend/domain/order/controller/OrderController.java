@@ -67,7 +67,6 @@ public class OrderController {
     public ResponseEntity<?> getOrderHistory(
             @RequestParam(defaultValue = "전체 기간") String period,
             @PageableDefault(size = 10, sort = "approvedAt", direction = Sort.Direction.DESC) Pageable pageable) {
-
         Page<OrderResponse> response = orderService.getOrdersByPeriod(period, pageable);
         return ResponseEntity.ok(response);
     }
@@ -121,7 +120,6 @@ public class OrderController {
                 "yearly", yearly,
                 "total", total
         );
-
         return ResponseEntity.ok(ApiResponse.success(result, "정산 요약 조회 성공"));
     }
 }

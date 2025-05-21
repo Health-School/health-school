@@ -107,7 +107,7 @@ export default function Header({ hideDropdownMenus = false }) {
                   </div>
                   {isDropdownOpen && (
                     <div
-                      className="fixed right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-[9999] border border-gray-200"
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200"
                       tabIndex={0}
                       onBlur={() => setIsDropdownOpen(false)}
                     >

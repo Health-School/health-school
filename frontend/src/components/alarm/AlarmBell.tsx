@@ -30,6 +30,26 @@ export default function AlarmBell() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
 
+  useEffect(() => {
+    const originalConsoleError = console.error;
+
+    console.error = (...args) => {
+      const message = args.join(" ");
+      if (
+        message.includes("No activity within") &&
+        message.includes("Reconnecting")
+      ) {
+        // 무시
+        return;
+      }
+      originalConsoleError(...args);
+    };
+
+    return () => {
+      console.error = originalConsoleError; // 정리
+    };
+  }, []);
+
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
   // SSE 연결 함수

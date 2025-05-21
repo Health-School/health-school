@@ -59,7 +59,6 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     @ToString.Exclude
-
     private List<TrainerApplication> trainerApplications = new ArrayList<>();
 
     // 사용자의 자격증 제출 내역
@@ -67,7 +66,6 @@ public class User extends BaseEntity {
     @Builder.Default
     @ToString.Exclude
     private List<UserCertification> userCertifications = new ArrayList<>();
-
 
     public User(long id, String email, String nickname) {
         this.setId(id);

@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +110,6 @@ public class LectureService {
                 .build();
 
         lectureRepository.save(lecture);
-
     }
     @Transactional
     public Page<LectureDto> getLectures(Pageable pageable, String category, LectureLevel lectureLevel) {

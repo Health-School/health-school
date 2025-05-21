@@ -33,7 +33,6 @@ public class ChatController {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messageTemplate;
-    private final ChatService chatService;
 
     @MessageMapping(value = "/chat/room/enter/{roomId}")
     public void enter(
