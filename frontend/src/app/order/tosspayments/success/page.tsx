@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function SuccessPage() {
-  const [isConfirmed, setIsConfirmed] = useState(true);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const searchParams = useSearchParams();
 
   const paymentKey = searchParams.get("paymentKey");

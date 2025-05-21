@@ -149,6 +149,8 @@ public class UserService {
             User user = optionalUser.get();
             if(user.getUserStatus() == UserStatus.BANNED) {
                 throw new AccessDeniedException("정지된 회원입니다."); // 403 에러 발생
+            } else if( user.getUserStatus() == UserStatus.DELETED  ){
+                throw new AccessDeniedException("삭제된 회원입니다."); // 403 에러 발생
             }
             if (passwordEncoder.matches(password, user.getPassword())) {
                 return rq.makeAuthCookie(user);

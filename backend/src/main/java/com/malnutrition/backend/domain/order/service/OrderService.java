@@ -1,10 +1,10 @@
 package com.malnutrition.backend.domain.order.service;
 
-import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
+import com.malnutrition.backend.domain.alarm.alarm.event.AlarmSendEvent;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
+import com.malnutrition.backend.domain.alarm.alarm.service.AlarmEventService;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
-import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.order.dto.*;
 import com.malnutrition.backend.domain.order.entity.Order;
@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final LectureService lectureService;
     private final LectureUserService lectureUserService;
+    private final AlarmEventService alarmEventService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -74,7 +74,7 @@ public class OrderService {
         return new OrderResponse(
                 order.getId(),
                 order.getAmount(),
-                order.getOrderStatus().toString(),
+                order.getOrderStatus().getDescription(),
                 order.getTossPaymentMethod().toString(),
                 order.getRequestedAt(),
                 order.getApprovedAt(),
@@ -84,13 +84,7 @@ public class OrderService {
         );
     }
 
-    public void orderSuccessEvent(){
-        AlarmType trainerReply = AlarmType.TRAINER_REPLY;
-        String titleMessage = trainerReply.formatMessage("준호", "공지");
-        String title = trainerReply.formatTitle();
-        AlarmRequestDto 시스템 = AlarmRequestDto.from(rq.getActor(),title, titleMessage,  null);
-        applicationEventPublisher.publishEvent(시스템);
-    }
+
 
     @Transactional
     public List<OrderResponse> getOrdersByPeriod(String period) {
@@ -156,7 +150,7 @@ public class OrderService {
         return orders.map(order -> OrderResponse.builder()
                 .id(order.getId())
                 .amount(order.getAmount())
-                .orderStatus(order.getOrderStatus().name())
+                .orderStatus(order.getOrderStatus().getDescription())
                 .tossPaymentMethod(order.getTossPaymentMethod().name())
                 .requestAt(order.getRequestedAt())
                 .approvedAt(order.getApprovedAt())
@@ -202,8 +196,11 @@ public class OrderService {
         order.setTossPaymentMethod(tossPaymentsResponse.getMethod());
         order.setTossPaymentStatus(tossPaymentsResponse.getStatus());
         order.setRequestedAt(tossPaymentsResponse.getRequestedAt().toLocalDateTime());
+        order.setApprovedAt(tossPaymentsResponse.getApprovedAt().toLocalDateTime());
 
+        alarmEventService.sendOrderCompleteAlarm();
     }
+
 
 
     @Transactional
@@ -228,6 +225,7 @@ public class OrderService {
     public Long getYearly(User trainer, int year) {
         return Optional.ofNullable(orderRepository.getYearlySettlementAmount(trainer, year)).orElse(0L);
     }
+
 
 
 }

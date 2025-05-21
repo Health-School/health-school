@@ -1,9 +1,8 @@
 package com.malnutrition.backend.domain.user.trainerApplication.service;
 
 
-import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
+import com.malnutrition.backend.domain.alarm.alarm.event.AlarmSendEvent;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
-import com.malnutrition.backend.domain.alarm.alarmsetting.entity.AlarmSetting;
 import com.malnutrition.backend.domain.certification.category.entitiy.CertificationCategory;
 import com.malnutrition.backend.domain.certification.category.service.CertificationCategoryService;
 import com.malnutrition.backend.domain.certification.certification.entity.Certification;
@@ -17,7 +16,6 @@ import com.malnutrition.backend.domain.user.trainerApplication.dto.TrainerApplic
 import com.malnutrition.backend.domain.user.trainerApplication.entity.TrainerApplication;
 import com.malnutrition.backend.domain.user.trainerApplication.repository.TrainerApplicationRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
-import com.malnutrition.backend.domain.user.user.service.UserService;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,12 +69,12 @@ public class TrainerApplicationService {
         // 이벤트 호출
         AlarmType systemNotice = AlarmType.SYSTEM_NOTICE;
         String message = systemNotice.formatMessage("트레이너 신청서 신청 완료");
-        AlarmRequestDto alarmRequestDto = AlarmRequestDto.builder()
+        AlarmSendEvent alarmSendEvent = AlarmSendEvent.builder()
                 .listener(user)
                 .title(systemNotice.formatTitle())
                 .message(message)
                 .url(null)
                 .build();
-        applicationEventPublisher.publishEvent(alarmRequestDto);
+        applicationEventPublisher.publishEvent(alarmSendEvent);
     }
 }

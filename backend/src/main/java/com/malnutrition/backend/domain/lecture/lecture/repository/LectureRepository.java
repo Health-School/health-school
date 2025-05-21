@@ -48,7 +48,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     SELECT l FROM Lecture l
     JOIN FETCH l.trainer
     JOIN FETCH l.lectureCategory
-    JOIN FETCH l.coverImage
+    LEFT JOIN FETCH l.coverImage
     WHERE l.id = :id
     """)
     Optional<Lecture> findByIdWithAllDetails(@Param("id") Long id);

@@ -1,6 +1,6 @@
 package com.malnutrition.backend.domain.alarm.alarm.service;
 
-import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
+import com.malnutrition.backend.domain.alarm.alarm.event.AlarmSendEvent;
 import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmResponseDto;
 import com.malnutrition.backend.domain.alarm.alarm.entity.Alarm;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmEventType;
@@ -119,11 +119,11 @@ public class AlarmService {
     }
 
     @Transactional
-    public void send(AlarmRequestDto alarmRequestDto) {
-        User listener = alarmRequestDto.getListener();
-        String message = alarmRequestDto.getMessage();
-        String title = alarmRequestDto.getTitle();
-        String url = alarmRequestDto.getUrl();
+    public void send(AlarmSendEvent alarmSendEvent) {
+        User listener = alarmSendEvent.getListener();
+        String message = alarmSendEvent.getMessage();
+        String title = alarmSendEvent.getTitle();
+        String url = alarmSendEvent.getUrl();
         log.info("message {}", message);
         log.info("url {}", url);
         Alarm alarmMessage = createAlarmMessage(listener,title, message, url);

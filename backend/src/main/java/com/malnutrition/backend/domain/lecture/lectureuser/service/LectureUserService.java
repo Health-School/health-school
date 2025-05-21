@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.service;
 
+import com.malnutrition.backend.domain.image.config.ImageProperties;
+import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumRepository;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.ProgressStatus;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
@@ -36,46 +38,10 @@ public class LectureUserService {
     private final Rq rq;
     private final CurriculumRepository curriculumRepository; //
     private final CurriculumProgressRepository curriculumProgressRepository;
+    private final ImageProperties imageProperties;
+    private final ImageService imageService;
 
-
-
-    public List<EnrollDto> getEnrolledLecturesByUser(User user) {
-
-        List<LectureUser> lectureUsers = lectureUserRepository.findByUser(user);
-        List<Order> orderList = orderRepository.findByUser(user);
-
-
-        return lectureUsers.stream()
-                .map(lu -> {
-                    // 해당 Lecture에 대한 Order 찾아 approvedAt 꺼내기
-                    Order matchedOrder = orderList.stream()
-                            .filter(o -> o.getLecture().getId().equals(lu.getLecture().getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    int total = curriculumRepository.countByLecture(lu.getLecture()); // 커리큘럼(영상) 갯수 세기
-                    int completedVideo = curriculumProgressRepository.findByUserAndLecture(user, lu.getLecture()).stream()
-                            .filter(curriculumProgress -> curriculumProgress.getStatus() == ProgressStatus.COMPLETED)
-                            .map(curriculumProgress -> curriculumProgress.getCurriculum().getId())
-                            .collect(Collectors.toSet()).size(); // 중복 제거
-
-                    int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
-
-                    return new EnrollDto(
-                            lu.getLecture().getId(),
-                            lu.getLecture().getTrainer().getNickname(),
-                            lu.getLecture().getTitle(),
-                            lu.getLecture().getLectureLevel().getDescription(),
-                            user.getNickname(),
-                            matchedOrder != null ? matchedOrder.getApprovedAt() : null,
-                            progressRate,
-                            lu.getCreatedDate()
-
-                    );
-                })
-                .collect(Collectors.toList());
-    }
-
+    
     public Page<EnrollDto> getEnrolledLecturesByUser(User user, Pageable pageable) {
         // 1) 페이징된 LectureUser 리스트 조회
         Page<LectureUser> lectureUsers = lectureUserRepository.findByUser(user, pageable);
@@ -97,16 +63,16 @@ public class LectureUserService {
                     .collect(Collectors.toSet()).size(); // 중복 제거
             int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
 
-            return new EnrollDto(
-                    lu.getLecture().getId(),
-                    lu.getLecture().getTrainer().getNickname(),
-                    lu.getLecture().getTitle(),
-                    lu.getLecture().getLectureLevel().getDescription(),
-                    user.getNickname(),
-                    matchedOrder != null ? matchedOrder.getApprovedAt() : null,
-                    progressRate,
-                    lu.getCreatedDate()
-            );
+            return  EnrollDto.builder()
+                    .lectureId (lu.getLecture().getId())
+                    .lectureName(lu.getLecture().getTitle())
+                    .lectureLevel(lu.getLecture().getLectureLevel().getDescription())
+                    .userName(lu.getLecture().getTrainer().getNickname())
+                    .startDate(matchedOrder != null ? matchedOrder.getApprovedAt() : null)
+                    .progressRate(progressRate)
+                    .createdDate(lu.getCreatedDate())
+                    .coverImageUrl(imageService.getImageUrl(lu.getLecture().getCoverImage()))
+                    .build();
         });
     }
 
