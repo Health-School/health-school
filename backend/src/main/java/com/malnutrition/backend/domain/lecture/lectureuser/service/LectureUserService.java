@@ -41,7 +41,7 @@ public class LectureUserService {
     private final ImageProperties imageProperties;
     private final ImageService imageService;
 
-    
+
     public Page<EnrollDto> getEnrolledLecturesByUser(User user, Pageable pageable) {
         // 1) 페이징된 LectureUser 리스트 조회
         Page<LectureUser> lectureUsers = lectureUserRepository.findByUser(user, pageable);
