@@ -21,5 +21,5 @@ public class LectureCategory extends BaseEntity {
     private String categoryName;
 
     @Column(nullable = true)
-    private String description; //설명
+    private String description; //설명z
 }
