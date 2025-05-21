@@ -9,7 +9,8 @@ public class PermitUrl {
             "/api/v1/exerciseSheets/**","/api/v1/admin/machine-types/**",
             "/api/v1/admin/machines/**","/api/v1/chatrooms/**",
             "/api/chat/**", "/ws-stomp/**", "/ws/**", "/chat/**",
-            "/api/v1/users/**","/api/v1/chats/**","/api/v1/machine-exercises/**"
+            "/api/v1/users/**","/api/v1/chats/**","/api/v1/machine-exercises/**",
+            "/api/v1/reports/**"
 
     };
     public static final String[] GET_URLS = {
@@ -20,6 +21,7 @@ public class PermitUrl {
             "/api/v1/lectureUsers/**", "/api/v1/curriculums/**",
             "/api/v1/curriculum-progress/**",
             "/api/v1/lecture_categories",
+
             "/api/v1/reports","/api/v1/reports/*"
 
     };
