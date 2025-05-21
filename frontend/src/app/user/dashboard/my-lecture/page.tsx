@@ -22,6 +22,7 @@ interface Lecture {
   userName: string;
   startDate: string;
   createdDate: string;
+  coverImageUrl: string | null;
 }
 
 export default function MyLecturePage() {
@@ -163,7 +164,11 @@ export default function MyLecturePage() {
           >
             <div className="relative h-48">
               <Image
-                src={`/images/lectures/lecture-${lecture.lectureId}.jpg`}
+                src={
+                  lecture.coverImageUrl
+                    ? lecture.coverImageUrl
+                    : `/images/lectures/lecture-${lecture.lectureId}.jpg`
+                }
                 alt={lecture.lectureName}
                 fill
                 className="object-cover"

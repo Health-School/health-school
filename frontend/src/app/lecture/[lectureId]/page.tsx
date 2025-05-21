@@ -127,19 +127,19 @@ export default function LectureDetailPage() {
           {/* 강의 소개 */}
           <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">강의 소개</h2>
-            <p className="text-gray-700 mb-4">{data.content}</p>
+            <div dangerouslySetInnerHTML={{ __html: data.content }}></div>
             {/* 예시 목차 */}
-            <ul className="list-disc pl-5 text-gray-700 space-y-1">
+            {/* <ul className="list-disc pl-5 text-gray-700 space-y-1">
               <li>근력운동의 기본 원리와 중요성</li>
               <li>올바른 자세와 운동법</li>
               <li>부상 방지를 위한 핵심 수칙</li>
               <li>개인별 맞춤 프로그램 설계 방법</li>
               <li>영양 및 회복의 중요성</li>
-            </ul>
+            </ul> */}
           </section>
 
           {/* 이런 분께 추천합니다 */}
-          <section className="mb-8">
+          {/* <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">이런 분께 추천합니다</h2>
             <ul className="list-disc pl-5 text-gray-700 space-y-1">
               <li>헬스초보, 체계적으로 운동하고 싶은 분</li>
@@ -148,10 +148,10 @@ export default function LectureDetailPage() {
               <li>효율적인 운동 방법을 배우고 싶은 분</li>
               <li>부상 없이 안전하게 운동하고 싶은 분</li>
             </ul>
-          </section>
+          </section> */}
 
           {/* 강의 수강 시 제공되는 자료 */}
-          <section className="mb-8">
+          {/* <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">
               강의 수강 시 제공되는 자료
             </h2>
@@ -161,7 +161,7 @@ export default function LectureDetailPage() {
               <li>영양 가이드북</li>
               <li>보너스 스트레칭 영상</li>
             </ul>
-          </section>
+          </section> */}
         </div>
 
         {/* 오른쪽: 결제/강의 정보 */}

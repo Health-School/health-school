@@ -35,12 +35,10 @@ public class LectureUserController {
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
         User user = rq.getActor();
         if (user == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
-
         Pageable pageable = PageRequest.of(page, size, getSortBy(sort));
         Page<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user, pageable);
         return ResponseEntity.ok(lectures);

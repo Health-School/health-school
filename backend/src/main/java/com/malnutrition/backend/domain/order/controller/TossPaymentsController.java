@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.order.service.TossPaymentService;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +38,11 @@ public class TossPaymentsController {
                 TossPaymentsResponse tossPaymentsResponse = response.getBody();
                 log.info("tossPayments body: {}", tossPaymentsResponse);
                 orderService.confirmOrder(tossPaymentsResponse);
+
                 return ResponseEntity.ok().body(ApiResponse.success(null, "결제 성공"));
             } catch (Exception e){
                 //결제 취소... db 에러
+                log.error("결제 취소 : ", e.getMessage());
             }
         }
         return ResponseEntity.internalServerError().body("결제 실패");

@@ -39,17 +39,17 @@ export default function Header({ hideDropdownMenus = false }) {
                 className="cursor-pointer"
               />
             </Link>
+          </div>
+          {/* 우측 메뉴 */}
+
+          <div className="flex items-center">
             <Link
               href="/lecture"
               className="ml-6 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
             >
               강의
             </Link>
-          </div>
-          {/* 우측 메뉴 */}
-
-          <div className="flex items-center">
-            <AlarmBell />
+            {isLogin ? <AlarmBell /> : null}
             <div className="flex items-center space-x-4">
               {!hideDropdownMenus && (
                 <button

@@ -80,10 +80,7 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(order, "주문 생성 성공"));
     }
 
-    @PostMapping("/alarm-event")
-    public void getOrderEventMessage() {
-        orderService.orderSuccessEvent();
-    }
+
 
     @PostMapping("/cancel-order")
     public ResponseEntity<ApiResponse<String>> cancelOrder (@RequestBody CancelOrderRequestDto cancelOrderRequestDto) throws
@@ -108,9 +105,7 @@ public class OrderController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<?> getSettlementSummary(
-
-    ) {
+    public ResponseEntity<?> getSettlementSummary() {
         User trainer = rq.getActor();
 
         LocalDate now = LocalDate.now();
