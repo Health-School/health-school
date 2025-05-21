@@ -36,7 +36,7 @@ public class ExerciseSheetController {
     public ResponseEntity<?> createFullExerciseSheet(@RequestBody ExerciseSheetCreateDto dto) {
         try {
             User user = rq.getActor();
-            ExerciseSheet created = exerciseSheetService.createFullExerciseSheet(dto, user.getId());
+            ExerciseSheetResponseDto created = exerciseSheetService.createFullExerciseSheet(dto, user.getId());
             return ResponseEntity.ok(ApiResponse.success(created, "운동 기록지 생성 완료!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
