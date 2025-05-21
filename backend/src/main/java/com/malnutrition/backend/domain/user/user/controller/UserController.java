@@ -113,8 +113,8 @@ public class UserController {
     }
 
     @GetMapping("/trainers")
-    public ResponseEntity<List<User>> getTrainerUsers() {
-        List<User> trainers = userService.getTrainerUsers();
+    public ResponseEntity<List<TrainerUserDto>> getTrainerUsers() {
+        List<TrainerUserDto> trainers = userService.getTrainerUsers();
         return ResponseEntity.ok(trainers);
     }
 

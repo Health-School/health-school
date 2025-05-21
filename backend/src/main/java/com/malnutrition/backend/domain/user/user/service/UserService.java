@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.user.user.service;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
+import com.malnutrition.backend.domain.user.user.dto.TrainerUserDto;
 import com.malnutrition.backend.domain.user.user.dto.UserJoinRequestDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -189,8 +191,10 @@ public class UserService {
         return userRepository.existsByProvider(provider);
     }
 
-    public List<User> getTrainerUsers() {
-        return userRepository.findByRole(Role.TRAINER);
+    public List<TrainerUserDto> getTrainerUsers() {
+        return userRepository.findByRole(Role.TRAINER).stream()
+                .map(user -> new TrainerUserDto(user.getNickname()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
