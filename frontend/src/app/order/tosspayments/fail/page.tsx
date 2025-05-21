@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 export default function FailPage() {
@@ -9,41 +9,44 @@ export default function FailPage() {
   const errorMessage = searchParams.get("message");
 
   return (
-    <div className="wrapper w-100">
-      <div className="flex-column align-center w-100 max-w-540">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
+      <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-xl w-full border border-gray-200 flex flex-col items-center">
         <img
           src="https://static.toss.im/lotties/error-spot-apng.png"
-          width="120"
-          height="120"
+          width="140"
+          height="140"
+          alt="결제 실패 이미지"
+          className="mb-6"
         />
-        <h2 className="title">결제를 실패했어요</h2>
-        <div className="response-section w-100">
-          <div className="flex justify-between">
-            <span className="response-label">code</span>
-            <span id="error-code" className="response-text">
+        <h2 className="text-3xl font-bold text-gray-800 mt-4 mb-2">
+          결제를 실패했어요
+        </h2>
+        <div className="w-full mt-6">
+          <div className="flex justify-between my-4">
+            <span className="font-semibold text-gray-600">code</span>
+            <span id="error-code" className="text-lg text-gray-800">
               {errorCode}
             </span>
           </div>
-          <div className="flex justify-between">
-            <span className="response-label">message</span>
-            <span id="error-message" className="response-text">
+          <div className="flex justify-between my-4">
+            <span className="font-semibold text-gray-600">message</span>
+            <span id="error-message" className="text-lg text-gray-800">
               {errorMessage}
             </span>
           </div>
         </div>
-
-        <div className="w-100 button-group">
-          <a
-            className="btn"
-            href="https://developers.tosspayments.com/sandbox"
+        <div className="w-full mt-10 flex flex-col gap-4">
+          <Link
+            className="btn w-full py-4 px-8 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-center text-lg font-semibold"
+            href="/"
             target="_blank"
             rel="noreferrer noopener"
           >
-            다시 테스트하기
-          </a>
-          <div className="flex" style={{ gap: "16px" }}>
+            홈페이지 가기
+          </Link>
+          {/* <div className="flex gap-4">
             <a
-              className="btn w-100"
+              className="btn w-full py-4 px-8 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-center text-lg font-semibold"
               href="https://docs.tosspayments.com/reference/error-codes"
               target="_blank"
               rel="noreferrer noopener"
@@ -51,14 +54,14 @@ export default function FailPage() {
               에러코드 문서보기
             </a>
             <a
-              className="btn w-100"
+              className="btn w-full py-4 px-8 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-center text-lg font-semibold"
               href="https://techchat.tosspayments.com"
               target="_blank"
               rel="noreferrer noopener"
             >
               실시간 문의하기
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
