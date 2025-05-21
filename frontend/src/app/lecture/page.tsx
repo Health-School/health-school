@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 // 강의 및 카테고리 타입 정의
 type Lecture = {
@@ -209,9 +210,11 @@ export default function LecturePage() {
             >
               <div className="relative w-full h-36 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                 {lecture.coverImageUrl ? (
-                  <img
+                  <Image
                     src={lecture.coverImageUrl}
                     alt={lecture.title}
+                    layout="fill"
+                    objectFit="cover"
                     className="object-cover w-full h-full"
                   />
                 ) : (
