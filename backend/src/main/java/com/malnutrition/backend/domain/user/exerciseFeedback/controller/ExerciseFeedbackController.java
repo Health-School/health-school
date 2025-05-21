@@ -24,7 +24,8 @@ public class ExerciseFeedbackController {
     public ResponseEntity<?> createFeedback(@RequestBody ExerciseFeedbackCreateDto dto) {
         try {
             ExerciseFeedback saved = feedbackService.createFeedback(dto);
-            return ResponseEntity.ok(ApiResponse.success(saved,"피드백 작성이 완료되었습니다."));
+            FeedbackDto responseDto = FeedbackDto.fromEntity(saved);
+            return ResponseEntity.ok(ApiResponse.success(responseDto, "피드백 작성이 완료되었습니다."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
         }

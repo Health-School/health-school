@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.controller;
 
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
+import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
@@ -34,12 +35,10 @@ public class LectureUserController {
             @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
         User user = rq.getActor();
         if (user == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
-
         Pageable pageable = PageRequest.of(page, size, getSortBy(sort));
         Page<EnrollDto> lectures = lectureUserService.getEnrolledLecturesByUser(user, pageable);
         return ResponseEntity.ok(lectures);
@@ -54,5 +53,18 @@ public class LectureUserController {
             case "latest" -> Sort.by(Sort.Direction.DESC, "createdDate"); // 최신순(생성일 기준) 기본값
             default -> Sort.by(Sort.Direction.DESC, "createdDate");
         };
+    }
+
+    @GetMapping("/students")
+    public ResponseEntity<?> getStudentsByTrainer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long trainerId = rq.getActor().getId();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<UserResponseDto> students = lectureUserService.getStudentsByTrainerId(trainerId, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(students, "수강생 목록 조회 성공"));
     }
 }

@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.user.exercisesheet.controller;
 
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.service.MachineExerciseSheetService;
 import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetCreateDto;
+import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetRespDto;
 import com.malnutrition.backend.domain.user.exercisesheet.dto.ExerciseSheetResponseDto;
 import com.malnutrition.backend.domain.user.exercisesheet.dto.MachineExerciseSheetResponseDto;
 import com.malnutrition.backend.domain.user.exercisesheet.entity.ExerciseSheet;
@@ -10,6 +11,10 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +59,8 @@ public class ExerciseSheetController {
             List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
                     .map(mes -> new MachineExerciseSheetResponseDto(
                             mes.getId(),
+                            mes.getExerciseSheet().getUser().getId(),
+                            mes.getExerciseSheet().getUser().getNickname(),
                             mes.getMachine().getName(),
                             mes.getReps(),
                             mes.getSets(),
@@ -75,6 +82,44 @@ public class ExerciseSheetController {
             return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 조회 중 오류가 발생했습니다."));
         }
     }
+    @GetMapping("/trainer/{id}")
+    public ResponseEntity<?> getExerciseSheetByIdFromTrainer(@PathVariable Long id) {
+        try {
+            // userId 없이 단순히 id로만 조회
+            ExerciseSheet sheet = exerciseSheetService.getExerciseSheetById(id);
+
+            if (sheet == null) {
+                return ResponseEntity.status(404).body(ApiResponse.fail("운동 기록을 찾을 수 없습니다."));
+            }
+
+            // ExerciseSheet에서 직접 DTO 변환
+            List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
+                    .map(mes -> new MachineExerciseSheetResponseDto(
+                            mes.getId(),
+                            mes.getExerciseSheet().getUser().getId(),
+                            mes.getExerciseSheet().getUser().getNickname(),
+                            mes.getMachine().getName(),
+                            mes.getReps(),
+                            mes.getSets(),
+                            mes.getWeight()
+                    ))
+                    .collect(Collectors.toList());
+
+            ExerciseSheetResponseDto responseDto = new ExerciseSheetResponseDto(
+                    sheet.getId(),
+                    sheet.getExerciseDate(),
+                    sheet.getExerciseStartTime(),
+                    sheet.getExerciseEndTime(),
+                    machineDtos
+            );
+
+            return ResponseEntity.ok(ApiResponse.success(responseDto, "운동 기록 조회 결과입니다."));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 조회 중 오류가 발생했습니다."));
+        }
+    }
+
 
     @GetMapping("/date-desc")
     public ResponseEntity<?> getExerciseSheetsByDateDesc(@RequestParam("date") String date) {
@@ -103,6 +148,8 @@ public class ExerciseSheetController {
                         List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
                                 .map(mes -> new MachineExerciseSheetResponseDto(
                                         mes.getId(),
+                                        mes.getExerciseSheet().getUser().getId(),
+                                        mes.getExerciseSheet().getUser().getNickname(),
                                         mes.getMachine().getName(),
                                         mes.getReps(),
                                         mes.getSets(),
@@ -159,6 +206,18 @@ public class ExerciseSheetController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(ApiResponse.fail("운동 기록 삭제 중 오류가 발생했습니다."));
         }
+    }
+
+    @GetMapping("/students-exercise-sheets")
+    public ResponseEntity<?> getStudentsExerciseSheets(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long trainerId = rq.getActor().getId();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("exerciseDate").descending());
+        Page<ExerciseSheetRespDto> result = exerciseSheetService.getAllStudentsExerciseSheets(trainerId, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(result, "수강생 운동 기록 조회 성공"));
     }
 
 

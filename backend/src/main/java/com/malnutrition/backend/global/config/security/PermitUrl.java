@@ -21,6 +21,9 @@ public class PermitUrl {
             "/api/v1/lectureUsers/**", "/api/v1/curriculums/**",
             "/api/v1/curriculum-progress/**",
             "/api/v1/lecture_categories",
+
+            "/api/v1/reports","/api/v1/reports/*"
+
     };
 
     public static final String[] POST_URLS = {

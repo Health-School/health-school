@@ -11,12 +11,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface LectureRepository extends JpaRepository<Lecture, Long> {
     boolean existsByTitle(String title);
     Optional<Lecture> findByTitle(String title);
+    Page<Lecture> findAll(Pageable pageable);
+
+    List<Lecture> findByTrainerId(Long trainerId);
 
     @Query(value = """
     SELECT l FROM Lecture l
@@ -44,7 +48,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     SELECT l FROM Lecture l
     JOIN FETCH l.trainer
     JOIN FETCH l.lectureCategory
-    JOIN FETCH l.coverImage
+    LEFT JOIN FETCH l.coverImage
     WHERE l.id = :id
     """)
     Optional<Lecture> findByIdWithAllDetails(@Param("id") Long id);

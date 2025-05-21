@@ -1,6 +1,5 @@
 package com.malnutrition.backend.domain.alarm.alarm.event;
 
-import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmRequestDto;
 import com.malnutrition.backend.domain.alarm.alarm.service.AlarmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,7 @@ public class AlarmEventHandler {
 
     @EventListener
     @Async
-    public void handleAlarmMessageSend(AlarmRequestDto alarmMessageRequestDto) {
+    public void handleAlarmMessageSend(AlarmSendEvent alarmMessageRequestDto) {
         log.info("event listener");
         log.info("alarmMessageRequestDto {}",  alarmMessageRequestDto);
         alarmService.send(alarmMessageRequestDto);

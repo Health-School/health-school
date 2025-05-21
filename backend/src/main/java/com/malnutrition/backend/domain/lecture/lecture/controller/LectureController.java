@@ -1,5 +1,4 @@
 package com.malnutrition.backend.domain.lecture.lecture.controller;
-
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
@@ -17,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +45,6 @@ public class LectureController {
         LectureDetailDto lecture = lectureService.getLecture(lectureId);
         return ResponseEntity.ok(ApiResponse.success(lecture, "강의 추가 완료"));
     }
-
 
     @Operation(summary = "강의 추가", description = "새로운 강의를 추가합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식

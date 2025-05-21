@@ -3,6 +3,13 @@
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// TossPaymentsModal 컴포넌트 동적 import (SSR 비활성화)
+const TossPaymentsModal = dynamic(
+  () => import("../../../components/payments/TossPaymentsModal"),
+  { ssr: false }
+);
 
 interface LectureResponseDto {
   id: number;
@@ -45,6 +52,7 @@ export default function LectureDetailPage() {
   const [data, setData] = useState<LectureResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showTossModal, setShowTossModal] = useState(false);
 
   useEffect(() => {
     if (!lectureId) return;
@@ -119,19 +127,19 @@ export default function LectureDetailPage() {
           {/* 강의 소개 */}
           <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">강의 소개</h2>
-            <p className="text-gray-700 mb-4">{data.content}</p>
+            <div dangerouslySetInnerHTML={{ __html: data.content }}></div>
             {/* 예시 목차 */}
-            <ul className="list-disc pl-5 text-gray-700 space-y-1">
+            {/* <ul className="list-disc pl-5 text-gray-700 space-y-1">
               <li>근력운동의 기본 원리와 중요성</li>
               <li>올바른 자세와 운동법</li>
               <li>부상 방지를 위한 핵심 수칙</li>
               <li>개인별 맞춤 프로그램 설계 방법</li>
               <li>영양 및 회복의 중요성</li>
-            </ul>
+            </ul> */}
           </section>
 
           {/* 이런 분께 추천합니다 */}
-          <section className="mb-8">
+          {/* <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">이런 분께 추천합니다</h2>
             <ul className="list-disc pl-5 text-gray-700 space-y-1">
               <li>헬스초보, 체계적으로 운동하고 싶은 분</li>
@@ -140,10 +148,10 @@ export default function LectureDetailPage() {
               <li>효율적인 운동 방법을 배우고 싶은 분</li>
               <li>부상 없이 안전하게 운동하고 싶은 분</li>
             </ul>
-          </section>
+          </section> */}
 
           {/* 강의 수강 시 제공되는 자료 */}
-          <section className="mb-8">
+          {/* <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">
               강의 수강 시 제공되는 자료
             </h2>
@@ -153,7 +161,7 @@ export default function LectureDetailPage() {
               <li>영양 가이드북</li>
               <li>보너스 스트레칭 영상</li>
             </ul>
-          </section>
+          </section> */}
         </div>
 
         {/* 오른쪽: 결제/강의 정보 */}
@@ -168,7 +176,10 @@ export default function LectureDetailPage() {
             <div className="text-xs text-yellow-500 mb-2">
               평점: {data.averageScore?.toFixed(1) ?? "-"}
             </div>
-            <button className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer">
+            <button
+              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer"
+              onClick={() => setShowTossModal(true)}
+            >
               수강하기
             </button>
             <button className="w-full border border-green-600 text-green-600 py-2 rounded mb-2">
@@ -190,6 +201,26 @@ export default function LectureDetailPage() {
           </div>
         </aside>
       </div>
+
+      {/* TossPayments 모달 */}
+      {showTossModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
+              onClick={() => setShowTossModal(false)}
+            >
+              ×
+            </button>
+            <TossPaymentsModal
+              lectureId={data.id}
+              amount={data.price}
+              lectureTitle={data.title}
+              onClose={() => setShowTossModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

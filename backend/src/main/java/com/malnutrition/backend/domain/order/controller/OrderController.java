@@ -9,6 +9,7 @@ import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,10 +80,7 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(order, "주문 생성 성공"));
     }
 
-    @PostMapping("/alarm-event")
-    public void getOrderEventMessage() {
-        orderService.orderSuccessEvent();
-    }
+
 
     @PostMapping("/cancel-order")
     public ResponseEntity<ApiResponse<String>> cancelOrder (@RequestBody CancelOrderRequestDto cancelOrderRequestDto) throws
@@ -89,5 +88,40 @@ public class OrderController {
         String cancelContent = tossPaymentService.requestPaymentCancel(cancelOrderRequestDto.getOrderId(), cancelOrderRequestDto.getCancelReason());
 
         return ResponseEntity.ok(ApiResponse.success(cancelContent, "환불 성공"));
+    }
+
+    @GetMapping("/settlements")
+    public ResponseEntity<?> getTrainerSettlementOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        User trainer = rq.getActor();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("approvedAt").descending());
+
+        Page<SettlementOrderDto> result = orderService.getTrainerSettlementOrders(trainer, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(result, "정산 내역 조회 성공!"));
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<?> getSettlementSummary() {
+        User trainer = rq.getActor();
+
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+
+        Long total = orderService.getTotal(trainer);
+        Long monthly = orderService.getMonthly(trainer, currentYear, currentMonth);
+        Long yearly = orderService.getYearly(trainer, currentYear);
+
+        Map<String, Long> result = Map.of(
+                "monthly", monthly,
+                "yearly", yearly,
+                "total", total
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(result, "정산 요약 조회 성공"));
     }
 }

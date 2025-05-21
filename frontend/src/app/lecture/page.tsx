@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 // 강의 및 카테고리 타입 정의
 type Lecture = {
@@ -124,8 +125,8 @@ export default function LecturePage() {
   return (
     <main className="bg-white min-h-screen pb-20">
       {/* 카테고리/필터 바 */}
-      <section className="w-full bg-white sticky top-0 z-10 border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
+      <section className="w-full bg-white sticky top-0 z-10 mt-10 border-b">
+        <div className=" mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -197,7 +198,7 @@ export default function LecturePage() {
       </section>
 
       {/* 강의 카드 리스트 */}
-      <section className="max-w-7xl mx-auto px-4 py-6">
+      <section className=" mx-auto px-4 py-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {lectures.map((lecture) => (
             <div
@@ -209,9 +210,11 @@ export default function LecturePage() {
             >
               <div className="relative w-full h-36 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                 {lecture.coverImageUrl ? (
-                  <img
+                  <Image
                     src={lecture.coverImageUrl}
                     alt={lecture.title}
+                    layout="fill"
+                    objectFit="cover"
                     className="object-cover w-full h-full"
                   />
                 ) : (
