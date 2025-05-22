@@ -42,8 +42,8 @@ public class ReportController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<?> AllReportsLecture(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "10", name = "size") int size
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         return ResponseEntity.ok(ApiResponse.success(reportService.AllReports(),"조회성공"));
@@ -54,8 +54,8 @@ public class ReportController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{lectureId}")
     public ResponseEntity<?> ReportsByLecture(@PathVariable(name = "lectureId") Long lectureId,
-                                              @RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "10") int size) {
+                                              @RequestParam(defaultValue = "0", name = "page") int page,
+                                              @RequestParam(defaultValue = "10", name = "size") int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         return ResponseEntity.ok(ApiResponse.success(reportService.lectureReports(lectureId),"조회성공"));
     }
