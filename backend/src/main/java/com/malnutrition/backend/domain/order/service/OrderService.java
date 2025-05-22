@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,9 +165,21 @@ public class OrderService {
     @Transactional
     public CreateOrderResponseDto createOrder(CreateAmountRequestDto saveAmountRequest){
         User actor = rq.getActor();
+
         String orderId = UUID.randomUUID().toString();
 
         Lecture lecture = lectureService.findLectureById(saveAmountRequest.getLectureId());
+        boolean isAttending = lectureUserService.existsAttendingLecture(actor.getId(), lecture.getId());
+        if(isAttending){
+            throw new AccessDeniedException("이미 수강중인 강의입니다.");
+        } else if( actor.getId().equals(lecture.getId())){
+            throw new AccessDeniedException("자신의 강의는 수강할 수 없습니다.");
+
+        }
+
+        //강사는 결제 못하게 하기
+
+
         lectureUserService.registerLectureUser(lecture, actor);
         Order order = Order.builder()
                 .id(orderId)

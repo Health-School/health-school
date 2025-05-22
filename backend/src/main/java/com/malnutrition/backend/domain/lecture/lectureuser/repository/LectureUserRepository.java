@@ -32,4 +32,7 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     Page<User> findDistinctUsersByLectureTrainerId(@Param("trainerId") Long trainerId, Pageable pageable);
 
     List<LectureUser> findByLectureIdIn(List<Long> lectureIds);
+
+    boolean existsByUserIdAndLecture_Id(Long userId, Long lectureId);
+
 }

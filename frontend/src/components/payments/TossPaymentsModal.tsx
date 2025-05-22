@@ -75,6 +75,8 @@ export default function TossPaymentsModal({
                   }
                 );
                 if (!response.ok) {
+                  alert("이미 수강한 강의입니다.");
+                  onClose();
                   throw new Error(
                     "서버에 결제 정보를 저장하는 데 실패했습니다."
                   );

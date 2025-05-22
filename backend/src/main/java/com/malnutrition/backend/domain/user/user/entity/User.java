@@ -56,13 +56,13 @@ public class User extends BaseEntity {
     private UserStatus userStatus;
 
     // 사용자의 트레이너 신청 목록 (이력)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
     private List<TrainerApplication> trainerApplications = new ArrayList<>();
 
     // 사용자의 자격증 제출 내역
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
     private List<UserCertification> userCertifications = new ArrayList<>();
