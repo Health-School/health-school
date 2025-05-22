@@ -3,14 +3,34 @@ package com.malnutrition.backend.domain.chatroom.chatmessage.repository;
 import com.malnutrition.backend.domain.chatroom.chatmessage.entity.ChatMessage;
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findByChatRoom(ChatRoom chatRoom);
-    List<ChatMessage> findByChatRoomIdOrderByCreatedDateAsc(Long chatRoomId);
 
-    Optional<ChatMessage> findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(Long chatRoomId, Long senderId);
-    void deleteByChatRoom(ChatRoom chatRoom);
+    @Query("SELECT cm FROM ChatMessage cm " +
+            "JOIN FETCH cm.chatRoom cr " +
+            "WHERE cr = :chatRoom")
+    List<ChatMessage> findByChatRoom(@Param("chatRoom") ChatRoom chatRoom);
+
+    @Query("SELECT cm FROM ChatMessage cm " +
+            "JOIN FETCH cm.chatRoom cr " +
+            "WHERE cr.id = :chatRoomId " +
+            "ORDER BY cm.createdDate ASC")
+    List<ChatMessage> findByChatRoomIdOrderByCreatedDateAsc(@Param("chatRoomId") Long chatRoomId);
+
+    @Query("SELECT cm FROM ChatMessage cm " +
+            "JOIN FETCH cm.chatRoom cr " +
+            "WHERE cr.id = :chatRoomId AND cm.sender.id = :senderId " +
+            "ORDER BY cm.createdDate DESC")
+    Optional<ChatMessage> findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(@Param("chatRoomId") Long chatRoomId,
+                                                                               @Param("senderId") Long senderId);
+
+    @Modifying
+    @Query("DELETE FROM ChatMessage cm WHERE cm.chatRoom = :chatRoom")
+    void deleteByChatRoom(@Param("chatRoom") ChatRoom chatRoom);
 }
