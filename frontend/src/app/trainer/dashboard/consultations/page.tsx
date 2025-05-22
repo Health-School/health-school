@@ -6,6 +6,7 @@ import { startOfWeek, addDays, format } from "date-fns";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "react-calendar/dist/Calendar.css";
+import ChatRoom from "@/components/ChatRoom";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -86,6 +87,7 @@ export default function ConsultationsPage() {
     useState<ScheduleDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [allSchedules, setAllSchedules] = useState<Schedule[]>([]);
+  const [chatRoomId, setChatRoomId] = useState<number | null>(null);
 
   // 시간 범위 (9시 ~ 17시)
   const timeSlots = Array.from({ length: 9 }, (_, i) => i + 9);
@@ -277,8 +279,8 @@ export default function ConsultationsPage() {
       console.log("Existing room ID check result:", existingRoomId);
 
       if (existingRoomId) {
-        console.log(`Redirecting to existing chat room: ${existingRoomId}`);
-        router.push(`/chat/room/${existingRoomId}`);
+        console.log(`Opening existing chat room: ${existingRoomId}`);
+        setChatRoomId(existingRoomId);
         return;
       }
 
@@ -304,7 +306,6 @@ export default function ConsultationsPage() {
         }
       );
 
-      // Add error handling for non-OK responses
       if (!response.ok) {
         const errorResult = await response.json();
         throw new Error(errorResult.message || "채팅방 생성에 실패했습니다.");
@@ -313,7 +314,7 @@ export default function ConsultationsPage() {
       const result: ApiResponse<ChatRoomResponse> = await response.json();
 
       if (result.success && result.data.id) {
-        router.push(`/chat/room/${result.data.id}`);
+        setChatRoomId(result.data.id);
       } else {
         throw new Error("채팅방 정보를 찾을 수 없습니다.");
       }
@@ -763,6 +764,11 @@ export default function ConsultationsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Chat Room Modal */}
+      {chatRoomId && (
+        <ChatRoom roomId={chatRoomId} onClose={() => setChatRoomId(null)} />
       )}
     </div>
   );

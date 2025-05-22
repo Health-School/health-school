@@ -98,10 +98,21 @@ export default function ChatRoom({ roomId, onClose }: ChatRoomProps) {
 
   // Add WebSocket connection function
   const connectWebSocket = (roomData: ChatRoom, user: User) => {
+    // 기존 연결이 있다면 먼저 해제
+    if (stompClient.current) {
+      stompClient.current.disconnect();
+    }
+
     const socket = new SockJS(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws-stomp`
     );
     const client = Stomp.over(socket);
+
+    // Disable debug logs with proper type
+    client.debug = () => {}; // or just: client.debug = null;
+
+    let chatSubscription: any = null;
+    let systemSubscription: any = null;
 
     client.connect(
       {},
@@ -109,32 +120,45 @@ export default function ChatRoom({ roomId, onClose }: ChatRoomProps) {
         console.log("STOMP 연결 성공");
         stompClient.current = client;
 
-        // Subscribe to chat messages
-        client.subscribe(`/subscribe/chat/room/${roomId}`, (message) => {
-          const chatMessage = JSON.parse(message.body);
-          setTimelineMessages((prev) => [
-            ...prev,
-            {
-              type: "chat",
-              message: chatMessage.message,
-              writerName: chatMessage.writerName,
-              timestamp: new Date(),
-            },
-          ]);
-        });
+        // 기존 구독 해제
+        if (chatSubscription) {
+          chatSubscription.unsubscribe();
+        }
+        if (systemSubscription) {
+          systemSubscription.unsubscribe();
+        }
 
-        // Subscribe to system messages
-        client.subscribe(`/subscribe/enter/room/${roomId}`, (message) => {
-          const systemMessage = JSON.parse(message.body);
-          setTimelineMessages((prev) => [
-            ...prev,
-            {
-              type: "system",
-              message: systemMessage.message,
-              timestamp: new Date(),
-            },
-          ]);
-        });
+        // 새로운 구독 설정
+        chatSubscription = client.subscribe(
+          `/subscribe/chat/room/${roomId}`,
+          (message) => {
+            const chatMessage = JSON.parse(message.body);
+            setTimelineMessages((prev) => [
+              ...prev,
+              {
+                type: "chat",
+                message: chatMessage.message,
+                writerName: chatMessage.writerName,
+                timestamp: new Date(),
+              },
+            ]);
+          }
+        );
+
+        systemSubscription = client.subscribe(
+          `/subscribe/enter/room/${roomId}`,
+          (message) => {
+            const systemMessage = JSON.parse(message.body);
+            setTimelineMessages((prev) => [
+              ...prev,
+              {
+                type: "system",
+                message: systemMessage.message,
+                timestamp: new Date(),
+              },
+            ]);
+          }
+        );
       }
       // (error) => {
       //   console.error("STOMP 연결 실패:", error);
