@@ -525,134 +525,113 @@ export default function ChatRoomPage({
   }
 
   return (
-    <div className="p-4 h-screen flex flex-col">
-      {chatRoom ? (
-        <>
-          <div className="flex justify-between items-center mb-4">
-            {/* <h2 className="text-xl font-bold">채팅방 #{chatRoom.id}</h2> */}
-            <h2 className="text-xl font-bold">채팅방명 #{chatRoom.title}</h2>
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white w-[400px] h-[600px] rounded-lg flex flex-col shadow-xl">
+        {/* Header */}
+        {chatRoom && (
+          <div className="px-4 py-3 flex items-center border-b bg-green-400 rounded-t-lg">
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="mr-4 text-black hover:text-gray-700"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <h2 className="text-lg font-medium flex-1 text-black">
+              {chatRoom.title}
+            </h2>
             <button
               onClick={leaveChat}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              className="text-black hover:text-gray-700"
             >
-              채팅방에서 나가기
+              나가기
             </button>
           </div>
+        )}
 
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-            <div className="space-y-2">
-              {timelineMessages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`p-2 rounded-lg ${
-                    msg.type === "system"
-                      ? "bg-gray-100 text-center"
-                      : msg.writerName === currentUser?.nickname
-                      ? "ml-auto bg-blue-500 text-white max-w-[30%]"
-                      : "bg-gray-200 max-w-[30%]"
-                  }`}
-                >
-                  {msg.type === "chat" && (
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm font-medium">{msg.writerName}</p>
-                      {msg.writerName === currentUser?.nickname &&
-                        msg.type === "chat" && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                setTimelineMessages((prev) =>
-                                  prev.map((m) =>
-                                    m === msg ? { ...m, isEditing: true } : m
-                                  )
-                                );
-                                setEditingMessage(msg.message);
-                              }}
-                              className="text-xs underline hover:text-gray-300"
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  window.confirm("정말로 삭제하시겠습니까?")
-                                ) {
-                                  deleteMessage(msg.id!);
-                                }
-                              }}
-                              className="text-xs underline hover:text-gray-300"
-                            >
-                              삭제
-                            </button>
-                          </div>
-                        )}
-                    </div>
-                  )}
-                  {msg.isEditing ? (
-                    <div className="flex gap-2 mt-1">
-                      <input
-                        type="text"
-                        value={editingMessage}
-                        onChange={(e) => setEditingMessage(e.target.value)}
-                        className="flex-1 p-1 rounded text-black"
-                      />
-                      <button
-                        onClick={() => updateMessage(msg.id!, editingMessage)}
-                        className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          <div className="space-y-3">
+            {timelineMessages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  msg.writerName === currentUser?.nickname
+                    ? "justify-end"
+                    : "justify-start"
+                }`}
+              >
+                {msg.type === "system" ? (
+                  <div className="bg-gray-200/70 rounded-full px-4 py-2 text-sm text-gray-600 mx-auto">
+                    {msg.message}
+                  </div>
+                ) : (
+                  <div className="flex max-w-[70%]">
+                    {msg.writerName !== currentUser?.nickname && (
+                      <div className="flex flex-col mr-2 items-start">
+                        <span className="text-sm mb-1">{msg.writerName}</span>
+                      </div>
+                    )}
+                    <div className="flex items-end">
+                      <div
+                        className={`rounded-2xl px-4 py-2 ${
+                          msg.writerName === currentUser?.nickname
+                            ? "bg-green-400 text-white"
+                            : "bg-white border border-green-200"
+                        }`}
                       >
-                        완료
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTimelineMessages((prev) =>
-                            prev.map((m) =>
-                              m === msg ? { ...m, isEditing: false } : m
-                            )
-                          );
-                          setEditingMessage("");
-                        }}
-                        className="px-2 py-1 bg-gray-500 text-white rounded text-xs"
-                      >
-                        취소
-                      </button>
+                        <p className="text-sm whitespace-pre-wrap">
+                          {msg.message}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-500 ml-2">
+                        {msg.timestamp.toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
+                      </span>
                     </div>
-                  ) : (
-                    <p className={msg.type === "system" ? "text-gray-600" : ""}>
-                      {msg.message}{" "}
-                      {msg.isEdited && (
-                        <span className="text-xs">(수정됨)</span>
-                      )}
-                    </p>
-                  )}
-                  <p className="text-xs text-right">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div ref={messageEndRef} />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+          <div ref={messageEndRef} />
+        </div>
 
-          {/* Message Input */}
-          <div className="flex gap-2 mt-auto">
+        {/* Input */}
+        <div className="p-4 border-t bg-white rounded-b-lg">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="메시지를 입력하세요..."
-              className="flex-1 p-2 border rounded"
+              placeholder="메시지 입력..."
+              className="flex-1 rounded-full px-4 py-2 border focus:outline-none focus:border-green-400"
             />
             <button
               onClick={sendMessage}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              disabled={!newMessage.trim()}
+              className="px-4 py-2 bg-green-400 text-white rounded-full hover:bg-green-500 disabled:opacity-50"
             >
               전송
             </button>
           </div>
-        </>
-      ) : (
-        <p>채팅방을 불러오는 중...</p>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
