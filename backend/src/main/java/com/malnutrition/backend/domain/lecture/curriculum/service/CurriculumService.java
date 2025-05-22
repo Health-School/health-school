@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CurriculumService {
 
-    private final S3Service s3Service;
+    private final CurriculumS3Service curriculumS3Service;
     private final CurriculumRepository curriculumRepository;
     private final LectureRepository lectureRepository;
     private final Rq rq;
@@ -41,8 +41,8 @@ public class CurriculumService {
     }
 
     @Transactional(readOnly = true)
-    public S3Service getS3Service() {
-        return this.s3Service;
+    public CurriculumS3Service getCurriculumS3Service() {
+        return this.curriculumS3Service;
     }
 
     // 커리큘럼(영상) 업로드
@@ -63,7 +63,7 @@ public class CurriculumService {
             }
         }
 
-        s3Service.uploadFile(s3path, file);
+        curriculumS3Service.uploadFile(s3path, file);
 
         Curriculum curriculum = Curriculum.builder()
                 .lecture(lecture)
@@ -111,12 +111,12 @@ public class CurriculumService {
             }
 
             // 기존 파일 삭제
-            s3Service.deleteFile(curriculum.getS3path());
+            curriculumS3Service.deleteFile(curriculum.getS3path());
 
             // 새 파일 업로드
             String newFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String newS3Path = "uploads/curriculums/" + newFileName;
-            s3Service.uploadFile(newS3Path, file);
+            curriculumS3Service.uploadFile(newS3Path, file);
 
             // 경로 교체
             curriculum.setS3path(newS3Path);
@@ -132,9 +132,10 @@ public class CurriculumService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 커리큘럼이 없습니다."));
 
         // S3 파일 삭제
-        s3Service.deleteFile(curriculum.getS3path());
+        curriculumS3Service.deleteFile(curriculum.getS3path());
 
         // DB에서 삭제
         curriculumRepository.delete(curriculum);
     }
+
 }

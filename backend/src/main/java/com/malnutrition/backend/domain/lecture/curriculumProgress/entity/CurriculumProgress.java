@@ -36,7 +36,10 @@ public class CurriculumProgress extends BaseEntity {
     private ProgressStatus status;
 
     @Column(nullable = true)
-    private Integer progressRate = 0;
+    private Integer duration = 0;
+
+    @Column(nullable = true)
+    private Integer totalWatchedSeconds = 0;
 
     @Column(nullable = true)
     private LocalDateTime lastWatchedAt; // 마지막으로 언제 봤는지

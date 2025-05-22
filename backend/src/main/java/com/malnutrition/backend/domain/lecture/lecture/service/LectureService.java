@@ -1,8 +1,17 @@
 package com.malnutrition.backend.domain.lecture.lecture.service;
 
+import com.malnutrition.backend.domain.certification.certification.repository.CertificationRepository;
 import com.malnutrition.backend.domain.image.config.ImageProperties;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumDetailDto;
+import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
+import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumRepository;
+import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumS3Service;
+import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumService;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.entity.CurriculumProgress;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureCurriculumDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
@@ -18,6 +27,7 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.domain.user.user.service.UserService;
+import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +40,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,6 +54,12 @@ public class LectureService {
     private final ImageProperties imageProperties;
     private final LikeRepository likeRepository;
     private final UserService userService;
+    private final CurriculumRepository curriculumRepository;
+    private final CurriculumS3Service curriculumS3Service;
+    private final CertificationRepository certificationRepository;
+
+
+    private final Rq rq;
 
     @Transactional(readOnly = true)
     public LectureDetailDto getLecture(Long lectureId){
@@ -169,6 +186,39 @@ public class LectureService {
         lecture.setLectureStatus(LectureStatus.COMPLETED);
         return lectureRepository.save(lecture);
     }
+
+
+
+    @Transactional(readOnly = true)
+    public LectureCurriculumDetailDto getLectureCurriculumDetailDto(Long lectureId) {
+
+        // 1. lectrue 데이터 가져오기, 강사, 카테고리 까지
+        Lecture lecture = lectureRepository.findByIdWithAllDetails(lectureId).
+                orElseThrow(() -> new IllegalArgumentException("존재하지 않는 lectureId 입니다."));
+        User actor = rq.getActor();
+        List<CurriculumDetailDto> curriculumDetailDtoList = curriculumRepository.findCurriculumDetailsWithProgressByLectureId(lecture.getId(), actor.getId());
+
+        curriculumDetailDtoList.forEach((curriculumDetailDto ->
+                curriculumDetailDto.setCurriculumVideoUrl(curriculumS3Service.getViewUrl(curriculumDetailDto.getCurriculumVideoUrl()))));
+
+        User trainer = lecture.getTrainer();
+        List<String> allTrainerCertification = certificationRepository.findAllCertificationNamesByUserId(trainer.getId());
+
+
+        return LectureCurriculumDetailDto.builder()
+                .lectureTitle(lecture.getTitle())
+                .lectureContent(lecture.getContent())
+                .lectureCategory(lecture.getLectureCategory().getCategoryName())
+                .lectureLevel(lecture.getLectureLevel().getDescription())
+                .trainerNickname(trainer.getNickname())
+                .trainerProfileUrl(imageService.getImageUrl(trainer.getProfileImage()))
+                .trainerCertificationNames(allTrainerCertification)
+                .curriculumDetailDtoList(curriculumDetailDtoList)
+                .build();
+
+    }
+
+
 
 
 }
