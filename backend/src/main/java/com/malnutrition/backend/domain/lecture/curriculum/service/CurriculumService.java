@@ -28,6 +28,19 @@ public class CurriculumService {
     private final LectureRepository lectureRepository;
     private final Rq rq;
 
+    private static final long MAX_VIDEO_SIZE = 500L * 1024 * 1024; // 500MB
+    private static final String VIDEO_CONTENT_TYPE_PREFIX = "video/";
+
+    // 유효성 검사
+    private void validateVideoFile(MultipartFile file) {
+        if (!file.getContentType().startsWith(VIDEO_CONTENT_TYPE_PREFIX)) {
+            throw new IllegalArgumentException("올바른 영상 파일 형식이 아닙니다.");
+        }
+        if (file.getSize() > MAX_VIDEO_SIZE) {
+            throw new IllegalArgumentException("파일 용량이 너무 큽니다.");
+        }
+    }
+
     // 커리큘럼 단건 조회
     @Transactional(readOnly = true)
     public CurriculumResponseDto findDtoById(Long curriculumId) {
@@ -51,18 +64,12 @@ public class CurriculumService {
         Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 강의가 없습니다."));
 
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String s3path = "uploads/curriculums/" + fileName;
-
         if (file != null) {
-            if (!file.getContentType().startsWith("video/")) {
-                throw new IllegalArgumentException("올바른 영상 파일 형식이 아닙니다.");
-            }
-            if (file.getSize() > 500 * 1024 * 1024) { // 500MB
-                throw new IllegalArgumentException("파일 용량이 너무 큽니다.");
-            }
+            validateVideoFile(file);
         }
 
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String s3path = "uploads/curriculums/" + fileName;
         s3Service.uploadFile(s3path, file);
 
         Curriculum curriculum = Curriculum.builder()
@@ -90,7 +97,6 @@ public class CurriculumService {
         Curriculum curriculum = curriculumRepository.findById(curriculumId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 커리큘럼이 없습니다."));
 
-        // 권한 확인
         User actor = rq.getActor();
         if (!curriculum.getLecture().getTrainer().getId().equals(actor.getId())) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
@@ -102,23 +108,14 @@ public class CurriculumService {
 
         MultipartFile file = dto.getNewFile();
         if (file != null && !file.isEmpty()) {
+            validateVideoFile(file);
 
-            if (!file.getContentType().startsWith("video/")) {
-                throw new IllegalArgumentException("올바른 영상 파일 형식이 아닙니다.");
-            }
-            if (file.getSize() > 500 * 1024 * 1024) { // 500MB
-                throw new IllegalArgumentException("파일 용량이 너무 큽니다.");
-            }
-
-            // 기존 파일 삭제
             s3Service.deleteFile(curriculum.getS3path());
 
-            // 새 파일 업로드
             String newFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String newS3Path = "uploads/curriculums/" + newFileName;
             s3Service.uploadFile(newS3Path, file);
 
-            // 경로 교체
             curriculum.setS3path(newS3Path);
         }
 
