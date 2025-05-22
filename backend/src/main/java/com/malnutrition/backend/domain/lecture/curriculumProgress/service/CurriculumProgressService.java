@@ -7,7 +7,6 @@ import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.Progress
 import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
-import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +56,4 @@ public class CurriculumProgressService {
         }
         curriculumProgressRepository.save(progress);
     }
-
-
-
 }

@@ -111,7 +111,7 @@ public class LectureService {
 
         lectureRepository.save(lecture);
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<LectureDto> getLectures(Pageable pageable, String category, LectureLevel lectureLevel) {
         return lectureRepository.findAllWithFiltersPaged(category,lectureLevel,pageable)
                 .map((lecture -> {
@@ -169,6 +169,4 @@ public class LectureService {
         lecture.setLectureStatus(LectureStatus.COMPLETED);
         return lectureRepository.save(lecture);
     }
-
-
 }
