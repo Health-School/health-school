@@ -25,6 +25,7 @@ public class ChatRoomService {
     private final ScheduleRepository scheduleRepository;
     private final Rq rq;
 
+    @Transactional
     public ChatRoomResponseDto createChatRoom(ChatRoomRequestDto requestDto) {
         User sender = rq.getActor(); // 현재 로그인한 사용자
         User receiver = userRepository.findById(requestDto.getReceiverId())
@@ -55,6 +56,7 @@ public class ChatRoomService {
         );
     }
 
+    @Transactional(readOnly = true)
     public ChatRoomResponseDto getChatRoom(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 채팅방을 찾을 수 없습니다."));

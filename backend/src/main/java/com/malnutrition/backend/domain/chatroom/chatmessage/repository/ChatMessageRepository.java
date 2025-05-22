@@ -19,9 +19,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     @Query("SELECT cm FROM ChatMessage cm " +
             "JOIN FETCH cm.chatRoom cr " +
+            "JOIN FETCH cr.sender " +
+            "JOIN FETCH cr.receiver " +
             "WHERE cr.id = :chatRoomId " +
             "ORDER BY cm.createdDate ASC")
     List<ChatMessage> findByChatRoomIdOrderByCreatedDateAsc(@Param("chatRoomId") Long chatRoomId);
+
 
     @Query("SELECT cm FROM ChatMessage cm " +
             "JOIN FETCH cm.chatRoom cr " +
