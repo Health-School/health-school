@@ -104,63 +104,26 @@ public class ChatService {
         }
     }
 
-    public void handleEnterMessage(Long roomId, ChatEnterRequestDto dto) {
-        ChatRoom room = getChatRoomById(roomId);
-        User user = getUserByNickname(dto.getWriterName());
-        validateUserInChatRoom(room, user);
+    @Transactional
+    public ChatEnterResponseMessageDto buildEnterOrLeaveResponseMessageDto(
+            ChatRoom chatRoom, User sender, String message, String receiverName, UserType userType) {
 
-        ChatMessage last = chatMessageRepository
-                .findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(roomId, user.getId())
-                .orElse(null);
-
-        if (last != null && last.getUserType() != UserType.LEAVE) return;
-
-        String msg = user.getNickname() + "님이 채팅방에 참여하였습니다.";
-        chatMessageRepository.save(ChatMessage.builder()
-                .chatRoom(room)
-                .sender(user)
-                .message(msg)
-                .userType(UserType.ENTER)
-                .build());
-
-        messagingTemplate.convertAndSend("/subscribe/enter/room/" + roomId,
-                ChatEnterResponseMessageDto.builder()
-                        .roomId(roomId)
-                        .writerName(user.getNickname())
-                        .message(msg)
-                        .userType(UserType.ENTER)
-                        .receiverName(dto.getReceiverName())
-                        .build());
+        return ChatEnterResponseMessageDto.builder()
+                .roomId(chatRoom.getId())
+                .writerName(sender.getNickname())
+                .message(message)
+                .userType(userType)
+                .receiverName(receiverName)
+                .build();
     }
 
-    public void handleLeaveMessage(Long roomId, ChatLeaveRequestDto dto) {
-        ChatRoom room = getChatRoomById(roomId);
-        User user = getUserByNickname(dto.getWriterName());
-        validateUserInChatRoom(room, user);
-
-        String msg = user.getNickname() + "님이 채팅방을 나갔습니다.";
-        chatMessageRepository.save(ChatMessage.builder()
-                .chatRoom(room)
-                .sender(user)
-                .message(msg)
-                .userType(UserType.LEAVE)
-                .build());
-
-        messagingTemplate.convertAndSend("/subscribe/leave/room/" + roomId, msg);
-    }
-
-    public void handleChatMessage(Long roomId, ChatMessageDto dto) {
-        ChatRoom room = getChatRoomById(roomId);
-        User user = getUserByNickname(dto.getWriterName());
-        validateUserInChatRoom(room, user);
-
-        chatMessageRepository.save(ChatMessage.builder()
-                .chatRoom(room)
-                .sender(user)
-                .message(dto.getMessage())
-                .userType(UserType.TALK)
-                .build());
-
-        messagingTemplate.convertAndSend("/subscribe/chat/room/" + roomId, dto);
+    @Transactional
+    public ChatMessage buildChatMessage(ChatRoom chatRoom, User sender, String message, UserType userType) {
+        return ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .sender(sender)
+                .message(message)
+                .userType(userType)
+                .build();
     }
 }

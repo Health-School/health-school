@@ -36,20 +36,74 @@ public class ChatController {
     private final SimpMessagingTemplate messageTemplate;
 
     @MessageMapping("/chat/room/enter/{roomId}")
-    public void enter(@DestinationVariable Long roomId,
+    public void enter(@DestinationVariable("roomId") Long roomId,
                       @Payload ChatEnterRequestDto enterMessage) {
-        chatService.handleEnterMessage(roomId, enterMessage);
+
+        ChatRoom chatRoom = chatService.getChatRoomById(roomId);
+        User sender = chatService.getUserByNickname(enterMessage.getWriterName());
+        chatService.validateUserInChatRoom(chatRoom, sender);
+
+        ChatMessage lastMessage = chatMessageRepository
+                .findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(roomId, sender.getId())
+                .orElse(null);
+
+        if (lastMessage != null && lastMessage.getUserType() != UserType.LEAVE) {
+            return;
+        }
+
+        String msg = sender.getNickname() + "님이 채팅방에 참여하였습니다.";
+
+        ChatMessage chatMessage = chatService.buildChatMessage(chatRoom, sender, msg, UserType.ENTER);
+        chatMessageRepository.save(chatMessage);
+
+        ChatEnterResponseMessageDto response = chatService.buildEnterOrLeaveResponseMessageDto(
+                chatRoom,
+                sender,
+                msg,
+                enterMessage.getReceiverName(),
+                UserType.ENTER
+        );
+
+        messageTemplate.convertAndSend("/subscribe/enter/room/" + roomId, response);
     }
 
+
     @MessageMapping("/chat/room/leave/{roomId}")
-    public void leave(@DestinationVariable Long roomId,
+    public void leave(@DestinationVariable("roomId") Long roomId,
                       @Payload ChatLeaveRequestDto leaveMessage) {
-        chatService.handleLeaveMessage(roomId, leaveMessage);
+
+        ChatRoom chatRoom = chatService.getChatRoomById(roomId);
+        User sender = chatService.getUserByNickname(leaveMessage.getWriterName());
+        chatService.validateUserInChatRoom(chatRoom, sender);
+
+        String msg = sender.getNickname() + "님이 채팅방을 나갔습니다.";
+
+        ChatMessage chatMessage = chatService.buildChatMessage(chatRoom, sender, msg, UserType.LEAVE);
+        chatMessageRepository.save(chatMessage);
+
+        ChatEnterResponseMessageDto response = chatService.buildEnterOrLeaveResponseMessageDto(
+                chatRoom,
+                sender,
+                msg,
+                leaveMessage.getReceiverName(),
+                UserType.LEAVE
+        );
+
+        messageTemplate.convertAndSend("/subscribe/leave/room/" + roomId, response);
     }
 
     @MessageMapping("/chat/message/{roomId}")
-    public void sendMessage(@DestinationVariable Long roomId,
+    public void sendMessage(@DestinationVariable("roomId") Long roomId,
                             @Payload ChatMessageDto message) {
-        chatService.handleChatMessage(roomId, message);
+
+        ChatRoom chatRoom = chatService.getChatRoomById(roomId);
+        User sender = chatService.getUserByNickname(message.getWriterName());
+        chatService.validateUserInChatRoom(chatRoom, sender);
+
+        ChatMessage chatMessage = chatService.buildChatMessage(chatRoom, sender, message.getMessage(), UserType.TALK);
+        chatMessageRepository.save(chatMessage);
+
+        messageTemplate.convertAndSend("/subscribe/chat/room/" + roomId, message);
     }
+
 }
