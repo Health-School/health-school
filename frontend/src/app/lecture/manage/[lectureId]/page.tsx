@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import CurriculumUploadModal from "@/components/CurriculumUploadModal"; // 앞서 안내한 모달 컴포넌트
 import Image from "next/image";
+import removeMarkdown from "remove-markdown";
 
 // 강의 상세 DTO
 interface LectureDetailDto {
@@ -41,12 +42,35 @@ export default function LectureManagePage({
 
   // 강의 상세/커리큘럼 목록 불러오기
   useEffect(() => {
-    fetch(`/api/v1/lectures/${params.lectureId}`)
+    // 강의 상세 정보 조회
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${params.lectureId}`,
+      {
+        credentials: "include",
+      }
+    )
       .then((res) => res.json())
-      .then((data) => setLecture(data.data));
-    fetch(`/api/v1/lectures/${params.lectureId}/curriculums`)
+      .then((response) => {
+        if (response.success) {
+          setLecture(response.data);
+        }
+      })
+      .catch((error) => console.error("강의 조회 실패:", error));
+
+    // 커리큘럼 목록 조회
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${params.lectureId}/curriculums`,
+      {
+        credentials: "include",
+      }
+    )
       .then((res) => res.json())
-      .then((data) => setCurriculums(data.data));
+      .then((response) => {
+        if (response.success) {
+          setCurriculums(response.data);
+        }
+      })
+      .catch((error) => console.error("커리큘럼 조회 실패:", error));
   }, [params.lectureId]);
 
   return (
@@ -63,7 +87,9 @@ export default function LectureManagePage({
           />
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-2">{lecture?.title}</h2>
-            <div className="text-gray-700 mb-2">{lecture?.content}</div>
+            <div className="text-gray-700 mb-2">
+              {lecture?.content ? removeMarkdown(lecture.content) : ''}
+            </div>
             <div className="flex gap-4 text-sm text-gray-500 mb-1">
               <span>
                 수강료:{" "}
@@ -155,9 +181,19 @@ export default function LectureManagePage({
           onClose={() => setShowModal(false)}
           onUploaded={() => {
             // 업로드 후 목록 새로고침
-            fetch(`/api/v1/lectures/${params.lectureId}/curriculums`)
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${params.lectureId}/curriculums`,
+              {
+                credentials: "include",
+              }
+            )
               .then((res) => res.json())
-              .then((data) => setCurriculums(data.data));
+              .then((response) => {
+                if (response.success) {
+                  setCurriculums(response.data);
+                }
+              })
+              .catch((error) => console.error("커리큘럼 조회 실패:", error));
           }}
         />
       )}
