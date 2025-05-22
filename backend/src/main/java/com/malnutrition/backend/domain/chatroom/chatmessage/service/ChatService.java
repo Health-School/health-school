@@ -1,14 +1,17 @@
 package com.malnutrition.backend.domain.chatroom.chatmessage.service;
-import com.malnutrition.backend.domain.chatroom.chatmessage.dto.ChatMessageUpdateRequestDto;
+import com.malnutrition.backend.domain.chatroom.chatmessage.dto.*;
 import com.malnutrition.backend.domain.chatroom.chatmessage.entity.ChatMessage;
 import com.malnutrition.backend.domain.chatroom.chatmessage.enums.MessageType;
 import com.malnutrition.backend.domain.chatroom.chatmessage.enums.UserType;
 import com.malnutrition.backend.domain.chatroom.chatmessage.repository.ChatMessageRepository;
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.chatroom.chatroom.repository.ChatRoomRepository;
+import com.malnutrition.backend.domain.chatroom.chatroom.service.ChatRoomService;
+import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,9 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomService chatRoomService;
+    private final SimpMessagingTemplate messagingTemplate;
+//    private final ChatService chatService;
 
     @Transactional
     public ChatMessage updateChatMessage(Long messageId, ChatMessageUpdateRequestDto dto, Long userId) {
@@ -77,5 +83,84 @@ public class ChatService {
             chatMessageRepository.deleteByChatRoom(chatRoom);
             chatRoomRepository.delete(chatRoom);
         }
+    }
+    @Transactional(readOnly = true)
+    public ChatRoom getChatRoomById(Long roomId) {
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방이 존재하지 않습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public void validateUserInChatRoom(ChatRoom chatRoom, User user) {
+        if (!chatRoom.getSender().getId().equals(user.getId()) &&
+                !chatRoom.getReceiver().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("이 채팅방에 접근 권한이 없습니다.");
+        }
+    }
+
+    public void handleEnterMessage(Long roomId, ChatEnterRequestDto dto) {
+        ChatRoom room = getChatRoomById(roomId);
+        User user = getUserByNickname(dto.getWriterName());
+        validateUserInChatRoom(room, user);
+
+        ChatMessage last = chatMessageRepository
+                .findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(roomId, user.getId())
+                .orElse(null);
+
+        if (last != null && last.getUserType() != UserType.LEAVE) return;
+
+        String msg = user.getNickname() + "님이 채팅방에 참여하였습니다.";
+        chatMessageRepository.save(ChatMessage.builder()
+                .chatRoom(room)
+                .sender(user)
+                .message(msg)
+                .userType(UserType.ENTER)
+                .build());
+
+        messagingTemplate.convertAndSend("/subscribe/enter/room/" + roomId,
+                ChatEnterResponseMessageDto.builder()
+                        .roomId(roomId)
+                        .writerName(user.getNickname())
+                        .message(msg)
+                        .userType(UserType.ENTER)
+                        .receiverName(dto.getReceiverName())
+                        .build());
+    }
+
+    public void handleLeaveMessage(Long roomId, ChatLeaveRequestDto dto) {
+        ChatRoom room = getChatRoomById(roomId);
+        User user = getUserByNickname(dto.getWriterName());
+        validateUserInChatRoom(room, user);
+
+        String msg = user.getNickname() + "님이 채팅방을 나갔습니다.";
+        chatMessageRepository.save(ChatMessage.builder()
+                .chatRoom(room)
+                .sender(user)
+                .message(msg)
+                .userType(UserType.LEAVE)
+                .build());
+
+        messagingTemplate.convertAndSend("/subscribe/leave/room/" + roomId, msg);
+    }
+
+    public void handleChatMessage(Long roomId, ChatMessageDto dto) {
+        ChatRoom room = getChatRoomById(roomId);
+        User user = getUserByNickname(dto.getWriterName());
+        validateUserInChatRoom(room, user);
+
+        chatMessageRepository.save(ChatMessage.builder()
+                .chatRoom(room)
+                .sender(user)
+                .message(dto.getMessage())
+                .userType(UserType.TALK)
+                .build());
+
+        messagingTemplate.convertAndSend("/subscribe/chat/room/" + roomId, dto);
     }
 }
