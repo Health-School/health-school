@@ -35,7 +35,7 @@ public class ExerciseSheet extends BaseEntity {
     @Column(name = "exercise_end_time", nullable = false)
     private LocalTime exerciseEndTime;
 
-    @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MachineExerciseSheet> machineExerciseSheets;
 
 }

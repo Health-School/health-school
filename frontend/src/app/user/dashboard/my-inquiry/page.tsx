@@ -4,10 +4,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-// Add Trainer interface
+// Update Trainer interface to match TrainerUserDto
 interface Trainer {
-  id: number;
-  nickname: string;
+  name: string; // Changed from nickname to name
 }
 
 interface Schedule {
@@ -75,7 +74,7 @@ export default function ConsultationPage() {
     fetchTrainers();
   }, []);
 
-  // Add trainer fetching function
+  // Update the trainers fetch function
   const fetchTrainers = async () => {
     try {
       const response = await fetch(
@@ -86,13 +85,13 @@ export default function ConsultationPage() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch trainers");
+        throw new Error("트레이너 목록 조회에 실패했습니다.");
       }
 
       const result = await response.json();
-      setTrainers(result);
+      setTrainers(result); // API directly returns array of TrainerUserDto
     } catch (error) {
-      console.error("Failed to fetch trainers:", error);
+      console.error("트레이너 목록 조회 실패:", error);
     }
   };
 
@@ -312,9 +311,9 @@ export default function ConsultationPage() {
               required
             >
               <option value="">트레이너를 선택하세요</option>
-              {trainers.map((trainer) => (
-                <option key={trainer.id} value={trainer.id}>
-                  {trainer.nickname}
+              {trainers.map((trainer, index) => (
+                <option key={index} value={index + 1}>
+                  {trainer.name}
                 </option>
               ))}
             </select>
@@ -417,9 +416,9 @@ export default function ConsultationPage() {
                       className="w-full p-2 border rounded-md"
                       required
                     >
-                      {trainers.map((trainer) => (
-                        <option key={trainer.id} value={trainer.nickname}>
-                          {trainer.nickname}
+                      {trainers.map((trainer, index) => (
+                        <option key={index} value={trainer.name}>
+                          {trainer.name}
                         </option>
                       ))}
                     </select>

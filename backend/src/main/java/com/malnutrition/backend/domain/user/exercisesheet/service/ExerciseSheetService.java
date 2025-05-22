@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,10 +38,11 @@ public class ExerciseSheetService {
     private final Rq rq;  // 로그인한 사용자 정보
 
     @Transactional
-    public ExerciseSheet createFullExerciseSheet(ExerciseSheetCreateDto dto, Long userId) {
+    public ExerciseSheetResponseDto createFullExerciseSheet(ExerciseSheetCreateDto dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
+        // 운동 기록지 생성
         ExerciseSheet sheet = ExerciseSheet.builder()
                 .user(user)
                 .exerciseDate(dto.getExerciseDate())
@@ -50,11 +52,12 @@ public class ExerciseSheetService {
 
         exerciseSheetRepository.save(sheet);
 
+        List<MachineExerciseSheetResponseDto> machineDtos = new ArrayList<>();
+
         for (MachineExerciseSheetCreateDto m : dto.getMachineExercises()) {
             Machine machine = machineRepository.findById(m.getMachineId())
                     .orElseThrow(() -> new IllegalArgumentException("해당 운동기구가 존재하지 않습니다."));
 
-            // approved 여부 확인
             if (!machine.isApproved()) {
                 throw new IllegalArgumentException("승인되지 않은 운동기구는 등록할 수 없습니다.");
             }
@@ -68,10 +71,29 @@ public class ExerciseSheetService {
                     .build();
 
             machineExerciseSheetRepository.save(mes);
+
+            // 응답 DTO 생성
+            MachineExerciseSheetResponseDto machineDto = new MachineExerciseSheetResponseDto(
+                    mes.getId(),
+                    user.getId(),
+                    user.getNickname(),  // 또는 user.getUsername(), getName() 등
+                    machine.getName(),
+                    mes.getReps(),
+                    mes.getSets(),
+                    mes.getWeight()
+            );
+            machineDtos.add(machineDto);
         }
 
-        return sheet;
+        return new ExerciseSheetResponseDto(
+                sheet.getId(),
+                sheet.getExerciseDate(),
+                sheet.getExerciseStartTime(),
+                sheet.getExerciseEndTime(),
+                machineDtos
+        );
     }
+
 
 
     @Transactional
