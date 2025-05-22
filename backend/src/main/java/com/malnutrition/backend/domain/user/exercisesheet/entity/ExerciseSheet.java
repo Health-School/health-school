@@ -38,6 +38,4 @@ public class ExerciseSheet extends BaseEntity {
     @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<MachineExerciseSheet> machineExerciseSheets;
 
-
-
 }

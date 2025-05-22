@@ -125,7 +125,7 @@ export default function LecturePage() {
   return (
     <main className="bg-white min-h-screen pb-20">
       {/* 카테고리/필터 바 */}
-      <section className="w-full bg-white sticky top-0 z-10 mt-10 border-b">
+      <section className="w-full bg-white sticky top-0  mt-10 border-b">
         <div className=" mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
           {categories.map((cat) => (
             <button

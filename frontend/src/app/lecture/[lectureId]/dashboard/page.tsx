@@ -1,10 +1,19 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 
 const LectureListPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
+
+  // lectureId 경로 변수 가져오기
+  const params = useParams();
+  const lectureId = params.lectureId;
+
+  // curriculumId 쿼리 파라미터 가져오기 (null일 수도 있음)
+  const searchParams = useSearchParams();
+  const curriculumId = searchParams.get("curriculumId");
 
   const lectures = [
     {
@@ -51,70 +60,67 @@ const LectureListPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <main className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-3 gap-8">
+      <main className="max-w-[1440px] mx-auto px-12 py-12 grid grid-cols-3 gap-12">
         {/* 왼쪽 비디오 및 설명 */}
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-2 space-y-8">
           {/* 영상 */}
-          <div className="bg-black aspect-video rounded-lg overflow-hidden">
+          <div className="bg-black aspect-video rounded-xl overflow-hidden">
             <video
               ref={videoRef}
               controls
               className="w-full h-full"
-              // 성민님 여기에다가 나중에 s3나 외부 링크로 바꿔주세요!!!!!!!!!@!!@ 여기입니다!!
               src="https://heathschool-video-picture.s3.ap-northeast-2.amazonaws.com/uploads/curriculums/ecc4c79f-352a-4f30-a548-91910aeb39bc_%ED%99%94%EB%A9%B4%20%EB%85%B9%ED%99%94%20%EC%A4%91%202025-05-21%20103644.mp4"
             />
           </div>
 
           {/* 강의 설명 */}
           <div>
-            <h1 className="text-2xl font-semibold">
+            <h1 className="text-3xl font-semibold">
               초보자를 위한 헬스 트레이닝 기초
             </h1>
-
-            <div className="flex items-center space-x-2 mt-1">
+            <div className="flex items-center space-x-3 mt-2">
               <img
                 src="https://via.placeholder.com/40"
                 alt="박준혁 트레이너"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover"
               />
-              <div className="text-sm text-gray-600">
+              <div className="text-base text-gray-600">
                 박준혁 트레이너 · 헬스 트레이닝 전문가
               </div>
             </div>
-
             <button
               onClick={handleChatClick}
-              className="mt-2 bg-green-100 text-green-700 text-sm rounded px-3 py-1 border border-green-300 hover:bg-green-200"
+              className="mt-3 bg-green-100 text-green-700 text-base rounded px-4 py-2 border border-green-300 hover:bg-green-200"
             >
               1:1 대화하기
             </button>
           </div>
 
           {/* 소개 */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">강의 소개</h2>
-            <p className="text-sm text-gray-700">
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold">강의 소개</h2>
+            <p className="text-base text-gray-700">
               이 강의는 헬스 트레이닝을 처음 시작하는 분들을 위한 기초
               과정입니다. 몸과 자세와 호흡법부터 시작하여 주요 근육 그룹별 기초
               운동 방법을 배우게 됩니다. 체계적인 커리큘럼을 통해 부상 없이
               안전하게 운동하는 방법을 익히고, 효과적인 트레이닝 루틴을 구성하는
               방법을 배울 수 있습니다.
             </p>
-            <div className="text-xs text-gray-500">
+            <div className="text-sm text-gray-500">
               초급 · 4주 과정 · 총 12개 강의 · 수료증 제공
             </div>
           </div>
         </div>
 
         {/* 오른쪽 사이드 */}
-        <aside className="bg-white rounded-lg p-4 shadow space-y-4">
+        <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
           {/* 탭 */}
-          <div className="flex space-x-4 border-b pb-2">
+          <div className="flex space-x-6 border-b pb-3">
             {["curriculum", "materials", "qna", "notes"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabClick(tab)}
-                className={`text-sm font-medium pb-1 ${
+                className={`text-base font-semibold pb-2 ${
                   selectedTab === tab
                     ? "border-b-2 border-green-600 text-green-600"
                     : "text-gray-500"
@@ -134,32 +140,32 @@ const LectureListPage = () => {
 
           {/* 커리큘럼 */}
           {selectedTab === "curriculum" && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-semibold">강의 목차</h3>
-                <span className="text-xs text-green-600">25% 완료</span>
+                <h3 className="font-semibold text-lg">강의 목차</h3>
+                <span className="text-sm text-green-600">25% 완료</span>
               </div>
 
               {lectures.map((section) => (
-                <div key={section.id} className="border-t pt-2">
-                  <p className="font-medium text-sm">{section.section}</p>
+                <div key={section.id} className="border-t pt-3">
+                  <p className="font-medium text-base">{section.section}</p>
                   {section.items?.length ? (
-                    <ul className="text-sm mt-1 space-y-1">
+                    <ul className="text-base mt-2 space-y-2">
                       {section.items.map((item) => (
                         <li
                           key={item.id}
-                          className="flex justify-between items-center px-2 py-1 rounded cursor-pointer hover:bg-gray-100"
+                          className="flex justify-between items-center px-3 py-2 rounded cursor-pointer hover:bg-gray-100"
                           onClick={() => handleTimeJump(item.seconds)}
                         >
                           <span>{item.title}</span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-sm text-gray-500">
                             {item.time}
                           </span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-xs text-gray-400 mt-1">강의 없음</p>
+                    <p className="text-sm text-gray-400 mt-2">강의 없음</p>
                   )}
                 </div>
               ))}
@@ -167,15 +173,15 @@ const LectureListPage = () => {
           )}
 
           {/* 하단 버튼 */}
-          <button className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700">
+          <button className="w-full bg-green-600 text-white py-3 rounded mt-6 hover:bg-green-700 text-lg">
             나의 운동 기록 작성하기
           </button>
 
-          <div className="flex justify-between mt-2">
-            <button className="text-sm text-gray-500 hover:underline">
+          <div className="flex justify-between mt-4">
+            <button className="text-base text-gray-500 hover:underline">
               ← 이전 강의
             </button>
-            <button className="text-sm text-green-600 font-semibold hover:underline">
+            <button className="text-base text-green-600 font-semibold hover:underline">
               다음 강의 →
             </button>
           </div>

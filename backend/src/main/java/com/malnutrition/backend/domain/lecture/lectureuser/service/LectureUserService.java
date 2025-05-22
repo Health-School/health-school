@@ -94,4 +94,8 @@ public class LectureUserService {
         return users.map(UserResponseDto::from);
     }
 
+    public boolean existsAttendingLecture(Long userId, Long lectureId){
+        return lectureUserRepository.existsByUserIdAndLecture_Id(userId, lectureId);
+    }
+
 }
