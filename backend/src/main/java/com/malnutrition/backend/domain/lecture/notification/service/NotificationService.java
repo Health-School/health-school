@@ -8,9 +8,12 @@ import com.malnutrition.backend.domain.lecture.notification.dto.NotificationUpda
 import com.malnutrition.backend.domain.lecture.notification.entity.Notification;
 import com.malnutrition.backend.domain.lecture.notification.repository.NotificationRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.domain.user.user.enums.Role;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +127,18 @@ public class NotificationService {
         }
 
         notificationRepository.delete(notification);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<NotificationResponseDto> getNotificationsByTrainer(User trainer, Pageable pageable) {
+        return notificationRepository.findByLectureTrainerId(trainer.getId(), pageable)
+                .map(notification -> new NotificationResponseDto(
+                        notification.getId(),
+                        notification.getTitle(),
+                        notification.getContent(),
+                        notification.getLecture().getTitle(),  // LAZY 해결됨
+                        notification.getCreatedDate()
+                ));
     }
 
 }

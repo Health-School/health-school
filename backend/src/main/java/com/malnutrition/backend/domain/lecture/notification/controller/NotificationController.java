@@ -8,6 +8,10 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,5 +79,19 @@ public class NotificationController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<NotificationResponseDto>> getMyNotifications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        User trainer = rq.getActor();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<NotificationResponseDto> notifications =
+                notificationService.getNotificationsByTrainer(trainer, pageable);
+
+        return ResponseEntity.ok(notifications);
     }
 }

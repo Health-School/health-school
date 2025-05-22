@@ -120,8 +120,19 @@ export default function StudentsPage() {
   // Add router
   const router = useRouter();
   const pathname = usePathname();
+  // Update initial activeTab state
   const [activeTab, setActiveTab] = useState<"students" | "qna" | "logs">(
-    "students"
+    () => {
+      // Check localStorage for saved tab if running in browser
+      if (typeof window !== "undefined") {
+        const savedTab = localStorage.getItem("activeTab");
+        // Clear the stored tab
+        localStorage.removeItem("activeTab");
+        // Return saved tab or default to 'students'
+        return (savedTab as "students" | "qna" | "logs") || "students";
+      }
+      return "students";
+    }
   );
   const [students, setStudents] = useState<Student[]>([]);
   const [qnas, setQnas] = useState<QnA[]>([]);
@@ -434,7 +445,7 @@ export default function StudentsPage() {
   const updateFeedback = async (feedbackId: number, comment: string) => {
     try {
       // Validate comment before sending request
-      if (!comment || comment.trim() === '') {
+      if (!comment || comment.trim() === "") {
         throw new Error("피드백 내용을 입력해주세요.");
       }
 
@@ -447,7 +458,7 @@ export default function StudentsPage() {
           },
           credentials: "include",
           body: JSON.stringify({
-            content: comment.trim() // Changed from 'comment' to 'content' to match DTO
+            content: comment.trim(), // Changed from 'comment' to 'content' to match DTO
           }),
         }
       );
@@ -465,7 +476,9 @@ export default function StudentsPage() {
       }
     } catch (error) {
       console.error("피드백 수정 실패:", error);
-      alert(error instanceof Error ? error.message : "피드백 수정에 실패했습니다.");
+      alert(
+        error instanceof Error ? error.message : "피드백 수정에 실패했습니다."
+      );
     }
   };
 
