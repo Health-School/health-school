@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface LikeRepository extends JpaRepository<Like, Long> {
-    @Query("SELECT AVG(l.score) FROM Like l WHERE l.lecture.id = :lectureId")
+    @Query("SELECT AVG(l.score) FROM Like l WHERE l.lectureUser.lecture.id = :lectureId")
     Double findAverageScoreByLectureId(@Param("lectureId") Long lectureId);
 }
