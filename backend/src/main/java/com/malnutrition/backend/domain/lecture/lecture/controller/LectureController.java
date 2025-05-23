@@ -73,7 +73,7 @@ public class LectureController {
     }
 
     @Operation(summary = "강의 상태 변경", description = "자신의 강의 상태를 완강으로 변경합니다.")
-    @PatchMapping("/{lectureId}/status")
+    @PutMapping("/{lectureId}/status")
     @PreAuthorize("hasRole('ROLE_TRAINER')")
     public ResponseEntity<?> updateLectureStatus(@PathVariable("lectureId") Long lectureId) {
         User user = rq.getActor();

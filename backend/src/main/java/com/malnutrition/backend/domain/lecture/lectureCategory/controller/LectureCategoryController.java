@@ -28,7 +28,7 @@ public class LectureCategoryController {
 
     // 조회
     @Operation(summary = "카테고리 조회", description = "원하는 카테고리 조회")
-    @GetMapping("{categoryId}")
+    @GetMapping("/{categoryId}")
     public ResponseEntity<ApiResponse<LectureCategory>> searchCategory(@PathVariable(name = "categoryId") Long categoryId) {
         return ResponseEntity.ok(ApiResponse.success(lectureCategoryService.findCategory(categoryId), "카테고리 조회 성공"));
     }

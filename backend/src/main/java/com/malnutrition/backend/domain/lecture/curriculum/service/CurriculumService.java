@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -144,6 +145,14 @@ public class CurriculumService {
 
         // DB에서 삭제
         curriculumRepository.delete(curriculum);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CurriculumResponseDto> getCurriculumsByLectureId(Long lectureId) {
+        List<Curriculum> curriculums = curriculumRepository.findByLectureIdOrderBySequenceAsc(lectureId);
+        return curriculums.stream()
+                .map(CurriculumResponseDto::from)
+                .toList();
     }
 
 }

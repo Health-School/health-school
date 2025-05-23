@@ -12,7 +12,6 @@ public class CurriculumResponseDto {
     private String content;
     private String s3path;
     private String lectureTitle;
-    private String trainerNickname;
 
     public static CurriculumResponseDto from(Curriculum curriculum) {
         return new CurriculumResponseDto(
@@ -20,8 +19,8 @@ public class CurriculumResponseDto {
                 curriculum.getTitle(),
                 curriculum.getContent(),
                 curriculum.getS3path(),
-                curriculum.getLecture().getTitle(),
-                null
+                curriculum.getLecture().getTitle()
+
         );
     }
 }

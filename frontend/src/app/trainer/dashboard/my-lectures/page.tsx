@@ -461,12 +461,12 @@ export default function MyLecturesPage() {
       {/* 강의 목록 */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">강의 목록</h2>
+          <h2 className="text-lg font-semibold">클래스 목록</h2>
           <button
             onClick={handleNewLecture}
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
           >
-            + 새 강의 등록
+            + 새 클래스 등록
           </button>
         </div>
         <div className="grid grid-cols-3 gap-6">
@@ -498,11 +498,7 @@ export default function MyLecturesPage() {
                     {lecture.price.toLocaleString()}원
                   </span>
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/trainer/dashboard/my-lectures/${lecture.id}`
-                      )
-                    }
+                    onClick={() => router.push(`/lecture/manage/${lecture.id}`)}
                     className="text-blue-600 hover:text-blue-700"
                   >
                     관리하기

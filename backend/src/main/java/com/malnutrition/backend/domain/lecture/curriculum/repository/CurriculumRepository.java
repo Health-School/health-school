@@ -49,4 +49,6 @@ ORDER BY c.sequence ASC
 
 
     int countByLecture(Lecture lecture);
+
+    List<Curriculum> findByLectureIdOrderBySequenceAsc(Long lectureId);
 }
