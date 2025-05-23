@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.service;
 
 import com.malnutrition.backend.domain.image.config.ImageProperties;
+import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumRepository;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.ProgressStatus;
@@ -9,6 +10,7 @@ import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.Cur
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
+import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserLectureDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
@@ -96,6 +98,22 @@ public class LectureUserService {
 
     public boolean existsAttendingLecture(Long userId, Long lectureId){
         return lectureUserRepository.existsByUserIdAndLecture_Id(userId, lectureId);
+    }
+
+    public List<UserLectureDto> getUsersByLectureId(Long lectureId) {
+        List<LectureUser> lectureUsers = lectureUserRepository.findByLectureId(lectureId);
+        return lectureUsers.stream()
+                .map(lectureUser -> {
+                    User user = lectureUser.getUser();
+                    return new UserLectureDto(
+                            user.getId(),
+                            user.getNickname(),
+                            user.getEmail(),
+                            user.getPhoneNumber(),
+                            user.getProfileImage() != null ? imageService.getImageUrl(user.getProfileImage()) : null
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
 }

@@ -5,8 +5,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import React from "react";
+import ReportModal from "@/components/report/ReportModal"; // 신고 모달 import
 
-// TossPaymentsModal 컴포넌트 동적 import (SSR 비활성화)
+// TossPaymentsModal 동적 import
 const TossPaymentsModal = dynamic(
   () => import("../../../components/payments/TossPaymentsModal"),
   { ssr: false }
@@ -28,11 +29,9 @@ interface LectureResponseDto {
   averageScore: number;
 }
 
-// 날짜 포맷에서 마지막 마침표 제거
 function formatDate(dateString: string) {
   if (!dateString) return "-";
   const date = new Date(dateString.replace(" ", "T"));
-  // toLocaleDateString("ko-KR") 결과에서 마지막 마침표 제거
   return date.toLocaleDateString("ko-KR").replace(/\.$/, "");
 }
 
@@ -56,9 +55,11 @@ export default function LectureDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTossModal, setShowTossModal] = useState(false);
+
   const [hoverScore, setHoverScore] = useState<number | null>(null);
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false); //  신고 모달 상태
 
   useEffect(() => {
     if (!lectureId) return;
@@ -125,7 +126,7 @@ export default function LectureDetailPage() {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 mt-8">
         {/* 왼쪽: 강의 정보 */}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold mb-2 ">{data.title}</h1>
+          <h1 className="text-2xl font-bold mb-2">{data.title}</h1>
           <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
             <span>{data.categoryName}</span>
             <span>·</span>
@@ -196,6 +197,14 @@ export default function LectureDetailPage() {
             </span>
           </div>
 
+          {/* 신고 버튼 */}
+          <button
+            onClick={() => setShowReportModal(true)}
+            className="text-red-500 text-sm underline mb-6 cursor-pointer"
+          >
+            강의 신고하기
+          </button>
+
           {/* 트레이너 정보 */}
           <div className="bg-white rounded-lg p-4 shadow mb-6 flex items-center gap-4">
             {data.trainerProfileImageUrl ? (
@@ -213,9 +222,6 @@ export default function LectureDetailPage() {
             )}
             <div>
               <div className="font-semibold">{data.trainerName}</div>
-              <div className="text-xs text-gray-500">
-                {/* 트레이너 설명이 있다면 여기에 추가 */}
-              </div>
               <a href="#" className="text-blue-500 text-xs mt-1 inline-block">
                 트레이너 프로필 보기 &gt;
               </a>
@@ -242,7 +248,7 @@ export default function LectureDetailPage() {
               평점: {data.averageScore?.toFixed(1) ?? "-"}
             </div>
             <button
-              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer"
+              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold"
               onClick={() => setShowTossModal(true)}
             >
               수강하기
@@ -267,7 +273,7 @@ export default function LectureDetailPage() {
         </aside>
       </div>
 
-      {/* TossPayments 모달 */}
+      {/* 결제 모달 */}
       {showTossModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg max-w-lg w-full relative">
@@ -285,6 +291,14 @@ export default function LectureDetailPage() {
             />
           </div>
         </div>
+      )}
+
+      {/*  신고 모달 */}
+      {showReportModal && (
+        <ReportModal
+          lectureId={data.id}
+          onClose={() => setShowReportModal(false)}
+        />
       )}
     </div>
   );

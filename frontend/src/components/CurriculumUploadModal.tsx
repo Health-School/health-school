@@ -1,16 +1,16 @@
 import { useRef, useState } from "react";
 
-interface Props {
+interface CurriculumUploadModalProps {
   lectureId: number;
   onClose: () => void;
-  onUploaded?: () => void;
+  onUploaded: () => Promise<void>; // Changed to Promise<void> since it's awaited
 }
 
 export default function CurriculumUploadModal({
   lectureId,
   onClose,
   onUploaded,
-}: Props) {
+}: CurriculumUploadModalProps) {
   const [title, setTitle] = useState("");
   const [videoType, setVideoType] = useState<"file" | "url">("file");
   const [file, setFile] = useState<File | null>(null);
@@ -22,53 +22,55 @@ export default function CurriculumUploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 업로드 핸들러
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!title.trim()) return alert("강의명을 입력하세요.");
-    if (videoType === "file" && !file) return alert("영상을 업로드하세요.");
-    if (videoType === "url" && !videoUrl.trim())
-      return alert("영상 URL을 입력하세요.");
 
-    setLoading(true);
+    const formData = new FormData();
+    formData.append(
+      "info",
+      new Blob(
+        [
+          JSON.stringify({
+            title,
+            content,
+            sequence,
+            lectureId,
+          }),
+        ],
+        {
+          type: "application/json",
+        }
+      )
+    );
+
+    if (file) {
+      formData.append("file", file);
+    }
 
     try {
-      const formData = new FormData();
-      // info JSON
-      formData.append(
-        "info",
-        new Blob(
-          [
-            JSON.stringify({
-              lectureId,
-              title,
-              content,
-              sequence,
-              // isPublic 등 추가 필드 필요시 여기에
-            }),
-          ],
-          { type: "application/json" }
-        )
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/curriculums/upload`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        }
       );
-      // 파일 업로드
-      if (videoType === "file" && file) {
-        formData.append("file", file);
+
+      // Changed success check to look at HTTP status instead of result.success
+      if (response.status === 201 || response.status === 200) {
+        alert("커리큘럼이 등록되었습니다.");
+        await onUploaded();
+        onClose();
+      } else {
+        const result = await response.json();
+        throw new Error(result.message || "커리큘럼 등록 실패");
       }
-      // URL 업로드는 별도 API가 필요하거나, file 대신 URL을 info에 담아야 함(백엔드 정책에 따라)
-      // 여기서는 파일 업로드만 처리
-
-      const res = await fetch("/api/v1/curriculums/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("업로드 실패");
-      alert("업로드 완료!");
-      onUploaded?.();
-      onClose();
-    } catch (err) {
-      alert("업로드 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("커리큘럼 등록 실패:", error);
+      alert(
+        error instanceof Error ? error.message : "커리큘럼 등록에 실패했습니다."
+      );
     }
   };
 

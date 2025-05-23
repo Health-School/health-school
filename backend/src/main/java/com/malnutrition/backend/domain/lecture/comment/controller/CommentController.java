@@ -2,8 +2,10 @@ package com.malnutrition.backend.domain.lecture.comment.controller;
 
 import com.malnutrition.backend.domain.lecture.comment.dto.CommentRequestDto;
 import com.malnutrition.backend.domain.lecture.comment.dto.CommentResponseDto;
+import com.malnutrition.backend.domain.lecture.comment.entity.Comment;
 import com.malnutrition.backend.domain.lecture.comment.service.CommentService;
 import com.malnutrition.backend.global.rp.ApiResponse;
+import com.malnutrition.backend.global.rq.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,10 +22,12 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
+    private final Rq rq;
 
     @Operation(summary = "댓글 생성", description = "댓글을 등록합니다.")
-    @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createComment(@RequestBody CommentRequestDto dto) {
+    @PostMapping("/{qnaId}/comments")
+    public ResponseEntity<ApiResponse<Long>> createComment( @PathVariable("qnaId") Long qnaId, @RequestBody CommentRequestDto dto) {
+        dto.setQnaboardId(qnaId);
         Long id = commentService.createComment(dto);
         return ResponseEntity.ok(ApiResponse.success(id, "생성성공"));
     }
@@ -51,5 +55,14 @@ public class CommentController {
             @Parameter(description = "QnA 게시글 ID") @PathVariable("qnaBoardId")Long qnaBoardId) {
         List<CommentResponseDto> comments = commentService.getCommentsByQnaBoard(qnaBoardId);
         return ResponseEntity.ok(ApiResponse.success(comments, "조회성공"));
+    }
+
+    @GetMapping("/qna/{qnaBoardId}/my-comments")
+    @Operation(summary = "내가 쓴 특정 QnA 댓글 조회", description = "특정 QnABoard에 내가 작성한 댓글 목록 조회")
+    public ResponseEntity<ApiResponse<List<CommentResponseDto>>> getMyCommentsByQnaBoardId(
+            @PathVariable Long qnaBoardId) {
+        Long userId = rq.getActor().getId();  // 로그인한 사용자 ID 가져오기
+        List<CommentResponseDto> comments = commentService.getMyCommentsByQnaBoardId(qnaBoardId, userId);
+        return ResponseEntity.ok(ApiResponse.success(comments, "내 댓글 목록 조회 성공"));
     }
 }

@@ -1,9 +1,7 @@
 package com.malnutrition.backend.domain.lecture.qnaboard.service;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
-//import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
-import com.malnutrition.backend.domain.lecture.qnaboard.dto.LectureQnaGroupDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardRequestDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.dto.QnaBoardResponseDto;
 import com.malnutrition.backend.domain.lecture.qnaboard.entity.QnaBoard;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,13 +71,13 @@ public class QnaBoardService {
         QnaBoard qna = qnaBoardRepository.findById(qnaId)
                 .orElseThrow(() -> new IllegalArgumentException("Q&A 게시글이 존재하지 않습니다."));
 
-        // 강의도 변경 가능하도록 처리
-//        Lecture lecture = lectureRepository.findById(requestDto.getLectureId())
-//                .orElseThrow(() -> new IllegalArgumentException("해당 강의가 존재하지 않습니다."));
+//         강의도 변경 가능하도록 처리
+        Lecture lecture = lectureRepository.findById(requestDto.getLectureId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 강의가 존재하지 않습니다."));
 
         qna.setTitle(requestDto.getTitle());
         qna.setContent(requestDto.getContent());
-//        qna.setLecture(lecture);
+        qna.setLecture(lecture);
         qna.setOpenStatus(requestDto.getOpenStatus());
 
         return ApiResponse.success(toResponseDto(qna), "Q&A 질문이 수정되었습니다.");
@@ -88,11 +85,10 @@ public class QnaBoardService {
 
     // 5. 질문 삭제
     @Transactional
-    public ApiResponse<Void> deleteQna(Long qnaId) {
+    public void deleteQna(Long qnaId) {
         QnaBoard qna = qnaBoardRepository.findById(qnaId)
                 .orElseThrow(() -> new IllegalArgumentException("Q&A 게시글이 존재하지 않습니다."));
         qnaBoardRepository.delete(qna);
-        return ApiResponse.success(null, "Q&A 질문이 삭제되었습니다.");
     }
 
     // 🔄 공통 변환 메서드
@@ -103,8 +99,8 @@ public class QnaBoardService {
                 .content(qna.getContent())
                 .lectureId(qna.getLecture().getId())
                 .lectureTitle(qna.getLecture().getTitle())
-//                .userId(qna.getUser().getId())
-//                .username(qna.getUser().getUsername())
+                .userId(qna.getUser().getId())
+                .username(qna.getUser().getNickname())
                 .openStatus(qna.getOpenStatus())
                 .createdDate(qna.getCreatedDate())
                 .updatedDate(qna.getUpdatedDate())
@@ -121,5 +117,11 @@ public class QnaBoardService {
     public Page<QnaBoardResponseDto> getQnaByLectureId(Long lectureId, Long trainerId, Pageable pageable) {
         Page<QnaBoard> qnaBoards = qnaBoardRepository.findByLectureIdAndTrainerId(lectureId, trainerId, pageable);
         return qnaBoards.map(QnaBoardResponseDto::from);
+    }
+
+    @Transactional
+    public Page<QnaBoardResponseDto> getQnaByLectureId(Long lectureId, Pageable pageable) {
+        return qnaBoardRepository.findByLectureId(lectureId, pageable)
+                .map(QnaBoardResponseDto::from);
     }
 }

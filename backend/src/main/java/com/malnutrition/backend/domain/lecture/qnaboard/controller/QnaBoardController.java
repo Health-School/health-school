@@ -91,4 +91,16 @@ public class QnaBoardController {
         Page<QnaBoardResponseDto> result = qnaBoardService.getQnaByLectureId(lectureId, trainerId, pageable);
         return ResponseEntity.ok(ApiResponse.success(result, "QnA 목록 조회 성공"));
     }
+
+    @GetMapping("/{lectureId}/qnas")
+    @Operation(summary = "강의 QnA 목록 조회 (페이징)", description = "page, size만 사용하는 QnA 페이징 조회")
+    public ResponseEntity<?> getQnaListByLecture(
+            @PathVariable Long lectureId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<QnaBoardResponseDto> qnaPage = qnaBoardService.getQnaByLectureId(lectureId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(qnaPage, "QnA 목록 조회 성공"));
+    }
 }

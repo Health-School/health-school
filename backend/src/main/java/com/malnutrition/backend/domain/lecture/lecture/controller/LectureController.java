@@ -73,7 +73,7 @@ public class LectureController {
     }
 
     @Operation(summary = "강의 상태 변경", description = "자신의 강의 상태를 완강으로 변경합니다.")
-    @PatchMapping("/{lectureId}/status")
+    @PutMapping("/{lectureId}/status")
     @PreAuthorize("hasRole('ROLE_TRAINER')")
     public ResponseEntity<?> updateLectureStatus(@PathVariable("lectureId") Long lectureId) {
         User user = rq.getActor();
@@ -82,10 +82,10 @@ public class LectureController {
     }
     @GetMapping
     public ResponseEntity<?> getLecturesByPage(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) LectureLevel lectureLevel
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "10", name = "size") int size,
+            @RequestParam(required = false, name = "category") String category,
+            @RequestParam(required = false, name = "lectureLevel") LectureLevel lectureLevel
     ) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<LectureDto> lectures = lectureService.getLectures(pageRequest, category, lectureLevel);

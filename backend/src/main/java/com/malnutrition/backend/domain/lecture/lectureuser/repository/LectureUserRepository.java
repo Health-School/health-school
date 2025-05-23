@@ -43,7 +43,11 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
 
     boolean existsByUserIdAndLecture_Id(Long userId, Long lectureId);
 
+    List<LectureUser> findByLectureId(Long lectureId);
+
+
 
     @Query("SELECT COUNT(DISTINCT lu.user) FROM LectureUser lu WHERE lu.lecture = :lecture")
     Long countDistinctUsersByLecture(@Param("lecture") Lecture lecture);
+
 }
