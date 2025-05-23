@@ -1,8 +1,5 @@
 package com.malnutrition.backend.domain.lecture.lecture.controller;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureResponseDto;
+import com.malnutrition.backend.domain.lecture.lecture.dto.*;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
@@ -38,13 +35,14 @@ public class LectureController {
     private final Rq rq;
     private final UserService userService;
 
-    @Operation(summary = "특정 강의 조회", description = "새로운 강의를 추가합니다.")
+    @Operation(summary = "특정 강의 조회", description = "강의 상세 페이지 조회")
     @GetMapping("/{lectureId}")
     public ResponseEntity<ApiResponse<LectureDetailDto>> getLecture(@PathVariable("lectureId") Long lectureId) {
 
         LectureDetailDto lecture = lectureService.getLecture(lectureId);
         return ResponseEntity.ok(ApiResponse.success(lecture, "강의 추가 완료"));
     }
+
 
     @Operation(summary = "강의 추가", description = "새로운 강의를 추가합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식
@@ -75,7 +73,7 @@ public class LectureController {
     }
 
     @Operation(summary = "강의 상태 변경", description = "자신의 강의 상태를 완강으로 변경합니다.")
-    @PatchMapping("/{lectureId}/status")
+    @PutMapping("/{lectureId}/status")
     @PreAuthorize("hasRole('ROLE_TRAINER')")
     public ResponseEntity<?> updateLectureStatus(@PathVariable("lectureId") Long lectureId) {
         User user = rq.getActor();
@@ -93,4 +91,14 @@ public class LectureController {
         Page<LectureDto> lectures = lectureService.getLectures(pageRequest, category, lectureLevel);
         return ResponseEntity.ok(ApiResponse.success(lectures, "조회 성공!"));
     }
+
+    @Operation(summary = "강의 대시보드 조회", description = "강의 대시보드 조회")
+    @GetMapping("/{lectureId}/dashboard")
+    public ResponseEntity<ApiResponse<LectureCurriculumDetailDto>> getLectureDashBoard(@PathVariable("lectureId") Long lectureId) {
+        LectureCurriculumDetailDto lectureCurriculumDetailDto = lectureService.getLectureCurriculumDetailDto(lectureId);
+
+        return ResponseEntity.ok(ApiResponse.success(lectureCurriculumDetailDto, "강의 대시보드 조회"));
+    }
+
+
 }

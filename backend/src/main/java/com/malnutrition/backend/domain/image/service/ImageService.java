@@ -179,7 +179,7 @@ public class ImageService {
     }
 
     @Transactional(readOnly = true)
-    public  String getImageUrl(Image image){
+    public String getImageUrl(Image image){
         boolean useS3 = imageProperties.isUseS3();
         if(Objects.isNull(image)) return null;
         String profileUrl;

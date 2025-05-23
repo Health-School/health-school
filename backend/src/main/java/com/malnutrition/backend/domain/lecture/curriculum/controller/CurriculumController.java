@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumUpdateRe
 import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumUploadRequestDto;
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
 import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumService;
+import com.malnutrition.backend.global.rp.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,7 +63,7 @@ public class CurriculumController {
         String filename = URLEncoder.encode(s3path.substring(s3path.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
 
         GetObjectRequest request = GetObjectRequest.builder()
-                .bucket(curriculumService.getS3Service().getBucket())
+                .bucket(curriculumService.getCurriculumS3Service().getBucket())
                 .key(s3path)
                 .build();
 
@@ -107,6 +109,16 @@ public class CurriculumController {
                 "message", e.getMessage()
         ));
     }
+
+
+    @GetMapping("/lecture/{lectureId}")
+    public ResponseEntity<ApiResponse<List<CurriculumResponseDto>>> getCurriculumsByLecture(
+            @PathVariable Long lectureId
+    ) {
+        List<CurriculumResponseDto> response = curriculumService.getCurriculumsByLectureId(lectureId);
+        return ResponseEntity.ok(ApiResponse.success(response, "커리큘럼 목록 조회 성공"));
+    }
+
 }
 
 

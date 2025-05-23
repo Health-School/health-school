@@ -12,4 +12,5 @@ public interface CurriculumProgressRepository extends JpaRepository<CurriculumPr
     Optional<CurriculumProgress> findByUserIdAndCurriculumId(Long userId, Long curriculumId);
 
     List<CurriculumProgress> findByUserAndLecture(User user, Lecture lecture);
+
 }

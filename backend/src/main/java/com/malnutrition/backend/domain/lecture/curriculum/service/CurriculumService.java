@@ -17,13 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CurriculumService {
 
-    private final S3Service s3Service;
+    private final CurriculumS3Service curriculumS3Service;
     private final CurriculumRepository curriculumRepository;
     private final LectureRepository lectureRepository;
     private final Rq rq;
@@ -54,8 +55,8 @@ public class CurriculumService {
     }
 
     @Transactional(readOnly = true)
-    public S3Service getS3Service() {
-        return this.s3Service;
+    public CurriculumS3Service getCurriculumS3Service() {
+        return this.curriculumS3Service;
     }
 
     // 커리큘럼(영상) 업로드
@@ -70,7 +71,8 @@ public class CurriculumService {
 
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String s3path = "uploads/curriculums/" + fileName;
-        s3Service.uploadFile(s3path, file);
+
+        curriculumS3Service.uploadFile(s3path, file);
 
         Curriculum curriculum = Curriculum.builder()
                 .lecture(lecture)
@@ -110,11 +112,21 @@ public class CurriculumService {
         if (file != null && !file.isEmpty()) {
             validateVideoFile(file);
 
-            s3Service.deleteFile(curriculum.getS3path());
+
+            if (!file.getContentType().startsWith("video/")) {
+                throw new IllegalArgumentException("올바른 영상 파일 형식이 아닙니다.");
+            }
+            if (file.getSize() > 500 * 1024 * 1024) { // 500MB
+                throw new IllegalArgumentException("파일 용량이 너무 큽니다.");
+            }
+
+            // 기존 파일 삭제
+            curriculumS3Service.deleteFile(curriculum.getS3path());
+
 
             String newFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String newS3Path = "uploads/curriculums/" + newFileName;
-            s3Service.uploadFile(newS3Path, file);
+            curriculumS3Service.uploadFile(newS3Path, file);
 
             curriculum.setS3path(newS3Path);
         }
@@ -129,9 +141,18 @@ public class CurriculumService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 커리큘럼이 없습니다."));
 
         // S3 파일 삭제
-        s3Service.deleteFile(curriculum.getS3path());
+        curriculumS3Service.deleteFile(curriculum.getS3path());
 
         // DB에서 삭제
         curriculumRepository.delete(curriculum);
     }
+
+    @Transactional(readOnly = true)
+    public List<CurriculumResponseDto> getCurriculumsByLectureId(Long lectureId) {
+        List<Curriculum> curriculums = curriculumRepository.findByLectureIdOrderBySequenceAsc(lectureId);
+        return curriculums.stream()
+                .map(CurriculumResponseDto::from)
+                .toList();
+    }
+
 }

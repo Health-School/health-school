@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,17 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, String> {
     // 사용자 ID로 결제 내역 조회
     List<Order> findByUser(User user);
+
+
+    // 특정 사용자의 주문 목록을 페이징하여 조회
+    @Query(value = "SELECT o FROM Order o " +
+                   "JOIN FETCH o.lecture l " +
+                   "JOIN FETCH l.trainer t " +
+                   "WHERE o.user = :user",
+           countQuery = "SELECT count(o) FROM Order o WHERE o.user = :user")
+    Page<Order> findPageByUserWithDetails(@Param("user") User user, Pageable pageable);
+
+
 
     // 주문 ID로 결제 내역 조회
     Optional<Order> findById(String orderId);
