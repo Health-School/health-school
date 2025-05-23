@@ -6,6 +6,8 @@ import CurriculumUploadModal from "@/components/CurriculumUploadModal"; // 앞�
 import Image from "next/image";
 import removeMarkdown from "remove-markdown";
 import { useRouter } from "next/navigation"; // 상단에 import 추가
+import NotificationCreateModal from "@/components/NotificationCreateModal"; // Add import at the top
+import NotificationEditModal from "@/components/NotificationEditModal"; // Add import for edit modal
 
 // 강의 상세 DTO
 interface LectureDetailDto {
@@ -48,6 +50,15 @@ interface LectureCategory {
   id: number;
   categoryName: string;
   description: string;
+}
+
+// Add this interface with other interfaces
+interface NotificationDto {
+  id: number;
+  title: string;
+  content: string;
+  lectureName: string;
+  createdAt: string;
 }
 
 const LECTURE_STATUS = {
@@ -98,6 +109,17 @@ export default function LectureManagePage({
   const [editorContent, setEditorContent] = useState(lecture?.content || "");
   // Add this state in the component
   const [categories, setCategories] = useState<LectureCategory[]>([]);
+  // Add this state with other states
+  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  // Add state for notification modal
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  // Add new state for selected notification
+  const [selectedNotification, setSelectedNotification] =
+    useState<NotificationDto | null>(null);
+  // Add state for edit modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingNotification, setEditingNotification] =
+    useState<NotificationDto | null>(null);
 
   // Update all API calls to use lectureIdRef
   useEffect(() => {
@@ -142,6 +164,21 @@ export default function LectureManagePage({
         }
       })
       .catch((error) => console.error("카테고리 조회 실패:", error));
+
+    // Fetch notifications
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureIdRef}`,
+      {
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          setNotifications(response.data);
+        }
+      })
+      .catch((error) => console.error("공지사항 조회 실패:", error));
   }, [lectureIdRef]);
 
   // Update the updateLectureStatus function
@@ -240,10 +277,54 @@ export default function LectureManagePage({
     }
   }, []);
 
+  // Add delete handler function
+  const handleDeleteNotification = async (notificationId: number) => {
+    if (!confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/${notificationId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("공지사항 삭제 실패");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        alert("공지사항이 삭제되었습니다.");
+        // Refresh notifications list
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureIdRef}`,
+          {
+            credentials: "include",
+          }
+        );
+        const updatedData = await updatedResponse.json();
+        if (updatedData.success) {
+          setNotifications(updatedData.data);
+        }
+      }
+    } catch (error) {
+      console.error("공지사항 삭제 실패:", error);
+      alert("공지사항 삭제에 실패했습니다.");
+    }
+  };
+
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div
+      className={`bg-gray-50 min-h-screen ${
+        showNotificationModal ? "opacity-50" : ""
+      }`}
+    >
       {/* 뒤로 가기 버튼 */}
-      <div className="max-w-4xl mx-auto pt-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <button
           onClick={() => router.back()}
           className="flex items-center text-gray-600 hover:text-gray-800"
@@ -266,8 +347,8 @@ export default function LectureManagePage({
       </div>
 
       {/* 강의 정보 카드 */}
-      <div className="max-w-4xl mx-auto mt-8">
-        <div className="bg-white rounded-xl shadow p-6 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div className="bg-white rounded-xl shadow p-8 flex gap-8">
           <Image
             src={lecture?.coverImageUrl || "/lecture-main.jpg"}
             alt="강의 대표 이미지"
@@ -335,7 +416,7 @@ export default function LectureManagePage({
       </div>
 
       {/* 탭 메뉴 */}
-      <div className="max-w-4xl mx-auto mt-8 flex gap-4 border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex gap-4 border-b">
         {["클래스 관리", "강의 목록", "공지사항", "Q&A"].map((tab) => (
           <button
             key={tab}
@@ -353,7 +434,7 @@ export default function LectureManagePage({
 
       {/* Conditional content based on active tab */}
       {activeTab === "강의 목록" && (
-        <div className="max-w-4xl mx-auto mt-4 bg-white rounded-xl shadow p-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 bg-white rounded-xl shadow p-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg">강의 목록</h3>
             <button
@@ -401,7 +482,7 @@ export default function LectureManagePage({
       )}
 
       {activeTab === "클래스 관리" && (
-        <div className="max-w-4xl mx-auto mt-4 bg-white rounded-xl shadow p-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 bg-white rounded-xl shadow p-8">
           <h3 className="font-bold text-lg mb-4">클래스 관리</h3>
           <form
             onSubmit={async (e) => {
@@ -573,6 +654,165 @@ export default function LectureManagePage({
                 }
               })
               .catch((error) => console.error("커리큘럼 조회 실패:", error));
+          }}
+        />
+      )}
+
+      {/* 공지사항 탭 내용 추가 */}
+      {activeTab === "공지사항" && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 bg-white rounded-xl shadow p-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg">공지사항</h3>
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded font-semibold"
+              onClick={() => setShowNotificationModal(true)}
+            >
+              + 공지사항 작성
+            </button>
+          </div>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-2 text-left px-4">제목</th>
+                <th className="w-32 text-center">작성일</th>
+                <th className="w-24 text-center">관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notifications.map((notification) => (
+                <>
+                  <tr
+                    key={notification.id}
+                    className="border-b cursor-pointer hover:bg-gray-50"
+                    onClick={() =>
+                      setSelectedNotification(
+                        selectedNotification?.id === notification.id
+                          ? null
+                          : notification
+                      )
+                    }
+                  >
+                    <td className="py-3 px-4">
+                      <div className="font-medium flex items-center">
+                        {notification.title}
+                        {selectedNotification?.id === notification.id && (
+                          <svg
+                            className="w-4 h-4 ml-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-center text-sm text-gray-600">
+                      {new Date(notification.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="text-center">
+                      <button
+                        className="text-blue-500 mr-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingNotification(notification);
+                          setShowEditModal(true);
+                        }}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="text-red-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNotification(notification.id);
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                  {selectedNotification?.id === notification.id && (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-4 bg-gray-50">
+                        <div className="text-gray-700 whitespace-pre-wrap">
+                          {notification.content}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              ))}
+              {notifications.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="text-center py-4 text-gray-500">
+                    등록된 공지사항이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Add notification modal */}
+      {showNotificationModal && (
+        <div className="fixed inset-0 z-50">
+          <NotificationCreateModal
+            lectureId={Number(lectureIdRef)}
+            onClose={() => setShowNotificationModal(false)}
+            onCreated={() => {
+              // Refresh notifications list
+              fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureIdRef}`,
+                {
+                  credentials: "include",
+                }
+              )
+                .then((res) => res.json())
+                .then((response) => {
+                  if (response.success) {
+                    setNotifications(response.data);
+                  }
+                })
+                .catch((error) => console.error("공지사항 조회 실패:", error));
+            }}
+          />
+        </div>
+      )}
+
+      {/* Edit notification modal */}
+      {showEditModal && editingNotification && (
+        <NotificationEditModal
+          notificationId={editingNotification.id}
+          initialTitle={editingNotification.title}
+          initialContent={editingNotification.content}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingNotification(null);
+          }}
+          onEdited={() => {
+            // Refresh notifications list
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureIdRef}`,
+              {
+                credentials: "include",
+              }
+            )
+              .then((res) => res.json())
+              .then((response) => {
+                if (response.success) {
+                  setNotifications(response.data);
+                }
+              })
+              .catch((error) => console.error("공지사항 조회 실패:", error));
+            setShowEditModal(false);
+            setEditingNotification(null);
           }}
         />
       )}
