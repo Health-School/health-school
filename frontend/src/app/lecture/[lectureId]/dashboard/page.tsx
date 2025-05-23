@@ -1,5 +1,8 @@
 "use client";
 
+
+import QnaTab from "@/components/qna/QnaTab";
+
 import React, { useRef, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import NotificationList from "@/components/notification/NotificationList";
@@ -55,9 +58,62 @@ async function saveCurriculumProgress(
   );
 }
 
+
 const LectureListPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
+
+  const [userId, setUserId] = useState<number | null>(null);
+
+  const params = useParams();
+  const lectureId = Number(params?.lectureId);
+  const searchParams = useSearchParams();
+  const curriculumId = searchParams.get("curriculumId");
+
+  // 유저 정보 불러오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`,
+          {
+            credentials: "include", // 쿠키 인증 필요 시
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch user info");
+        }
+        const data = await response.json();
+
+        setUserId(data.data.id);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  const lectures = [
+    {
+      id: 1,
+      section: "기초 운동의 이해",
+      items: [
+        { id: 1, title: "올바른 자세의 중요성", time: "08:45", seconds: 525 },
+        { id: 2, title: "호흡법 기초", time: "07:15", seconds: 435 },
+        { id: 3, title: "운동 전 준비 운동", time: "09:30", seconds: 570 },
+      ],
+    },
+    { id: 2, section: "가슴 운동 기초", items: [] },
+    { id: 3, section: "등 운동 기초", items: [] },
+    { id: 4, section: "하체 운동 기초", items: [] },
+  ];
+
+  const handleTimeJump = (seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      videoRef.current.play();
+
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
@@ -121,6 +177,7 @@ const LectureListPage = () => {
       selectedCurriculum.lastWatchedSecond > 0
     ) {
       videoRef.current.currentTime = selectedCurriculum.lastWatchedSecond;
+
     }
   }, [selectedCurriculum]);
 
@@ -134,6 +191,8 @@ const LectureListPage = () => {
     const handleTimeUpdate = () => {
       const current = Math.floor(videoRef.current!.currentTime);
       if (videoRef.current!.paused) return; // 정지 상태에서는 저장하지 않음
+
+
 
       // 누적 시청 시간 계산 (간단 예시: 1초마다 1초씩 증가)
       if (current > lastTime) {
@@ -227,12 +286,12 @@ const LectureListPage = () => {
     );
   }
 
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <main className="max-w-[1440px] mx-auto px-12 py-12 grid grid-cols-3 gap-12">
         {/* 왼쪽 비디오 및 설명 */}
         <div className="col-span-2 space-y-8">
-          {/* 영상 */}
           <div className="bg-black aspect-video rounded-xl overflow-hidden">
             <video
               ref={videoRef}
@@ -242,7 +301,6 @@ const LectureListPage = () => {
             />
           </div>
 
-          {/* 강의 설명 */}
           <div>
             <h1 className="text-3xl font-semibold">
               {lectureData.lectureTitle}
@@ -267,7 +325,6 @@ const LectureListPage = () => {
             </div>
           </div>
 
-          {/* 소개 */}
           <div className="space-y-3">
             <h2 className="text-xl font-semibold">강의 소개</h2>
             <div
@@ -281,7 +338,6 @@ const LectureListPage = () => {
 
         {/* 오른쪽 사이드 */}
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
-          {/* 탭 */}
           <div className="flex space-x-6 border-b pb-3">
             {["curriculum", "materials", "qna", "notifications"].map((tab) => (
               <button
@@ -305,6 +361,7 @@ const LectureListPage = () => {
             ))}
           </div>
 
+
           {/* 공지사항 탭일 때 리스트 보여주기 */}
           {selectedTab === "notifications" && (
             <NotificationList
@@ -314,6 +371,7 @@ const LectureListPage = () => {
           )}
 
           {/* 커리큘럼 */}
+
           {selectedTab === "curriculum" && (
             <div className="space-y-2">
               {/* 진도율 바 */}
@@ -372,6 +430,8 @@ const LectureListPage = () => {
                   % 완료
                 </span>
               </div>
+
+
               <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white overflow-hidden">
                 {lectureData.curriculumDetailDtoList.map((curriculum, idx) => {
                   const isSelected =
@@ -399,6 +459,7 @@ const LectureListPage = () => {
                           className={`font-medium ${
                             isSelected ? "text-green-700" : "text-gray-900"
                           }`}
+
                         >
                           {idx + 1}. {curriculum.curriculumTitle}
                         </div>
@@ -416,6 +477,18 @@ const LectureListPage = () => {
               </ul>
             </div>
           )}
+
+
+          {selectedTab === "qna" && userId !== null && (
+            <QnaTab lectureId={lectureId} userId={userId} />
+          )}
+
+          <button className="w-full bg-green-600 text-white py-3 rounded mt-6 hover:bg-green-700 text-lg">
+            나의 운동 기록 작성하기
+          </button>
+
+      
+
         </aside>
 
         {/* 공지사항 상세 모달 */}

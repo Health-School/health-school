@@ -10,4 +10,6 @@ public class CommentRequestDto {
     private Long qnaboardId;
     private Long userId;
     private Long parentCommentId; // 대댓글일 경우에만 사용
-}
+
+
+    }
