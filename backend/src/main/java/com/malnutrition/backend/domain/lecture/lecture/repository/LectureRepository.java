@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.lecture.lecture.repository;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
+import com.malnutrition.backend.domain.lecture.notification.entity.Notification;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,11 +49,14 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 
     @Query("""
     SELECT l FROM Lecture l
-    JOIN FETCH l.trainer
+    JOIN FETCH l.trainer t
+    LEFT JOIN FETCH t.profileImage
     JOIN FETCH l.lectureCategory
     LEFT JOIN FETCH l.coverImage
     WHERE l.id = :id
-    """)
+""")
     Optional<Lecture> findByIdWithAllDetails(@Param("id") Long id);
+
+
 
 }

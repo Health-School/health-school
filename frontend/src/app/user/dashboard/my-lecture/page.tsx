@@ -190,7 +190,7 @@ export default function MyLecturePage() {
               </p>
               <div className="mt-4">
                 <Link
-                  href={`/lectures/${lecture.lectureId}`}
+                  href={`/lecture/${lecture.lectureId}/dashboard`}
                   className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition-colors text-center block"
                 >
                   강의 이어보기

@@ -13,7 +13,10 @@ import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,6 +130,22 @@ public class NotificationService {
         }
 
         notificationRepository.delete(notification);
+    }
+    @Transactional
+    public List<NotificationResponseDto> getNotificationsByLecture(Long lectureId, int page, int size) {
+        // JPA 페이징 처리
+        Pageable pageable = (Pageable) PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        Page<Notification> notifications = notificationRepository.findByLectureId(lectureId, pageable);
+
+        return notifications.getContent().stream()
+                .map(notification -> new NotificationResponseDto(
+                        notification.getId(),
+                        notification.getTitle(),
+                        notification.getContent(),
+                        notification.getLecture().getTitle(),
+                        notification.getCreatedDate()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
