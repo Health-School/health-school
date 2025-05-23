@@ -45,6 +45,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             @Param("lectureLevel") LectureLevel lectureLevel,
             Pageable pageable
     );
+
+
     long countByCreatedDateBefore(LocalDateTime localDateTime);
 
     @Query("""

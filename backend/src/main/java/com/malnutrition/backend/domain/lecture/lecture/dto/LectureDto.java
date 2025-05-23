@@ -19,9 +19,10 @@ public class LectureDto {
     private String trainerName;
     private String coverImageUrl;
     private String category;
+    private double averageScore;
     private LocalDateTime createdAt;
 
-    public static LectureDto from(Lecture lecture, String coverImageUrl) {
+    public static LectureDto from(Lecture lecture, String coverImageUrl, double averageScore) {
         return LectureDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
@@ -32,6 +33,7 @@ public class LectureDto {
                 .trainerName(lecture.getTrainer().getNickname()) // getUsername은 User 엔티티에 맞게 수정
                 .category(lecture.getLectureCategory().getCategoryName())
                 .coverImageUrl(coverImageUrl)
+                .averageScore(averageScore)
                 .createdAt(lecture.getCreatedDate())
                 .build();
     }

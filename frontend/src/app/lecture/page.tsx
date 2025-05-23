@@ -14,6 +14,7 @@ type Lecture = {
   lectureLevel: string;
   trainerName: string;
   coverImageUrl: string;
+  averageScore: number;
   category: string; // 추가
   createdAt: string; // 추가 (LocalDateTime → string으로 받음)
 };
@@ -154,12 +155,7 @@ export default function LecturePage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
               </svg>
             </button>
             {levelDropdownOpen && (
@@ -231,6 +227,64 @@ export default function LecturePage() {
                 <div className="mb-1">
                   <span className="text-black font-bold text-base">
                     {lecture.price?.toLocaleString()}원
+                  </span>
+                </div>
+                {/* 평점 별점 표시 */}
+                <div className="flex items-center gap-1 mb-1">
+                  {Array.from({ length: 5 }).map((_, idx) => {
+                    const score = lecture.averageScore ?? 0;
+                    if (score >= idx + 1) {
+                      // 꽉 찬 별
+                      return (
+                        <svg
+                          key={idx}
+                          className="w-4 h-4 text-yellow-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                        </svg>
+                      );
+                    } else if (score > idx && score < idx + 1) {
+                      // 반 별
+                      return (
+                        <svg key={idx} className="w-4 h-4" viewBox="0 0 20 20">
+                          <defs>
+                            <linearGradient
+                              id={`half${lecture.id}-${idx}`}
+                              x1="0"
+                              x2="100%"
+                              y1="0"
+                              y2="0"
+                            >
+                              <stop offset="50%" stopColor="#facc15" />
+                              <stop offset="50%" stopColor="#d1d5db" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"
+                            fill={`url(#half${lecture.id}-${idx})`}
+                          />
+                        </svg>
+                      );
+                    } else {
+                      // 빈 별
+                      return (
+                        <svg
+                          key={idx}
+                          className="w-4 h-4 text-gray-300"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                        </svg>
+                      );
+                    }
+                  })}
+                  <span className="text-xs text-gray-500 ml-1">
+                    {Number.isFinite(lecture.averageScore)
+                      ? lecture.averageScore.toFixed(1)
+                      : "-"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 mb-1">
