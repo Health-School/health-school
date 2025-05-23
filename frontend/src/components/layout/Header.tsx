@@ -24,6 +24,8 @@ export default function Header({ hideDropdownMenus = false }) {
     return <div>로딩중...</div>;
   }
 
+  const isAdmin = isLogin && loginUser?.roleName === "ADMIN";
+
   return (
     <nav className="bg-white ">
       <div className="max-w-[1600px] mx-auto ">
@@ -42,10 +44,21 @@ export default function Header({ hideDropdownMenus = false }) {
           </div>
           {/* 우측 메뉴 */}
 
-          <div className="flex items-center">
+
+
+    <div className="flex items-center">
+
+    {isAdmin && (
+        <Link
+        href="/admin"
+        className="ml-3 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
+        > 관리자
+        </Link>
+        )}
+
             <Link
               href="/lecture"
-              className="ml-6 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
+              className="ml-1 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
             >
               강의
             </Link>
