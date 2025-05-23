@@ -76,4 +76,14 @@ public class NotificationController {
             return ResponseEntity.status(500).body(ApiResponse.fail("서버 오류가 발생했습니다."));
         }
     }
+
+    @GetMapping("/lecture/{lectureId}/scroll")
+    public ResponseEntity<?> getNotificationsByLecture(
+            @PathVariable(name = "lectureId") Long lectureId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<NotificationResponseDto> notifications = notificationService.getNotificationsByLecture(lectureId, page, size);
+        return ResponseEntity.ok(ApiResponse.success(notifications, "조회 성공!"));
+    }
 }

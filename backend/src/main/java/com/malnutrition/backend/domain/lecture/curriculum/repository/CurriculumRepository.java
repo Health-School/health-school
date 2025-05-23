@@ -28,10 +28,11 @@ SELECT new com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumDeta
     c.sequence,
     c.content,
     c.s3path,
-    cp.progressRate,
+    cp.totalWatchedSeconds,
     cp.lastWatchedSecond,
     cp.status,
-    cp.completedAt
+    cp.completedAt,
+    cp.lastWatchedAt
 )
 FROM Curriculum c
 LEFT JOIN CurriculumProgress cp

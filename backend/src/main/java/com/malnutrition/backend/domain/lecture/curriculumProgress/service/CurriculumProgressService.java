@@ -39,13 +39,11 @@ public class CurriculumProgressService {
 
     private void updateProgress(int totalWatchedSeconds, int lastWatchedSecond, int duration, CurriculumProgress progress) {
         progress.setTotalWatchedSeconds(totalWatchedSeconds);
-        progress.setDuration(duration);
         progress.setLastWatchedSecond(lastWatchedSecond);
         progress.setLastWatchedAt(java.time.LocalDateTime.now());
         int watchRate = (int) ((double) totalWatchedSeconds / duration * 100);
         if (watchRate >= 90 && progress.getStatus() != ProgressStatus.COMPLETED) {
             progress.setStatus(ProgressStatus.COMPLETED);
-            progress.setCompletedAt(java.time.LocalDateTime.now());
         }
         curriculumProgressRepository.save(progress);
     }
@@ -58,7 +56,6 @@ public class CurriculumProgressService {
                 .user(actor)
                 .curriculum(curriculum)
                 .status(ProgressStatus.KeepGoing)
-                .duration(0)
                 .build();
         curriculumProgressRepository.save(progress);
     }

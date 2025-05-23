@@ -2,20 +2,25 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import NotificationList from "@/components/notification/NotificationList";
+import NotificationModal from "@/components/notification/NotificationModal";
+import { Notification } from "@/components/notification/Notification";
 
 interface CurriculumDetailDto {
+  curriculumId: number;
+
   curriculumTitle: string;
   sequence: number;
   curriculumContent: string;
   curriculumVideoUrl: string;
-  progressRate: number;
+  totalWatchedSeconds: number;
   lastWatchedSecond: number | null;
   progressStatus: string;
   completedAt: string | null;
+  lastWatchedAt: string | null;
 }
 
 interface LectureCurriculumDetailDto {
-  curriculumId: number;
   lectureTitle: string;
   lectureContent: string;
   lectureCategory: string;
@@ -26,9 +31,36 @@ interface LectureCurriculumDetailDto {
   curriculumDetailDtoList: CurriculumDetailDto[];
 }
 
+// 시청 위치 및 누적 시청 시간 저장 함수
+async function saveCurriculumProgress(
+  curriculumId: number,
+  lastWatchedSecond: number,
+  totalWatchedSeconds: number,
+  duration: number
+) {
+  await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/curriculum-progress/${curriculumId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        lastWatchedSecond,
+        totalWatchedSeconds,
+        duration,
+      }),
+    }
+  );
+}
+
 const LectureListPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [selectedNotification, setSelectedNotification] =
+    useState<Notification | null>(null);
   const params = useParams();
   const lectureId = params.lectureId;
   const searchParams = useSearchParams();
@@ -39,6 +71,9 @@ const LectureListPage = () => {
   const [selectedCurriculum, setSelectedCurriculum] =
     useState<CurriculumDetailDto | null>(null);
   const [videoDurations, setVideoDurations] = React.useState<string[]>([]);
+
+  // 누적 시청 시간 관리용 state
+  const [watchedSeconds, setWatchedSeconds] = useState(0);
 
   // 데이터 패칭
   useEffect(() => {
@@ -52,21 +87,30 @@ const LectureListPage = () => {
       const json = await res.json();
       setLectureData(json.data);
 
-      // curriculumId가 있으면 해당 커리큘럼 선택, 없으면 첫 번째 커리큘럼 선택
+      // lastWatchedAt이 있는 강의 중 가장 최근 시청한 강의를 기본 선택
       if (json.data?.curriculumDetailDtoList?.length) {
-        let found = null;
-        if (curriculumId) {
-          found = json.data.curriculumDetailDtoList.find(
-            (c: CurriculumDetailDto) =>
-              String(c.sequence) === String(curriculumId)
+        const list = json.data.curriculumDetailDtoList;
+        // lastWatchedAt이 있는 강의만 필터
+        const watchedList = list.filter(
+          (c: CurriculumDetailDto) => c.lastWatchedAt
+        );
+        let defaultCurriculum = null;
+        if (watchedList.length > 0) {
+          // 가장 최근(lastWatchedAt이 가장 큰) 강의 선택
+          defaultCurriculum = watchedList.reduce(
+            (a: CurriculumDetailDto, b: CurriculumDetailDto) =>
+              new Date(a.lastWatchedAt!) > new Date(b.lastWatchedAt!) ? a : b
           );
+        } else {
+          // 없으면 첫 번째 강의 선택
+          defaultCurriculum = list[0];
         }
-        setSelectedCurriculum(found || json.data.curriculumDetailDtoList[0]);
+        setSelectedCurriculum(defaultCurriculum);
       }
     }
     fetchLectureDashboard();
     // eslint-disable-next-line
-  }, [lectureId, curriculumId]);
+  }, [lectureId]);
 
   // 비디오 재생 위치 복원
   useEffect(() => {
@@ -80,6 +124,54 @@ const LectureListPage = () => {
     }
   }, [selectedCurriculum]);
 
+  // 영상이 재생될 때마다 시청 위치와 누적 시청 시간 저장
+  useEffect(() => {
+    if (!videoRef.current || !selectedCurriculum) return;
+
+    let lastTime = selectedCurriculum.lastWatchedSecond || 0;
+    let totalWatched = selectedCurriculum.totalWatchedSeconds || 0;
+
+    const handleTimeUpdate = () => {
+      const current = Math.floor(videoRef.current!.currentTime);
+      if (videoRef.current!.paused) return; // 정지 상태에서는 저장하지 않음
+
+      // 누적 시청 시간 계산 (간단 예시: 1초마다 1초씩 증가)
+      if (current > lastTime) {
+        totalWatched += current - lastTime;
+        lastTime = current;
+        setWatchedSeconds(totalWatched);
+      }
+      // 5초마다 서버에 저장 (최적화 가능)
+      if (current % 5 === 0) {
+        saveCurriculumProgress(
+          selectedCurriculum.curriculumId,
+          current,
+          totalWatched,
+          Math.floor(videoRef.current!.duration)
+        );
+      }
+    };
+
+    // 영상이 끝났을 때도 저장
+    const handleEnded = () => {
+      const duration = Math.floor(videoRef.current!.duration);
+      saveCurriculumProgress(
+        selectedCurriculum.curriculumId,
+        duration,
+        duration,
+        duration
+      );
+    };
+
+    videoRef.current.addEventListener("timeupdate", handleTimeUpdate);
+    videoRef.current.addEventListener("ended", handleEnded);
+
+    return () => {
+      videoRef.current?.removeEventListener("timeupdate", handleTimeUpdate);
+      videoRef.current?.removeEventListener("ended", handleEnded);
+    };
+  }, [selectedCurriculum]);
+
   // 강의 데이터가 바뀔 때마다 모든 영상의 duration을 가져옴
   useEffect(() => {
     if (!lectureData) return;
@@ -91,7 +183,7 @@ const LectureListPage = () => {
         video.preload = "metadata";
         video.onloadedmetadata = () => {
           const dur = video.duration;
-          if (!isNaN(dur) && isFinite(dur)) {
+          if (!isNaN(dur) && isFinite(dur) && dur > 0) {
             const min = Math.floor(dur / 60)
               .toString()
               .padStart(2, "0");
@@ -100,9 +192,26 @@ const LectureListPage = () => {
               .padStart(2, "0");
             resolve(`${min}:${sec}`);
           } else {
-            resolve("--:--");
+            resolve("00:00");
           }
         };
+        // duration이 바로 로드되는 경우도 처리
+        setTimeout(() => {
+          if (
+            video.readyState >= 1 &&
+            !isNaN(video.duration) &&
+            isFinite(video.duration) &&
+            video.duration > 0
+          ) {
+            const min = Math.floor(video.duration / 60)
+              .toString()
+              .padStart(2, "0");
+            const sec = Math.floor(video.duration % 60)
+              .toString()
+              .padStart(2, "0");
+            resolve(`${min}:${sec}`);
+          }
+        }, 300);
         video.onerror = () => resolve("--:--");
       });
     });
@@ -174,7 +283,7 @@ const LectureListPage = () => {
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
           {/* 탭 */}
           <div className="flex space-x-6 border-b pb-3">
-            {["curriculum", "materials", "qna", "notes"].map((tab) => (
+            {["curriculum", "materials", "qna", "notifications"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -189,12 +298,20 @@ const LectureListPage = () => {
                     curriculum: "커리큘럼",
                     materials: "학습자료",
                     qna: "Q&A",
-                    notes: "노트",
+                    notifications: "공지사항",
                   }[tab]
                 }
               </button>
             ))}
           </div>
+
+          {/* 공지사항 탭일 때 리스트 보여주기 */}
+          {selectedTab === "notifications" && (
+            <NotificationList
+              lectureId={String(lectureId)}
+              onSelect={setSelectedNotification}
+            />
+          )}
 
           {/* 커리큘럼 */}
           {selectedTab === "curriculum" && (
@@ -208,7 +325,7 @@ const LectureListPage = () => {
                 <span className="font-bold text-green-600 text-base">
                   {
                     lectureData.curriculumDetailDtoList.filter(
-                      (c) => c.progressStatus === "COMPLETE"
+                      (c) => c.progressStatus === "COMPLETED"
                     ).length
                   }
                 </span>
@@ -222,7 +339,7 @@ const LectureListPage = () => {
                     style={{
                       width: `${
                         (lectureData.curriculumDetailDtoList.filter(
-                          (c) => c.progressStatus === "COMPLETE"
+                          (c) => c.progressStatus === "COMPLETED"
                         ).length /
                           lectureData.curriculumDetailDtoList.length) *
                         100
@@ -233,7 +350,7 @@ const LectureListPage = () => {
                 <span className="text-gray-500 text-base font-semibold ml-2">
                   {(
                     (lectureData.curriculumDetailDtoList.filter(
-                      (c) => c.progressStatus === "COMPLETE"
+                      (c) => c.progressStatus === "COMPLETED"
                     ).length /
                       lectureData.curriculumDetailDtoList.length) *
                     100
@@ -247,7 +364,7 @@ const LectureListPage = () => {
                 <span className="text-sm text-green-600">
                   {Math.round(
                     (lectureData.curriculumDetailDtoList.filter(
-                      (c) => c.progressStatus === "COMPLETE"
+                      (c) => c.progressStatus === "COMPLETED"
                     ).length /
                       lectureData.curriculumDetailDtoList.length) *
                       100
@@ -259,7 +376,7 @@ const LectureListPage = () => {
                 {lectureData.curriculumDetailDtoList.map((curriculum, idx) => {
                   const isSelected =
                     selectedCurriculum.sequence === curriculum.sequence;
-                  const isComplete = curriculum.progressStatus === "COMPLETE";
+                  const isComplete = curriculum.progressStatus === "COMPLETED";
                   return (
                     <li
                       key={curriculum.sequence}
@@ -268,7 +385,7 @@ const LectureListPage = () => {
                         ${isSelected ? "bg-green-50" : "bg-white"}
                         transition-colors
                       `}
-                      onClick={() => setSelectedCurriculum(curriculum)}
+                      onClick={() => setSelectedCurriculum(curriculum)} // 커리큘럼 선택 시
                     >
                       {/* 완료 아이콘 */}
                       {isComplete ? (
@@ -299,21 +416,15 @@ const LectureListPage = () => {
               </ul>
             </div>
           )}
-
-          {/* 하단 버튼 */}
-          <button className="w-full bg-green-600 text-white py-3 rounded mt-6 hover:bg-green-700 text-lg">
-            나의 운동 기록 작성하기
-          </button>
-
-          <div className="flex justify-between mt-4">
-            <button className="text-base text-gray-500 hover:underline">
-              ← 이전 강의
-            </button>
-            <button className="text-base text-green-600 font-semibold hover:underline">
-              다음 강의 →
-            </button>
-          </div>
         </aside>
+
+        {/* 공지사항 상세 모달 */}
+        {selectedNotification && (
+          <NotificationModal
+            notification={selectedNotification}
+            onClose={() => setSelectedNotification(null)}
+          />
+        )}
       </main>
     </div>
   );

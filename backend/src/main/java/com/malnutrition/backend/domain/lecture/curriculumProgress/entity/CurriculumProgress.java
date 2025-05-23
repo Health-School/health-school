@@ -36,9 +36,6 @@ public class CurriculumProgress extends BaseEntity {
     private ProgressStatus status;
 
     @Column(nullable = true)
-    private Integer duration = 0;
-
-    @Column(nullable = true)
     private Integer totalWatchedSeconds = 0;
 
     @Column(nullable = true)

@@ -22,10 +22,11 @@ public class CurriculumDetailDto {
     String curriculumVideoUrl;
 
     //커리큘럼 진행도
-    Integer progressRate;
+    Integer totalWatchedSeconds;
     Integer lastWatchedSecond;
     String progressStatus;
     LocalDateTime completedAt;
+    LocalDateTime lastWatchedAt;
 
 
     public CurriculumDetailDto(Long curriculumId,
@@ -33,19 +34,21 @@ public class CurriculumDetailDto {
                                Integer sequence,
                                String curriculumContent,
                                String curriculumVideoUrl,
-                               Integer progressRate,
+                               Integer totalWatchedSeconds,
                                Integer lastWatchedSecond,
                                ProgressStatus progressStatus,
-                               LocalDateTime completedAt) {
+                               LocalDateTime completedAt,
+                               LocalDateTime lastWatchedAt) {
         this.curriculumId = curriculumId;
         this.curriculumTitle = curriculumTitle;
         this.sequence = sequence;
         this.curriculumContent = curriculumContent;
         this.curriculumVideoUrl = curriculumVideoUrl;
-        this.progressRate = progressRate != null ? lastWatchedSecond : 0;
+        this.totalWatchedSeconds = totalWatchedSeconds != null ? totalWatchedSeconds : 0;
         this.lastWatchedSecond = lastWatchedSecond;
-        this.progressStatus = progressStatus != null ? progressStatus.getDescription() : null;
+        this.progressStatus = progressStatus != null ? progressStatus.name() : null;
         this.completedAt = completedAt;
+        this.lastWatchedAt = lastWatchedAt;
     }
 
 
