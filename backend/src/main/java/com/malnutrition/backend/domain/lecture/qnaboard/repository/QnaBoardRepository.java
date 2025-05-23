@@ -19,4 +19,6 @@ public interface QnaBoardRepository extends JpaRepository<QnaBoard ,Long> {
             @Param("trainerId") Long trainerId,
             Pageable pageable
     );
+
+    Page<QnaBoard> findByLectureId(Long lectureId, Pageable pageable);
 }

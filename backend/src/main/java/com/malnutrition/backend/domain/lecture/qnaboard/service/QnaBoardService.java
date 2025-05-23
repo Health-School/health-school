@@ -122,4 +122,10 @@ public class QnaBoardService {
         Page<QnaBoard> qnaBoards = qnaBoardRepository.findByLectureIdAndTrainerId(lectureId, trainerId, pageable);
         return qnaBoards.map(QnaBoardResponseDto::from);
     }
+
+    @Transactional
+    public Page<QnaBoardResponseDto> getQnaByLectureId(Long lectureId, Pageable pageable) {
+        return qnaBoardRepository.findByLectureId(lectureId, pageable)
+                .map(QnaBoardResponseDto::from);
+    }
 }

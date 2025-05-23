@@ -103,4 +103,12 @@ public class CommentService {
 
         return roots;
     }
+
+    @Transactional
+    public List<CommentResponseDto> getMyCommentsByQnaBoardId(Long qnaBoardId, Long userId) {
+        List<Comment> comments = commentRepository.findByQnaBoardIdAndUserId(qnaBoardId, userId);
+        return comments.stream()
+                .map(CommentResponseDto::from)
+                .toList();
+    }
 }

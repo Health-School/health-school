@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CurriculumRepository extends JpaRepository<Curriculum,Long> {
@@ -19,4 +20,6 @@ public interface CurriculumRepository extends JpaRepository<Curriculum,Long> {
     Optional<Curriculum> findWithLectureAndUserById(@Param("id") Long id);
 
     int countByLecture(Lecture lecture);
+
+    List<Curriculum> findByLectureIdOrderBySequenceAsc(Long lectureId);
 }
