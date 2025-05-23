@@ -55,7 +55,6 @@ export default function ReportModal({ lectureId, onClose }: ReportModalProps) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      {/* 🔹 배경: 완전 투명 */}
       <div
         className="absolute inset-0 bg-transparent"
         onClick={onClose}
