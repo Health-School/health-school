@@ -6,6 +6,7 @@ import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
 import org.eclipse.angus.mail.imap.protocol.BODY;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificationExecutor<User> {
     Optional<User> findByEmail(String email);
     Optional<User> findByRefreshToken(String refreshToken);
 

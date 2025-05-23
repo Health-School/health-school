@@ -57,6 +57,14 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 """)
     Optional<Lecture> findByIdWithAllDetails(@Param("id") Long id);
 
+    @Query(value = "SELECT l FROM Lecture l " +
+                   "LEFT JOIN FETCH l.lectureCategory " +
+                   "LEFT JOIN FETCH l.coverImage " +
+                   "WHERE l.trainer = :trainer",
+            countQuery = "SELECT count(l) FROM Lecture l WHERE l.trainer = :trainer")
+    Page<Lecture> findByTrainer(@Param("trainer") User trainer, Pageable pageable);
+
+
 
 
 }

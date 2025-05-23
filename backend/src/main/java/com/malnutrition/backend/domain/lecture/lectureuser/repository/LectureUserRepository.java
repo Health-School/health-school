@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.repository;
 
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
@@ -13,13 +14,20 @@ import java.util.Optional;
 
 public interface LectureUserRepository extends JpaRepository<LectureUser, Long> {
     List<LectureUser> findByUser(User user);
+
+    @Query(value = "SELECT lu FROM LectureUser lu " +
+            "JOIN FETCH lu.lecture l " +
+            "JOIN FETCH l.trainer " +
+            "LEFT JOIN FETCH l.coverImage " +
+            "WHERE lu.user = :user",
+            countQuery = "SELECT count(lu) FROM LectureUser lu WHERE lu.user = :user")
     Page<LectureUser> findByUser(User user, Pageable pageable);
 
     @Query("""
     SELECT lu FROM LectureUser lu
     JOIN FETCH lu.lecture l
     JOIN FETCH l.trainer
-    WHERE lu.id = :id
+    WHERE lu.id = :idg
 """)
     Optional<LectureUser> findWithLectureAndTrainerById(@Param("id") Long id);
 
@@ -35,4 +43,7 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
 
     boolean existsByUserIdAndLecture_Id(Long userId, Long lectureId);
 
+
+    @Query("SELECT COUNT(DISTINCT lu.user) FROM LectureUser lu WHERE lu.lecture = :lecture")
+    Long countDistinctUsersByLecture(@Param("lecture") Lecture lecture);
 }
