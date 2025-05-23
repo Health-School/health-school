@@ -61,6 +61,24 @@ interface NotificationDto {
   createdAt: string;
 }
 
+// Add this interface with other interfaces
+interface StudentEnrollmentDto {
+  id: number;
+  userName: string;
+  userEmail: string;
+  enrolledAt: string;
+  progress: number;
+}
+
+// Update the interface to match the backend DTO
+interface UserLectureDto {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  profileImage: string;
+}
+
 const LECTURE_STATUS = {
   예정: "예정",
   진행중: "진행중",
@@ -120,6 +138,8 @@ export default function LectureManagePage({
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingNotification, setEditingNotification] =
     useState<NotificationDto | null>(null);
+  // Add state for students
+  const [students, setStudents] = useState<UserLectureDto[]>([]);
 
   // Update all API calls to use lectureIdRef
   useEffect(() => {
@@ -179,6 +199,21 @@ export default function LectureManagePage({
         }
       })
       .catch((error) => console.error("공지사항 조회 실패:", error));
+
+    // Fetch students
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectureUsers/${lectureIdRef}/users`,
+      {
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          setStudents(response.data);
+        }
+      })
+      .catch((error) => console.error("수강생 목록 조회 실패:", error));
   }, [lectureIdRef]);
 
   // Update the updateLectureStatus function
@@ -417,19 +452,21 @@ export default function LectureManagePage({
 
       {/* 탭 메뉴 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex gap-4 border-b">
-        {["클래스 관리", "강의 목록", "공지사항", "Q&A"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 border-b-2 ${
-              activeTab === tab
-                ? "border-green-500 font-bold text-green-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            } transition-colors`}
-          >
-            {tab}
-          </button>
-        ))}
+        {["클래스 관리", "강의 목록", "공지사항", "수강생 목록", "Q&A"].map(
+          (tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 border-b-2 ${
+                activeTab === tab
+                  ? "border-green-500 font-bold text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              } transition-colors`}
+            >
+              {tab}
+            </button>
+          )
+        )}
       </div>
 
       {/* Conditional content based on active tab */}
@@ -815,6 +852,53 @@ export default function LectureManagePage({
             setEditingNotification(null);
           }}
         />
+      )}
+
+      {/* 수강생 목록 탭 내용 추가 */}
+      {activeTab === "수강생 목록" && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 bg-white rounded-xl shadow p-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg">수강생 목록</h3>
+            <div className="text-sm text-gray-500">
+              총 {students.length}명의 수강생이 있습니다.
+            </div>
+          </div>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-2 text-left px-4">프로필</th>
+                <th className="py-2 text-left px-4">이름</th>
+                <th className="py-2 text-left px-4">이메일</th>
+                <th className="py-2 text-left px-4">연락처</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student) => (
+                <tr key={student.id} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-4">
+                    <Image
+                      src={student.profileImage || "/default-profile.png"}
+                      alt={`${student.name}의 프로필`}
+                      width={40}
+                      height={40}
+                      className="rounded-full"
+                    />
+                  </td>
+                  <td className="py-3 px-4">{student.name}</td>
+                  <td className="py-3 px-4 text-gray-600">{student.email}</td>
+                  <td className="py-3 px-4 text-gray-600">{student.phone}</td>
+                </tr>
+              ))}
+              {students.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-4 text-gray-500">
+                    등록된 수강생이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
