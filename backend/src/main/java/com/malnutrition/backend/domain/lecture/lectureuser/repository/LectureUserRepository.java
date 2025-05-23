@@ -35,4 +35,6 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
 
     boolean existsByUserIdAndLecture_Id(Long userId, Long lectureId);
 
+    List<LectureUser> findByLectureId(Long lectureId);
+
 }

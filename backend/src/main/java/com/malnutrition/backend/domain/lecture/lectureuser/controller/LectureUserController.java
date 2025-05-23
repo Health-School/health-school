@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.controller;
 
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
+import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserLectureDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.service.LectureUserService;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -15,10 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -66,5 +64,12 @@ public class LectureUserController {
         Page<UserResponseDto> students = lectureUserService.getStudentsByTrainerId(trainerId, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(students, "수강생 목록 조회 성공"));
+    }
+
+    @Operation(summary = "강의 수강생 목록 조회", description = "해당 강의를 수강 중인 유저들의 목록을 반환합니다.")
+    @GetMapping("/{lectureId}/users")
+    public ResponseEntity<?> getLectureUsers(@PathVariable Long lectureId) {
+        List<UserLectureDto> userDtos = lectureUserService.getUsersByLectureId(lectureId);
+        return ResponseEntity.ok(ApiResponse.success(userDtos, "수강생 목록 조회 성공"));
     }
 }
