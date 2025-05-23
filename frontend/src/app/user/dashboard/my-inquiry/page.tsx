@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ChatRoom from "@/components/ChatRoom";
 
 // Update Trainer interface to match TrainerUserDto
 interface Trainer {
@@ -68,6 +69,9 @@ export default function ConsultationPage() {
   // Add new states for editing
   const [isEditing, setIsEditing] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+
+  // Add new state for chat modal
+  const [chatRoomId, setChatRoomId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchSchedules();
@@ -152,7 +156,7 @@ export default function ConsultationPage() {
     fetchSchedules();
   }, [page]);
 
-  // Add function to handle chat room entry
+  // Update the chat room entry handler
   const handleChatRoomEntry = async (scheduleId: number) => {
     try {
       const response = await fetch(
@@ -167,19 +171,16 @@ export default function ConsultationPage() {
       }
 
       const result = await response.json();
-      // result 객체 전체를 콘솔에 출력하여 구조 확인
       console.log("Chat room response:", result);
 
-      // API 응답 구조에 맞게 수정
-      const chatRoom: ChatRoomResponseDto = result; // .data 제거
+      const chatRoom: ChatRoomResponseDto = result;
 
-      // 채팅방 ID가 있는지 확인
       if (!chatRoom.id) {
         throw new Error("Invalid chat room ID");
       }
 
-      // Navigate to chat room using the chat room id
-      window.location.href = `/chat/room/${chatRoom.id}`;
+      // Instead of navigation, set the chat room ID
+      setChatRoomId(chatRoom.id);
     } catch (error) {
       console.error("Failed to enter chat room:", error);
       alert("채팅방 입장에 실패했습니다.");
@@ -607,6 +608,11 @@ export default function ConsultationPage() {
           다음
         </button>
       </div>
+
+      {/* Add ChatRoom modal */}
+      {chatRoomId && (
+        <ChatRoom roomId={chatRoomId} onClose={() => setChatRoomId(null)} />
+      )}
     </div>
   );
 }

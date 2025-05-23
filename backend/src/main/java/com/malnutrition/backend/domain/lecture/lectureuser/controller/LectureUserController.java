@@ -32,9 +32,9 @@ public class LectureUserController {
 
     @GetMapping("/my-lectures")
     public ResponseEntity<?> getMyLectures(
-            @RequestParam(defaultValue = "latest") String sort,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "latest", name = "sort") String sort,
+            @RequestParam(defaultValue = "0", name = "page") int page,
+            @RequestParam(defaultValue = "10", name = "size") int size) {
         User user = rq.getActor();
         if (user == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
@@ -57,8 +57,8 @@ public class LectureUserController {
 
     @GetMapping("/students")
     public ResponseEntity<?> getStudentsByTrainer(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0", name = "page") int page,
+            @RequestParam(defaultValue = "10", name = "size") int size
     ) {
         Long trainerId = rq.getActor().getId();
         Pageable pageable = PageRequest.of(page, size);

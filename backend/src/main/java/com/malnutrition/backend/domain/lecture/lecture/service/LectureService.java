@@ -128,7 +128,7 @@ public class LectureService {
 
         lectureRepository.save(lecture);
     }
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<LectureDto> getLectures(Pageable pageable, String category, LectureLevel lectureLevel) {
         return lectureRepository.findAllWithFiltersPaged(category,lectureLevel,pageable)
                 .map((lecture -> {
@@ -187,8 +187,6 @@ public class LectureService {
         return lectureRepository.save(lecture);
     }
 
-
-
     @Transactional(readOnly = true)
     public LectureCurriculumDetailDto getLectureCurriculumDetailDto(Long lectureId) {
 
@@ -217,8 +215,6 @@ public class LectureService {
                 .build();
 
     }
-
-
 
 
 }

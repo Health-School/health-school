@@ -25,7 +25,7 @@ public class CurriculumProgressController {
     public ResponseEntity<?> updateProgress(
             @PathVariable(name = "curriculumId") Long curriculumId,
             @RequestBody @Valid CurriculumProgressRequestDto dto) {
-        curriculumProgressService.updateProgress(
+        curriculumProgressService.updateOrCreateProgress(
                 curriculumId,
                 dto.getTotalWatchedSeconds(),
                 dto.getLastWatchedSecond(),

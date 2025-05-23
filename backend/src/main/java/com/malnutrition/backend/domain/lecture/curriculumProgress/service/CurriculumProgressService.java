@@ -23,7 +23,7 @@ public class CurriculumProgressService {
 
 
     @Transactional
-    public void updateProgress( Long curriculumId, int totalWatchedSeconds, int lastWatchedSecond, int duration) {
+    public void updateOrCreateProgress( Long curriculumId, int totalWatchedSeconds, int lastWatchedSecond, int duration) {
         User actor = rq.getActor();
         CurriculumProgress progress = curriculumProgressRepository.findByUserIdAndCurriculumId(actor.getId(), curriculumId)
                 .orElse(null);
@@ -48,6 +48,7 @@ public class CurriculumProgressService {
         curriculumProgressRepository.save(progress);
     }
 
+
     private void createProgress(Long curriculumId, User actor) {
         CurriculumProgress progress;
         Curriculum curriculum = curriculumRepository.findById(curriculumId)
@@ -59,6 +60,7 @@ public class CurriculumProgressService {
                 .build();
         curriculumProgressRepository.save(progress);
     }
+
 
 
 }
