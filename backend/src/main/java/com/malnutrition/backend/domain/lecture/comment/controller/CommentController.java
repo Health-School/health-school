@@ -22,8 +22,9 @@ public class CommentController {
     private final CommentService commentService;
 
     @Operation(summary = "댓글 생성", description = "댓글을 등록합니다.")
-    @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createComment(@RequestBody CommentRequestDto dto) {
+    @PostMapping("/{qnaId}/comments")
+    public ResponseEntity<ApiResponse<Long>> createComment( @PathVariable("qnaId") Long qnaId, @RequestBody CommentRequestDto dto) {
+        dto.setQnaboardId(qnaId);
         Long id = commentService.createComment(dto);
         return ResponseEntity.ok(ApiResponse.success(id, "생성성공"));
     }
