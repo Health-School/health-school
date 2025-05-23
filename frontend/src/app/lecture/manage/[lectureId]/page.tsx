@@ -1,5 +1,6 @@
 "use client";
 
+import { Editor } from "@tinymce/tinymce-react";
 import { useEffect, useState } from "react";
 import CurriculumUploadModal from "@/components/CurriculumUploadModal"; // 앞서 안내한 모달 컴포넌트
 import Image from "next/image";
@@ -33,6 +34,22 @@ interface CurriculumDto {
   isPublic: boolean;
 }
 
+interface LectureRequestDto {
+  title: string;
+  content: string;
+  price: number;
+  lectureLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+  lectureStatus: "PLANNED" | "ONGOING" | "COMPLETED"; // Updated to match backend enum
+  categoryName: string;
+}
+
+// Add this interface near other interfaces
+interface LectureCategory {
+  id: number;
+  categoryName: string;
+  description: string;
+}
+
 const LECTURE_STATUS = {
   예정: "예정",
   진행중: "진행중",
@@ -44,6 +61,26 @@ const STATUS_STYLES = {
   예정: "bg-yellow-100 text-yellow-800",
   진행중: "bg-green-100 text-green-800",
   완강: "bg-blue-100 text-blue-800",
+} as const;
+
+// Add status mapping constant
+const STATUS_MAPPING = {
+  예정: "PLANNED",
+  진행중: "ONGOING",
+  완강: "COMPLETED",
+} as const;
+
+// Add this constant for level mapping
+const LEVEL_MAPPING = {
+  초급: "BEGINNER",
+  중급: "INTERMEDIATE",
+  고급: "ADVANCED",
+} as const;
+
+const REVERSE_LEVEL_MAPPING = {
+  BEGINNER: "초급",
+  INTERMEDIATE: "중급",
+  ADVANCED: "고급",
 } as const;
 
 export default function LectureManagePage({
@@ -58,9 +95,13 @@ export default function LectureManagePage({
   const [curriculums, setCurriculums] = useState<CurriculumDto[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("강의 목록");
+  const [editorContent, setEditorContent] = useState(lecture?.content || "");
+  // Add this state in the component
+  const [categories, setCategories] = useState<LectureCategory[]>([]);
 
   // Update all API calls to use lectureIdRef
   useEffect(() => {
+    // Fetch lecture details
     fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureIdRef}`,
       {
@@ -75,6 +116,7 @@ export default function LectureManagePage({
       })
       .catch((error) => console.error("강의 조회 실패:", error));
 
+    // Fetch curriculums
     fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/curriculums/${lectureIdRef}`,
       {
@@ -88,6 +130,18 @@ export default function LectureManagePage({
         }
       })
       .catch((error) => console.error("커리큘럼 조회 실패:", error));
+
+    // Update categories fetch to use the correct endpoint
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lecture_categories`, {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          setCategories(response.data);
+        }
+      })
+      .catch((error) => console.error("카테고리 조회 실패:", error));
   }, [lectureIdRef]);
 
   // Update the updateLectureStatus function
@@ -129,6 +183,62 @@ export default function LectureManagePage({
       alert("강의 상태 변경에 실패했습니다.");
     }
   };
+
+  const updateLecture = async (data: LectureRequestDto) => {
+    try {
+      const mappedData = {
+        ...data,
+        lectureStatus: STATUS_MAPPING[lecture?.lectureStatus || "예정"],
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureIdRef}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(mappedData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        alert("강의가 성공적으로 수정되었습니다.");
+        // Fetch updated lecture data immediately
+        const updatedResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureIdRef}`,
+          {
+            credentials: "include",
+          }
+        );
+        const updatedData = await updatedResponse.json();
+        if (updatedData.success) {
+          setLecture(updatedData.data);
+          sessionStorage.setItem("activeTab", "클래스 관리");
+          router.refresh();
+        }
+      }
+    } catch (error) {
+      console.error("강의 수정 실패:", error);
+      alert("강의 수정에 실패했습니다.");
+    }
+  };
+
+  // Add this to your useEffect to check for stored tab
+  useEffect(() => {
+    const storedTab = sessionStorage.getItem("activeTab");
+    if (storedTab) {
+      setActiveTab(storedTab);
+      sessionStorage.removeItem("activeTab");
+    }
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -287,6 +397,160 @@ export default function LectureManagePage({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === "클래스 관리" && (
+        <div className="max-w-4xl mx-auto mt-4 bg-white rounded-xl shadow p-6">
+          <h3 className="font-bold text-lg mb-4">클래스 관리</h3>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const koreanStatus = lecture?.lectureStatus || "예정";
+              const data: LectureRequestDto = {
+                title: formData.get("title") as string,
+                content: editorContent,
+                price: Number(formData.get("price")),
+                lectureLevel:
+                  LEVEL_MAPPING[
+                    formData.get("lectureLevel") as keyof typeof LEVEL_MAPPING
+                  ],
+                lectureStatus:
+                  STATUS_MAPPING[koreanStatus as keyof typeof STATUS_MAPPING],
+                categoryName: formData.get("categoryName") as string,
+              };
+              await updateLecture(data);
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                강의명
+              </label>
+              <input
+                type="text"
+                name="title"
+                defaultValue={lecture?.title}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                강의 내용
+              </label>
+              <Editor
+                apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+                value={editorContent}
+                onInit={(evt, editor) => {
+                  setEditorContent(lecture?.content || "");
+                }}
+                onEditorChange={(content) => {
+                  setEditorContent(content);
+                }}
+                init={{
+                  height: 300,
+                  menubar: false,
+                  plugins: [
+                    "advlist",
+                    "autolink",
+                    "lists",
+                    "link",
+                    "image",
+                    "charmap",
+                    "preview",
+                    "anchor",
+                    "searchreplace",
+                    "visualblocks",
+                    "code",
+                    "fullscreen",
+                    "insertdatetime",
+                    "media",
+                    "table",
+                    "code",
+                    "help",
+                    "wordcount",
+                  ],
+                  toolbar:
+                    "undo redo | blocks | " +
+                    "bold italic forecolor | alignleft aligncenter " +
+                    "alignright alignjustify | bullist numlist outdent indent | " +
+                    "removeformat | help",
+                  content_style:
+                    "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                수강료
+              </label>
+              <input
+                type="number"
+                name="price"
+                defaultValue={lecture?.price}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                난이도
+              </label>
+              <select
+                name="lectureLevel"
+                value={lecture?.lectureLevel || "초급"} // Changed from defaultValue to value
+                onChange={(e) => {
+                  const updatedLecture = {
+                    ...lecture!,
+                    lectureLevel: e.target.value,
+                  };
+                  setLecture(updatedLecture);
+                }}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              >
+                <option value="초급">초급</option>
+                <option value="중급">중급</option>
+                <option value="고급">고급</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                카테고리
+              </label>
+              <select
+                name="categoryName"
+                value={lecture?.categoryName || ""} // Changed from defaultValue to value
+                onChange={(e) => {
+                  const updatedLecture = {
+                    ...lecture!,
+                    categoryName: e.target.value,
+                  };
+                  setLecture(updatedLecture);
+                }}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              >
+                <option value="">카테고리 선택</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.categoryName}>
+                    {category.categoryName}
+                    {category.description && ` - ${category.description}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                수정하기
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
