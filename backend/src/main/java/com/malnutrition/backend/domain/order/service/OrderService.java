@@ -60,6 +60,23 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getOrdersByUser(User user, Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findPageByUserWithDetails(user, pageable);
+
+        return orderPage.map(order -> OrderResponse.builder()
+                .id(order.getId())
+                .amount(order.getAmount())
+                .orderStatus(order.getOrderStatus().name())
+                .tossPaymentMethod(order.getTossPaymentMethod() != null ? order.getTossPaymentMethod().name() : null)
+                .requestAt(order.getRequestedAt())
+                .approvedAt(order.getApprovedAt())
+                .lectureId(order.getLecture().getId())
+                .lectureTitle(order.getLecture().getTitle())
+                .trainerName(order.getLecture().getTrainer().getNickname())
+                .build());
+    }
+
 
     // 결제 내역을 주문 ID로 조회
     @Transactional(readOnly = true)

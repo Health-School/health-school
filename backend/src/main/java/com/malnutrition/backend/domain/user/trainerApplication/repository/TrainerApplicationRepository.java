@@ -18,11 +18,21 @@ public interface TrainerApplicationRepository extends JpaRepository<TrainerAppli
     // 특정 사용자의 트레이너 신청 내역 최신순 조회
     List<TrainerApplication> findByUserOrderByCreatedDateDesc(User user);
 
+
+    @Query(value = "SELECT ta FROM TrainerApplication ta " +
+                   "JOIN FETCH ta.user u " +
+                   "WHERE ta.user = :user " +
+                   "ORDER BY ta.createdDate DESC",
+        countQuery = "SELECT count(ta) FROM TrainerApplication ta WHERE ta.user = :user")
+    Page<TrainerApplication> findByUserOrderByCreatedDateDesc(User user, Pageable pageable);
+
+
     // 특정 사용자의 가장 최근 트레이너 신청 건 조회
     Optional<TrainerApplication> findTopByUserOrderByCreatedDateDesc(User user);
 
     // 특정 조건의 신청 목록만 조회
     Page<TrainerApplication> findByVerificationResultOrderByCreatedDateDesc(TrainerVerificationStatus verificationResult, Pageable pageable);
+
 
 
     @Query("SELECT DISTINCT ta FROM TrainerApplication ta " +
@@ -33,5 +43,7 @@ public interface TrainerApplicationRepository extends JpaRepository<TrainerAppli
             "LEFT JOIN FETCH sc.image sci " +
             "WHERE ta.id = :applicationId")
     Optional<TrainerApplication> findByIdWithDetails(@Param("applicationId") Long applicationId);
+
+    Optional<TrainerApplication> findTopByUserAndVerificationResultOrderByCreatedDateDesc(User user, TrainerVerificationStatus verificationStatus);
 
 }
