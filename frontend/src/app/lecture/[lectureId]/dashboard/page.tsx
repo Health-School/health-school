@@ -487,14 +487,7 @@ const LectureListPage = () => {
             나의 운동 기록 작성하기
           </button>
 
-          <div className="flex justify-between mt-4">
-            <button className="text-base text-gray-500 hover:underline">
-              ← 이전 강의
-            </button>
-            <button className="text-base text-green-600 font-semibold hover:underline">
-              다음 강의 →
-            </button>
-          </div>
+      
 
         </aside>
 
