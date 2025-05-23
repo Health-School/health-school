@@ -32,10 +32,14 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AdminDashboardService {
 
+    private static final double ZERO = 0.0;
+    private static final double ONE_HUNDRED = 100.0;
+
     private final UserRepository userRepository;
     private final DailyMetricSnapshotRepository dailyMetricSnapshotRepository;
     private final LectureRepository lectureRepository;
     private final OrderRepository orderRepository;
+
 
     public MetricWidgetDto getTotalUsersMetric() {
         // 현재 총 사용자 수
@@ -128,11 +132,11 @@ public class AdminDashboardService {
             return null;
 
         if(yesterdayValue == 0)
-            return (currentValue > 0) ? 100.0 : 0.0;
+            return (currentValue > 0) ? ONE_HUNDRED : ZERO;
 
-        double change = ((double) (currentValue - yesterdayValue) / yesterdayValue) * 100.0;
+        double change = ((double) (currentValue - yesterdayValue) / yesterdayValue) * ONE_HUNDRED;
 
-        return Math.round(change * 100.0) / 100.0;
+        return Math.round(change * ONE_HUNDRED) / ONE_HUNDRED;
 
     }
 

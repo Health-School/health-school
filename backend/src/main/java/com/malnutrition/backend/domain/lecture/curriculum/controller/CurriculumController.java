@@ -63,7 +63,7 @@ public class CurriculumController {
         String filename = URLEncoder.encode(s3path.substring(s3path.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
 
         GetObjectRequest request = GetObjectRequest.builder()
-                .bucket(curriculumService.getS3Service().getBucket())
+                .bucket(curriculumService.getCurriculumS3Service().getBucket())
                 .key(s3path)
                 .build();
 
@@ -110,6 +110,7 @@ public class CurriculumController {
         ));
     }
 
+
     @GetMapping("/lecture/{lectureId}")
     public ResponseEntity<ApiResponse<List<CurriculumResponseDto>>> getCurriculumsByLecture(
             @PathVariable Long lectureId
@@ -117,6 +118,7 @@ public class CurriculumController {
         List<CurriculumResponseDto> response = curriculumService.getCurriculumsByLectureId(lectureId);
         return ResponseEntity.ok(ApiResponse.success(response, "커리큘럼 목록 조회 성공"));
     }
+
 }
 
 

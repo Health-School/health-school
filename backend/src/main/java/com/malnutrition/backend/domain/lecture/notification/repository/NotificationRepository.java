@@ -11,6 +11,10 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByLectureIdOrderByCreatedDateDesc(Long lectureId);
+
+
+    Page<Notification> findByLectureId(Long lectureId, Pageable pageable);
+
     @Query("SELECT n FROM Notification n JOIN FETCH n.lecture l WHERE l.trainer.id = :trainerId")
     Page<Notification> findByLectureTrainerId(@Param("trainerId") Long trainerId, Pageable pageable);
 

@@ -14,7 +14,7 @@ import java.io.InputStream;
 @Getter
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class CurriculumS3Service {
 
     private final S3Client s3Client;
 
@@ -37,11 +37,16 @@ public class S3Service {
         }
     }
 
-
     public void deleteFile(String s3path) {
         s3Client.deleteObject(builder -> builder
                 .bucket(bucket)
                 .key(s3path)
                 .build());
     }
+
+    public String getViewUrl(String uploadPath){
+        return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + uploadPath;
+    }
+
+
 }

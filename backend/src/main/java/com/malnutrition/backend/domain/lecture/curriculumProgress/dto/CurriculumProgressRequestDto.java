@@ -16,11 +16,12 @@ public class CurriculumProgressRequestDto {
 
     @NotNull
     @Min(0)
-    @Max(100)
-    private Integer progressRate;
+    private Integer totalWatchedSeconds;
 
     @NotNull
     @Min(0)
     private Integer lastWatchedSecond;
+
+    private Integer duration;
 
 }
