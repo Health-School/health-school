@@ -82,7 +82,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
   }, [lectureId]);
 
   return (
-    <div className="max-h-[500px] overflow-y-auto" ref={scrollRef}>
+    <div className="max-h-[600px] overflow-y-auto" ref={scrollRef}>
       <ul>
         {notifications.map((n) => (
           <li

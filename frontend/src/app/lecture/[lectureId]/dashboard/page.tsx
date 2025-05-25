@@ -34,6 +34,7 @@ interface LectureCurriculumDetailDto {
 
 // 시청 위치 및 누적 시청 시간 저장 함수
 async function saveCurriculumProgress(
+  lectureId: number,
   curriculumId: number,
   lastWatchedSecond: number,
   totalWatchedSeconds: number,
@@ -48,6 +49,7 @@ async function saveCurriculumProgress(
       },
       credentials: "include",
       body: JSON.stringify({
+        lectureId,
         lastWatchedSecond,
         totalWatchedSeconds,
         duration,
@@ -183,12 +185,15 @@ const LectureListPage = () => {
       }
       // 5초마다 서버에 저장 (최적화 가능)
       if (current % 5 === 0) {
-        saveCurriculumProgress(
-          selectedCurriculum.curriculumId,
-          current,
-          totalWatched,
-          Math.floor(videoRef.current!.duration)
-        );
+        if (lectureId !== undefined) {
+          saveCurriculumProgress(
+            Number(lectureId),
+            selectedCurriculum.curriculumId,
+            current,
+            totalWatched,
+            Math.floor(videoRef.current!.duration)
+          );
+        }
       }
     };
 
@@ -196,6 +201,7 @@ const LectureListPage = () => {
     const handleEnded = () => {
       const duration = Math.floor(videoRef.current!.duration);
       saveCurriculumProgress(
+        Number(lectureId),
         selectedCurriculum.curriculumId,
         duration,
         duration,
@@ -495,48 +501,58 @@ const LectureListPage = () => {
                   % 완료
                 </span>
               </div>
-              <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white overflow-hidden">
-                {lectureData.curriculumDetailDtoList.map((curriculum, idx) => {
-                  const isSelected =
-                    selectedCurriculum.sequence === curriculum.sequence;
-                  const isComplete = curriculum.progressStatus === "COMPLETED";
-                  return (
-                    <li
-                      key={curriculum.sequence}
-                      className={`
-                        flex items-center px-4 py-3 gap-3 cursor-pointer
-                        ${isSelected ? "bg-green-50" : "bg-white"}
-                        transition-colors
-                      `}
-                      onClick={() => setSelectedCurriculum(curriculum)} // 커리큘럼 선택 시
-                    >
-                      {/* 완료 아이콘 */}
-                      {isComplete ? (
-                        <span className="text-green-500 mr-2 text-xl">✔️</span>
-                      ) : (
-                        <span className="text-gray-400 mr-2 text-xl">▶️</span>
-                      )}
-                      {/* 번호 및 제목 */}
-                      <div className="flex-1 min-w-0">
-                        <div
-                          className={`font-medium ${
-                            isSelected ? "text-green-700" : "text-gray-900"
-                          }`}
+              {/* 스크롤 가능한 목차 리스트 */}
+              <div className="max-h-[550px] overflow-y-auto rounded-lg border border-gray-200 bg-white">
+                <ul className="divide-y divide-gray-100">
+                  {lectureData.curriculumDetailDtoList.map(
+                    (curriculum, idx) => {
+                      const isSelected =
+                        selectedCurriculum.sequence === curriculum.sequence;
+                      const isComplete =
+                        curriculum.progressStatus === "COMPLETED";
+                      return (
+                        <li
+                          key={curriculum.sequence}
+                          className={`
+                          flex items-center px-4 py-3 gap-3 cursor-pointer
+                          ${isSelected ? "bg-green-50" : "bg-white"}
+                          transition-colors
+                        `}
+                          onClick={() => setSelectedCurriculum(curriculum)}
                         >
-                          {idx + 1}. {curriculum.curriculumTitle}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate">
-                          {curriculum.curriculumContent}
-                        </div>
-                      </div>
-                      {/* 재생시간: 실제 영상의 총 시간 */}
-                      <div className="ml-4 text-sm text-gray-600 font-mono">
-                        {videoDurations[idx] || "--:--"}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                          {/* 완료 아이콘 */}
+                          {isComplete ? (
+                            <span className="text-green-500 mr-2 text-xl">
+                              ✔️
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 mr-2 text-xl">
+                              ▶️
+                            </span>
+                          )}
+                          {/* 번호 및 제목 */}
+                          <div className="flex-1 min-w-0">
+                            <div
+                              className={`font-medium ${
+                                isSelected ? "text-green-700" : "text-gray-900"
+                              }`}
+                            >
+                              {idx + 1}. {curriculum.curriculumTitle}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">
+                              {curriculum.curriculumContent}
+                            </div>
+                          </div>
+                          {/* 재생시간 */}
+                          <div className="ml-4 text-sm text-gray-600 font-mono">
+                            {videoDurations[idx] || "--:--"}
+                          </div>
+                        </li>
+                      );
+                    }
+                  )}
+                </ul>
+              </div>
             </div>
           )}
         </aside>

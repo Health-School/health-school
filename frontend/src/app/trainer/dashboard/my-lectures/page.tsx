@@ -79,7 +79,7 @@ export default function MyLecturesPage() {
   const [activeTab, setActiveTab] = useState("내 정보");
   const [stats, setStats] = useState<Stats>({
     totalStudents: 0,
-    completionRate: 85,
+    completionRate: 0, // 기본값 0
     averageRating: 4.8,
     totalRevenue: 1850000,
   });
@@ -250,12 +250,35 @@ export default function MyLecturesPage() {
     setIsModalOpen(false);
   };
 
+  // 수료율 가져오기
+  const fetchCompletionRate = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectureUsers/completion-rate`,
+        { credentials: "include" }
+      );
+      if (!response.ok) throw new Error("수료율 조회 실패");
+      const result = await response.json();
+      if (result.success && result.data) {
+        // result.data가 "85%" 형태라면 숫자만 추출
+        const rate = parseFloat(result.data.replace("%", ""));
+        setStats((prev) => ({
+          ...prev,
+          completionRate: rate,
+        }));
+      }
+    } catch (e) {
+      console.error("수료율 조회 실패:", e);
+    }
+  };
+
   useEffect(() => {
     fetchLectures();
     fetchTotalStudents();
     fetchTotalRevenue();
     checkNewConsultations();
-    fetchNotifications(); // Add this line
+    fetchNotifications();
+    fetchCompletionRate(); // 수료율도 패칭
   }, []);
 
   const tabs = [
