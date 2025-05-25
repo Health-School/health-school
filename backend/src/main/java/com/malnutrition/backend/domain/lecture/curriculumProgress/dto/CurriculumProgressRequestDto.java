@@ -14,6 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CurriculumProgressRequestDto {
 
+    private Long lectureId;
+
     @NotNull
     @Min(0)
     private Integer totalWatchedSeconds;

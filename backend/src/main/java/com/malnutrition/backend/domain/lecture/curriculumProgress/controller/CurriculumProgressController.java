@@ -27,9 +27,7 @@ public class CurriculumProgressController {
             @RequestBody @Valid CurriculumProgressRequestDto dto) {
         curriculumProgressService.updateOrCreateProgress(
                 curriculumId,
-                dto.getTotalWatchedSeconds(),
-                dto.getLastWatchedSecond(),
-                dto.getDuration()
+                dto
         );
         return ResponseEntity.ok(ApiResponse.success(null, "성공"));
     }

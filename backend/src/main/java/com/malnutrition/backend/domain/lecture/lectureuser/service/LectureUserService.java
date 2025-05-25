@@ -13,6 +13,7 @@ import com.malnutrition.backend.domain.lecture.lectureuser.dto.EnrollDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserLectureDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.dto.UserResponseDto;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
+import com.malnutrition.backend.domain.lecture.lectureuser.enums.CompletionStatus;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
@@ -83,6 +84,7 @@ public class LectureUserService {
         LectureUser lectureUser = LectureUser.builder()
                 .lecture(lecture)
                 .user(user)
+                .completionStatus(CompletionStatus.NOT_COMPLETED)
                 .build();
         lectureUserRepository.save(lectureUser);
     }
@@ -114,6 +116,17 @@ public class LectureUserService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    public String getTrainerCompletionRateFormatted() {
+        User trainer = rq.getActor();
+        long total = lectureUserRepository.countByTrainerId(trainer.getId());
+        if (total == 0) return "0.00";
+
+        long completed = lectureUserRepository.countCompletedByTrainerId(trainer.getId());
+        double rate = (double) completed / total * 100.0;
+
+        return String.format("%.2f", rate); // 소수 둘째 자리까지 반올림
     }
 
 }

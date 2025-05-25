@@ -45,9 +45,26 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
 
     List<LectureUser> findByLectureId(Long lectureId);
 
-
+    Optional<LectureUser> findByUserIdAndLectureId(Long userId, Long lectureId);
 
     @Query("SELECT COUNT(DISTINCT lu.user) FROM LectureUser lu WHERE lu.lecture = :lecture")
     Long countDistinctUsersByLecture(@Param("lecture") Lecture lecture);
+
+    @Query("""
+        SELECT COUNT(lu)
+        FROM LectureUser lu
+        WHERE lu.lecture.trainer.id = :trainerId
+        """)
+    long countByTrainerId(@Param("trainerId") Long trainerId);
+
+
+    // COMPLETED 상태인 수강자 수
+    @Query("""
+        SELECT COUNT(lu)
+        FROM LectureUser lu
+        WHERE lu.lecture.trainer.id = :trainerId
+        AND lu.completionStatus = com.malnutrition.backend.domain.lecture.lectureuser.enums.CompletionStatus.COMPLETED
+        """)
+    long countCompletedByTrainerId(@Param("trainerId") Long trainerId);
 
 }
