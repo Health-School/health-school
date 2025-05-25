@@ -20,6 +20,7 @@ public class LectureCurriculumDetailDto {
     String lectureContent;
     String lectureCategory;
     String lectureLevel;
+    double averageScore;
 
     //트레이너 정보
     String trainerNickname;

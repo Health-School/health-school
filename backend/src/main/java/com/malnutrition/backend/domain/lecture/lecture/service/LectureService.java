@@ -39,10 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -130,12 +128,28 @@ public class LectureService {
     }
     @Transactional(readOnly = true)
     public Page<LectureDto> getLectures(Pageable pageable, String category, LectureLevel lectureLevel) {
-        return lectureRepository.findAllWithFiltersPaged(category,lectureLevel,pageable)
-                .map((lecture -> {
-                    String imageProfileUrl = imageService.getImageUrl(lecture.getCoverImage());
-                    return LectureDto.from(lecture,imageProfileUrl);
-                }));
+        // 1차 쿼리: 필터링된 강의 목록 페이징 조회
+        Page<Lecture> lectures = lectureRepository.findAllWithFiltersPaged(category, lectureLevel, pageable);
+
+        // 2차 쿼리: 해당 강의들의 평균 평점 조회
+        List<Long> lectureIds = lectures.stream()
+                .map(Lecture::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Double> scoreMap = likeRepository.findAverageScoresByLectureIds(lectureIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],         // lectureId
+                        row -> (Double) row[1]        // averageScore
+                ));
+
+        // 최종: DTO 매핑
+        return lectures.map(lecture -> {
+            String imageProfileUrl = imageService.getImageUrl(lecture.getCoverImage());
+            double averageScore = scoreMap.getOrDefault(lecture.getId(), 0.0);
+            return LectureDto.from(lecture, imageProfileUrl, averageScore);
+        });
     }
+
 
     @Transactional(readOnly = true)
     public Lecture findLectureById(Long lectureId){
@@ -196,12 +210,16 @@ public class LectureService {
         User actor = rq.getActor();
         List<CurriculumDetailDto> curriculumDetailDtoList = curriculumRepository.findCurriculumDetailsWithProgressByLectureId(lecture.getId(), actor.getId());
 
+        Double averageScore = likeRepository.findAverageScoreByLectureId(lectureId);
+
+        if(averageScore == null) averageScore = 0.0;
+
+
         curriculumDetailDtoList.forEach((curriculumDetailDto ->
                 curriculumDetailDto.setCurriculumVideoUrl(curriculumS3Service.getViewUrl(curriculumDetailDto.getCurriculumVideoUrl()))));
 
         User trainer = lecture.getTrainer();
         List<String> allTrainerCertification = certificationRepository.findAllCertificationNamesByUserId(trainer.getId());
-
 
         return LectureCurriculumDetailDto.builder()
                 .lectureTitle(lecture.getTitle())
@@ -211,6 +229,7 @@ public class LectureService {
                 .trainerNickname(trainer.getNickname())
                 .trainerProfileUrl(imageService.getImageUrl(trainer.getProfileImage()))
                 .trainerCertificationNames(allTrainerCertification)
+                .averageScore(averageScore)
                 .curriculumDetailDtoList(curriculumDetailDtoList)
                 .build();
 

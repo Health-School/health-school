@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import React from "react";
 import ReportModal from "@/components/report/ReportModal"; // 신고 모달 import
 
 // TossPaymentsModal 동적 import
@@ -23,6 +24,7 @@ interface LectureResponseDto {
   trainerName: string;
   trainerProfileImageUrl: string | null;
   createdAt: string;
+
   categoryName: string;
   averageScore: number;
 }
@@ -33,10 +35,15 @@ function formatDate(dateString: string) {
   return date.toLocaleDateString("ko-KR").replace(/\.$/, "");
 }
 
-async function fetchLectureDetail(lectureId: number): Promise<LectureResponseDto> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureId}`);
+async function fetchLectureDetail(
+  lectureId: number
+): Promise<LectureResponseDto> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/${lectureId}`
+  );
   if (!res.ok) throw new Error("강의 정보를 불러오지 못했습니다.");
   const data = await res.json();
+  console.log("강의 상세 응답:", data);
   return data.data;
 }
 
@@ -48,6 +55,10 @@ export default function LectureDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTossModal, setShowTossModal] = useState(false);
+
+  const [hoverScore, setHoverScore] = useState<number | null>(null);
+  const [userScore, setUserScore] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false); //  신고 모달 상태
 
   useEffect(() => {
@@ -61,6 +72,40 @@ export default function LectureDetailPage() {
       .catch(() => setError("강의 정보를 불러올 수 없습니다."))
       .finally(() => setIsLoading(false));
   }, [lectureId]);
+
+  // 별 클릭 시 서버에 평점 등록
+  const handleStarClick = async (score: number) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/like`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            lectureId: data?.id,
+            score,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("평점 등록 실패");
+      const result = await res.json();
+      setUserScore(score);
+      // 서버에서 받은 새로운 평균 평점으로 갱신
+      setData((prev) =>
+        prev ? { ...prev, averageScore: result.data.average } : prev
+      );
+      // userScore를 null로 초기화하여 평균점수에 따라 별이 다시 반영되게 함
+      setTimeout(() => setUserScore(null), 300); // 0.3초 후 초기화(UX 개선)
+      alert("평점이 등록되었습니다!");
+    } catch (e) {
+      alert("평점 등록에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) return <div>로딩 중...</div>;
   if (error || !data) return <div>강의 정보를 불러올 수 없습니다.</div>;
@@ -91,7 +136,65 @@ export default function LectureDetailPage() {
             <span>·</span>
             <span>개설일: {formatDate(data.createdAt)}</span>
             <span>·</span>
-            <span>평점: {data.averageScore?.toFixed(1) ?? "-"}</span>
+            {/* 평점 표시 및 별점 평가 */}
+            <span className="flex items-center">
+              <span className="font-semibold mr-2 text-base text-black">
+                평점
+              </span>
+              {Array.from({ length: 5 }).map((_, idx) => {
+                // 별을 채울지 결정: 평균점수(소수점 반올림X, 소수점까지 표현)
+                const score = hoverScore ?? userScore ?? data.averageScore ?? 0;
+                let fill = "text-gray-300";
+                if (score >= idx + 1) {
+                  fill = "text-yellow-400";
+                } else if (score > idx && score < idx + 1) {
+                  // 소수점 별: 반만 채우기(half star)
+                  fill = "text-yellow-400";
+                }
+                return (
+                  <svg
+                    key={idx}
+                    className={`w-6 h-6 cursor-pointer transition ${fill}`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    onMouseEnter={() => setHoverScore(idx + 1)}
+                    onMouseLeave={() => setHoverScore(null)}
+                    onClick={() => handleStarClick(idx + 1)}
+                    style={{ pointerEvents: isSubmitting ? "none" : "auto" }}
+                  >
+                    <title>{`${idx + 1}점`}</title>
+                    {score > idx && score < idx + 1 ? (
+                      // 반 별 SVG (왼쪽만 채움)
+                      <g>
+                        <defs>
+                          <linearGradient
+                            id={`half${idx}`}
+                            x1="0"
+                            x2="100%"
+                            y1="0"
+                            y2="0"
+                          >
+                            <stop offset="50%" stopColor="#facc15" />
+                            <stop offset="50%" stopColor="#d1d5db" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"
+                          fill={`url(#half${idx})`}
+                        />
+                      </g>
+                    ) : (
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                    )}
+                  </svg>
+                );
+              })}
+              <span className="ml-2 text-base text-black">
+                {Number.isFinite(data.averageScore)
+                  ? data.averageScore.toFixed(1)
+                  : "-"}
+              </span>
+            </span>
           </div>
 
           {/* 신고 버튼 */}
@@ -192,7 +295,6 @@ export default function LectureDetailPage() {
 
       {/*  신고 모달 */}
       {showReportModal && (
-        
         <ReportModal
           lectureId={data.id}
           onClose={() => setShowReportModal(false)}

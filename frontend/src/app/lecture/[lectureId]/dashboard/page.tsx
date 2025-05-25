@@ -1,8 +1,5 @@
 "use client";
 
-
-import QnaTab from "@/components/qna/QnaTab";
-
 import React, { useRef, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import NotificationList from "@/components/notification/NotificationList";
@@ -11,7 +8,6 @@ import { Notification } from "@/components/notification/Notification";
 
 interface CurriculumDetailDto {
   curriculumId: number;
-
   curriculumTitle: string;
   sequence: number;
   curriculumContent: string;
@@ -31,6 +27,8 @@ interface LectureCurriculumDetailDto {
   trainerNickname: string;
   trainerProfileUrl: string;
   trainerCertificationNames: string[];
+  averageScore: number;
+
   curriculumDetailDtoList: CurriculumDetailDto[];
 }
 
@@ -58,62 +56,9 @@ async function saveCurriculumProgress(
   );
 }
 
-
 const LectureListPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
-
-  const [userId, setUserId] = useState<number | null>(null);
-
-  const params = useParams();
-  const lectureId = Number(params?.lectureId);
-  const searchParams = useSearchParams();
-  const curriculumId = searchParams.get("curriculumId");
-
-  // 유저 정보 불러오기
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`,
-          {
-            credentials: "include", // 쿠키 인증 필요 시
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch user info");
-        }
-        const data = await response.json();
-
-        setUserId(data.data.id);
-      } catch (error) {
-        console.error("Error fetching user info:", error);
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
-
-  const lectures = [
-    {
-      id: 1,
-      section: "기초 운동의 이해",
-      items: [
-        { id: 1, title: "올바른 자세의 중요성", time: "08:45", seconds: 525 },
-        { id: 2, title: "호흡법 기초", time: "07:15", seconds: 435 },
-        { id: 3, title: "운동 전 준비 운동", time: "09:30", seconds: 570 },
-      ],
-    },
-    { id: 2, section: "가슴 운동 기초", items: [] },
-    { id: 3, section: "등 운동 기초", items: [] },
-    { id: 4, section: "하체 운동 기초", items: [] },
-  ];
-
-  const handleTimeJump = (seconds: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = seconds;
-      videoRef.current.play();
-
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
@@ -130,6 +75,45 @@ const LectureListPage = () => {
 
   // 누적 시청 시간 관리용 state
   const [watchedSeconds, setWatchedSeconds] = useState(0);
+
+  const [hoverScore, setHoverScore] = useState<number | null>(null);
+  const [userScore, setUserScore] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 별 클릭 시 서버에 평점 등록
+  const handleStarClick = async (score: number) => {
+    if (isSubmitting) return;
+    if (!lectureId) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/like`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            lectureId: Number(lectureId),
+            score,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("평점 등록 실패");
+      const result = await res.json();
+      setUserScore(score);
+      // 서버에서 받은 새로운 평균 평점으로 갱신
+      setLectureData((prev) =>
+        prev ? { ...prev, averageScore: result.data.average } : prev
+      );
+      // userScore를 잠깐 보여주고 평균점수로 다시 반영
+      setTimeout(() => setUserScore(null), 300);
+      alert("평점이 등록되었습니다!");
+    } catch (e) {
+      alert("평점 등록에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // 데이터 패칭
   useEffect(() => {
@@ -177,7 +161,6 @@ const LectureListPage = () => {
       selectedCurriculum.lastWatchedSecond > 0
     ) {
       videoRef.current.currentTime = selectedCurriculum.lastWatchedSecond;
-
     }
   }, [selectedCurriculum]);
 
@@ -191,8 +174,6 @@ const LectureListPage = () => {
     const handleTimeUpdate = () => {
       const current = Math.floor(videoRef.current!.currentTime);
       if (videoRef.current!.paused) return; // 정지 상태에서는 저장하지 않음
-
-
 
       // 누적 시청 시간 계산 (간단 예시: 1초마다 1초씩 증가)
       if (current > lastTime) {
@@ -286,12 +267,12 @@ const LectureListPage = () => {
     );
   }
 
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <main className="max-w-[1440px] mx-auto px-12 py-12 grid grid-cols-3 gap-12">
         {/* 왼쪽 비디오 및 설명 */}
         <div className="col-span-2 space-y-8">
+          {/* 영상 */}
           <div className="bg-black aspect-video rounded-xl overflow-hidden">
             <video
               ref={videoRef}
@@ -301,6 +282,7 @@ const LectureListPage = () => {
             />
           </div>
 
+          {/* 강의 설명 */}
           <div>
             <h1 className="text-3xl font-semibold">
               {lectureData.lectureTitle}
@@ -325,6 +307,90 @@ const LectureListPage = () => {
             </div>
           </div>
 
+          {/* 강의 정보 상단에 평점 표시 예시 */}
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-semibold text-base">평점</span>
+            <span className="flex items-center">
+              {Array.from({ length: 5 }).map((_, idx) => {
+                const score =
+                  hoverScore ?? userScore ?? lectureData.averageScore ?? 0;
+                // 별 색상 결정
+                if (score >= idx + 1) {
+                  // 꽉 찬 별
+                  return (
+                    <svg
+                      key={idx}
+                      className="w-5 h-5 cursor-pointer transition text-yellow-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      onMouseEnter={() => setHoverScore(idx + 1)}
+                      onMouseLeave={() => setHoverScore(null)}
+                      onClick={() => handleStarClick(idx + 1)}
+                      style={{ pointerEvents: isSubmitting ? "none" : "auto" }}
+                    >
+                      <title>{`${idx + 1}점`}</title>
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                    </svg>
+                  );
+                } else if (score > idx && score < idx + 1) {
+                  // 반 별
+                  return (
+                    <svg
+                      key={idx}
+                      className="w-5 h-5 cursor-pointer transition"
+                      viewBox="0 0 20 20"
+                      onMouseEnter={() => setHoverScore(idx + 1)}
+                      onMouseLeave={() => setHoverScore(null)}
+                      onClick={() => handleStarClick(idx + 1)}
+                      style={{ pointerEvents: isSubmitting ? "none" : "auto" }}
+                    >
+                      <title>{`${idx + 1}점`}</title>
+                      <defs>
+                        <linearGradient
+                          id={`half${idx}`}
+                          x1="0"
+                          x2="100%"
+                          y1="0"
+                          y2="0"
+                        >
+                          <stop offset="50%" stopColor="#facc15" />
+                          <stop offset="50%" stopColor="#d1d5db" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"
+                        fill={`url(#half${idx})`}
+                      />
+                    </svg>
+                  );
+                } else {
+                  // 빈 별
+                  return (
+                    <svg
+                      key={idx}
+                      className="w-5 h-5 cursor-pointer transition text-gray-300"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      onMouseEnter={() => setHoverScore(idx + 1)}
+                      onMouseLeave={() => setHoverScore(null)}
+                      onClick={() => handleStarClick(idx + 1)}
+                      style={{ pointerEvents: isSubmitting ? "none" : "auto" }}
+                    >
+                      <title>{`${idx + 1}점`}</title>
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                    </svg>
+                  );
+                }
+              })}
+              <span className="ml-1 text-sm text-gray-600">
+                {Number.isFinite(lectureData.averageScore)
+                  ? lectureData.averageScore.toFixed(1)
+                  : "-"}
+              </span>
+            </span>
+          </div>
+
+          {/* 소개 */}
           <div className="space-y-3">
             <h2 className="text-xl font-semibold">강의 소개</h2>
             <div
@@ -338,6 +404,7 @@ const LectureListPage = () => {
 
         {/* 오른쪽 사이드 */}
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
+          {/* 탭 */}
           <div className="flex space-x-6 border-b pb-3">
             {["curriculum", "materials", "qna", "notifications"].map((tab) => (
               <button
@@ -361,7 +428,6 @@ const LectureListPage = () => {
             ))}
           </div>
 
-
           {/* 공지사항 탭일 때 리스트 보여주기 */}
           {selectedTab === "notifications" && (
             <NotificationList
@@ -371,7 +437,6 @@ const LectureListPage = () => {
           )}
 
           {/* 커리큘럼 */}
-
           {selectedTab === "curriculum" && (
             <div className="space-y-2">
               {/* 진도율 바 */}
@@ -430,8 +495,6 @@ const LectureListPage = () => {
                   % 완료
                 </span>
               </div>
-
-
               <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white overflow-hidden">
                 {lectureData.curriculumDetailDtoList.map((curriculum, idx) => {
                   const isSelected =
@@ -459,7 +522,6 @@ const LectureListPage = () => {
                           className={`font-medium ${
                             isSelected ? "text-green-700" : "text-gray-900"
                           }`}
-
                         >
                           {idx + 1}. {curriculum.curriculumTitle}
                         </div>
@@ -477,18 +539,6 @@ const LectureListPage = () => {
               </ul>
             </div>
           )}
-
-
-          {selectedTab === "qna" && userId !== null && (
-            <QnaTab lectureId={lectureId} userId={userId} />
-          )}
-
-          <button className="w-full bg-green-600 text-white py-3 rounded mt-6 hover:bg-green-700 text-lg">
-            나의 운동 기록 작성하기
-          </button>
-
-      
-
         </aside>
 
         {/* 공지사항 상세 모달 */}
