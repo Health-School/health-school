@@ -149,10 +149,12 @@ public class CurriculumService {
 
     @Transactional(readOnly = true)
     public List<CurriculumResponseDto> getCurriculumsByLectureId(Long lectureId) {
-        List<Curriculum> curriculums = curriculumRepository.findByLectureIdOrderBySequenceAsc(lectureId);
-        return curriculums.stream()
-                .map(CurriculumResponseDto::from)
-                .toList();
+        List<CurriculumResponseDto> curriculumResponseDtos = curriculumRepository.findAllByLectureIdOrderBySequenceAsc(lectureId);
+        curriculumResponseDtos.forEach( (curriculumResponseDto -> {
+            String viewUrl = curriculumS3Service.getViewUrl(curriculumResponseDto.getS3path());
+            curriculumResponseDto.setS3path(viewUrl);
+        }) );
+        return curriculumResponseDtos;
     }
 
 }

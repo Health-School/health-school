@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.curriculum.repository;
 
 import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumDetailDto;
+import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumResponseDto;
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.ProgressStatus;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
@@ -47,11 +48,15 @@ ORDER BY c.sequence ASC
             @Param("userId") Long userId
     );
 
-
-
     int countByLecture(Lecture lecture);
 
-    List<Curriculum> findByLectureIdOrderBySequenceAsc(Long lectureId);
 
+    @Query("SELECT new com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumResponseDto(" +
+            "c.id, c.title, c.content, c.s3path, l.title) " +
+            "FROM Curriculum c " +
+            "JOIN c.lecture l " +
+            "WHERE l.id = :lectureId " +
+            "ORDER BY c.sequence ASC")
+    List<CurriculumResponseDto> findAllByLectureIdOrderBySequenceAsc(@Param("lectureId") Long lectureId);
 
 }
