@@ -15,6 +15,7 @@ import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,11 +98,32 @@ public class ExerciseSheetService {
 
 
 
-    @Transactional
-    public ExerciseSheet getExerciseSheetById(Long id, Long userId) {
-        return exerciseSheetRepository.findByIdAndUserId(id, userId)
+    @Transactional(readOnly = true)
+    public ExerciseSheetResponseDto getExerciseSheetById(Long id, Long userId) {
+        ExerciseSheet sheet = exerciseSheetRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 운동 기록을 찾을 수 없습니다."));
+
+        List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
+                .map(mes -> new MachineExerciseSheetResponseDto(
+                        mes.getId(),
+                        mes.getExerciseSheet().getUser().getId(),
+                        mes.getExerciseSheet().getUser().getNickname(),
+                        mes.getMachine().getName(),
+                        mes.getReps(),
+                        mes.getSets(),
+                        mes.getWeight()
+                ))
+                .collect(Collectors.toList());
+
+        return new ExerciseSheetResponseDto(
+                sheet.getId(),
+                sheet.getExerciseDate(),
+                sheet.getExerciseStartTime(),
+                sheet.getExerciseEndTime(),
+                machineDtos
+        );
     }
+
 
     @Transactional(readOnly = true)
     public List<ExerciseSheetResponseDto> getExerciseSheetsByUserAndDateDesc(Long userId, LocalDate exerciseDate) {
@@ -194,11 +217,36 @@ public class ExerciseSheetService {
         exerciseSheetRepository.delete(sheet);
     }
 
-    public List<ExerciseSheet> getAllExerciseSheetsByUser(Long userId) {
-        return exerciseSheetRepository.findAllByUserIdOrderByExerciseDateDesc(userId);
+    @Transactional(readOnly = true)
+    public List<ExerciseSheetResponseDto> getAllExerciseSheetsByUser(Long userId) {
+        List<ExerciseSheet> sheets = exerciseSheetRepository.findAllByUserIdOrderByExerciseDateDesc(userId);
+
+        return sheets.stream()
+                .map(sheet -> {
+                    List<MachineExerciseSheetResponseDto> machineDtos = sheet.getMachineExerciseSheets().stream()
+                            .map(mes -> new MachineExerciseSheetResponseDto(
+                                    mes.getId(),
+                                    mes.getExerciseSheet().getUser().getId(),
+                                    mes.getExerciseSheet().getUser().getNickname(),
+                                    mes.getMachine().getName(),
+                                    mes.getReps(),
+                                    mes.getSets(),
+                                    mes.getWeight()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new ExerciseSheetResponseDto(
+                            sheet.getId(),
+                            sheet.getExerciseDate(),
+                            sheet.getExerciseStartTime(),
+                            sheet.getExerciseEndTime(),
+                            machineDtos
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<ExerciseSheetRespDto> getAllStudentsExerciseSheets(Long trainerId, Pageable pageable) {
         // 1. 트레이너가 개설한 강의 목록
         List<Long> lectureIds = lectureRepository.findByTrainerId(trainerId)
@@ -218,14 +266,21 @@ public class ExerciseSheetService {
             return Page.empty(); // 수강생 없으면 빈 페이지 반환
         }
 
-        // 3. 운동 기록 조회
-        return exerciseSheetRepository.findByUserIds(studentIds, pageable)
-                .map(ExerciseSheetRespDto::from);
+        // 3. EntityGraph를 사용해 연관 엔티티를 모두 미리 로딩 + 페이징 적용
+        Page<ExerciseSheet> sheets = exerciseSheetRepository.findByUserIdsWithAll(studentIds, pageable);
+
+        // 4. DTO 변환
+        Page<ExerciseSheetRespDto> dtoPage = sheets.map(ExerciseSheetRespDto::from);
+
+        return dtoPage;
     }
 
-    @Transactional
+
+
+    @Transactional(readOnly = true)
     public ExerciseSheet getExerciseSheetById(Long id) {
-        return exerciseSheetRepository.findById(id).orElse(null);
+        return exerciseSheetRepository.findById(id)
+                .orElse(null);
     }
 
 

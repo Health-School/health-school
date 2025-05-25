@@ -36,9 +36,21 @@ public interface ExerciseSheetRepository extends JpaRepository<ExerciseSheet, Lo
     List<ExerciseSheet> findAllByUserIdOrderByExerciseDateDesc(@Param("userId") Long userId);
 
     // Page는 fetch join과 충돌 위험 → EntityGraph 방식 사용
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {
+            "user",
+            "machineExerciseSheets",
+            "machineExerciseSheets.machine"
+    })
     @Query("SELECT e FROM ExerciseSheet e WHERE e.user.id IN :userIds")
-    Page<ExerciseSheet> findByUserIds(@Param("userIds") List<Long> userIds, Pageable pageable);
+    Page<ExerciseSheet> findByUserIdsWithAll(@Param("userIds") List<Long> userIds, Pageable pageable);
+
+
+    @EntityGraph(attributePaths = {
+            "user",
+            "machineExerciseSheets",
+            "machineExerciseSheets.machine"
+    })
+    Optional<ExerciseSheet> findById(Long id);
 }
 
 
