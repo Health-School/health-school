@@ -2,12 +2,14 @@ package com.malnutrition.backend.domain.lecture.curriculum.repository;
 
 import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumDetailDto;
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.enums.ProgressStatus;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,8 +49,9 @@ ORDER BY c.sequence ASC
 
 
 
-
     int countByLecture(Lecture lecture);
 
     List<Curriculum> findByLectureIdOrderBySequenceAsc(Long lectureId);
+
+
 }

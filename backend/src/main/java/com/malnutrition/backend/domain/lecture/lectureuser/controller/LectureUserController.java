@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,4 +71,13 @@ public class LectureUserController {
         List<UserLectureDto> userDtos = lectureUserService.getUsersByLectureId(lectureId);
         return ResponseEntity.ok(ApiResponse.success(userDtos, "수강생 목록 조회 성공"));
     }
+
+    @Operation(summary = "강의 수강생 목록 조회", description = "해당 강의를 수강 중인 유저들의 목록을 반환합니다.")
+    @GetMapping("/completion-rate")
+    public ResponseEntity<?> getCompletionRate() {
+        String rate = lectureUserService.getTrainerCompletionRateFormatted();
+        return ResponseEntity.ok(ApiResponse.success(rate, "수료율 조회 성공"));
+    }
+
+
 }
