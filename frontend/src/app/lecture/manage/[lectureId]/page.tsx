@@ -1,7 +1,7 @@
 "use client";
 
 import { Editor } from "@tinymce/tinymce-react";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import CurriculumUploadModal from "@/components/CurriculumUploadModal"; // 앞서 안내한 모달 컴포넌트
 import Image from "next/image";
 import removeMarkdown from "remove-markdown";
@@ -152,10 +152,14 @@ const REVERSE_LEVEL_MAPPING = {
 export default function LectureManagePage({
   params,
 }: {
-  params: { lectureId: string };
+  params: Promise<{ lectureId: string }>;
 }) {
   const router = useRouter();
-  const lectureIdRef = useState(params.lectureId)[0]; // Create a stable reference
+  // Next.js 14+에서 params는 Promise이므로 use()로 언래핑
+  const { lectureId } = use(params);
+
+  // 이제 lectureId를 안전하게 사용
+  const lectureIdRef = lectureId;
 
   const [lecture, setLecture] = useState<LectureDetailDto | null>(null);
   const [curriculums, setCurriculums] = useState<CurriculumDto[]>([]);
@@ -583,9 +587,6 @@ export default function LectureManagePage({
     onClose: () => void;
   }) => {
     // Add S3 base URL
-    const videoUrl = s3path.startsWith("http")
-      ? s3path
-      : `${process.env.NEXT_PUBLIC_S3_BASE_URL}/${s3path}`;
 
     return (
       <div className="fixed inset-0 z-50">
@@ -608,13 +609,13 @@ export default function LectureManagePage({
               className="w-full h-full"
               controls
               autoPlay
-              src={videoUrl}
+              src={s3path}
               onError={(e) => {
                 console.error("Video loading error:", e);
                 alert("비디오를 불러오는데 실패했습니다.");
               }}
             >
-              <source src={videoUrl} type="video/mp4" />
+              <source src={s3path} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
