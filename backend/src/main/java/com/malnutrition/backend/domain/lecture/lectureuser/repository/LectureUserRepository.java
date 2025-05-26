@@ -67,4 +67,6 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
         """)
     long countCompletedByTrainerId(@Param("trainerId") Long trainerId);
 
+    Optional<LectureUser> findByLecture_IdAndUser_Id(Long lectureId, Long userId);
+
 }

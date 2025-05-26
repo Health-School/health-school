@@ -35,7 +35,7 @@ public class LikeService {
     public double updateLikeScore(Long lectureId,int score){
         Long actorId = rq.getActor().getId();
         Like like = likeRepository.findByLectureUser_Lecture_IdAndLectureUser_User_Id(lectureId, actorId)
-                .orElseThrow(() -> new IllegalArgumentException("lectureId, scoreId 중 잘못된 id 가 있습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("lectureId, userId 중 잘못된 id 가 있습니다."));
         like.setScore(score);
         Double likeAverage = likeRepository.findAverageScoreByLectureId(lectureId);
         if (likeAverage == null) return 0.0;
