@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import NotificationList from "@/components/notification/NotificationList";
 import NotificationModal from "@/components/notification/NotificationModal";
 import { Notification } from "@/components/notification/Notification";
+import QnaTab from "@/components/qna/QnaTab";
 
 interface CurriculumDetailDto {
   curriculumId: number;
@@ -81,6 +82,7 @@ export default function LectureDashboard() {
   const [hoverScore, setHoverScore] = useState<number | null>(null);
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   // 별 클릭 시 서버에 평점 등록
   const handleStarClick = async (score: number) => {
@@ -376,6 +378,26 @@ export default function LectureDashboard() {
     }
   };
 
+
+  // 유저 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`,
+          { credentials: "include" }
+        );
+        if (!response.ok) throw new Error("Failed to fetch user info");
+        const data = await response.json();
+        setUserId(data.data.id);
+      } catch (e) {
+        setUserId(null);
+      }
+    };
+    fetchUserInfo();
+  }, []);
+
+
   if (!lectureData || !selectedCurriculum) {
     return (
       <div className="flex items-center justify-center min-h-screen text-xl text-gray-500">
@@ -664,6 +686,11 @@ export default function LectureDashboard() {
                 </ul>
               </div>
             </div>
+          )}
+
+          {/* Q&A 탭일 때 QnaTab 보여주기 */}
+          {selectedTab === "qna" && userId !== null && (
+            <QnaTab lectureId={Number(lectureId)} userId={userId} />
           )}
         </aside>
 

@@ -18,12 +18,12 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     List<LectureUser> findByUser(User user);
 
     @Query(value = "SELECT lu FROM LectureUser lu " +
-            "JOIN FETCH lu.lecture l " +
-            "JOIN FETCH l.trainer " +
-            "LEFT JOIN FETCH l.coverImage " +
-            "WHERE lu.user = :user",
+            "JOIN FETCH lu.lecture l " +                 // 강의 정보
+            "JOIN FETCH l.trainer " +                    // 강사 정보
+            "LEFT JOIN FETCH l.coverImage " +           // 커버 이미지 (있을 수도 없음)
+            "WHERE lu.user = :user",                     // 해당 유저가 수강한 것만
             countQuery = "SELECT count(lu) FROM LectureUser lu WHERE lu.user = :user")
-    Page<LectureUser> findByUser(User user, Pageable pageable);
+    Page<LectureUser> findByUser(@Param("user") User user, Pageable pageable);
 
     @Query("""
     SELECT lu FROM LectureUser lu
