@@ -16,8 +16,8 @@ public class LikeController {
     private final LikeService likeService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<LikeResponseDto>> getLectureScore(@RequestBody LikeRequestDto likeRequestDto){
-        double likeAverageScore = likeService.getLikeAverageScore(likeRequestDto.getLectureId());
+    public ResponseEntity<ApiResponse<LikeResponseDto>> getLectureScore(@RequestParam Long lectureId){
+        double likeAverageScore = likeService.getLikeAverageScore(lectureId);
         LikeResponseDto likeResponseDto = new LikeResponseDto(likeAverageScore);
         return ResponseEntity.ok(ApiResponse.success(likeResponseDto, "average 조회 완료"));
     }
@@ -26,6 +26,6 @@ public class LikeController {
         double score = likeService.saveOrUpdateLikeScore(likeRequestDto.getLectureId(), likeRequestDto.getScore());
 
         LikeResponseDto likeResponseDto = new LikeResponseDto(score);
-        return ResponseEntity.ok(ApiResponse.success(likeResponseDto, "존재하지 않는 lectureId, userId 입니다."));
+        return ResponseEntity.ok(ApiResponse.success(likeResponseDto, "수정 성공!"));
     }
 }
