@@ -282,9 +282,7 @@ export default function LectureDetailPage() {
             )}
             <div>
               <div className="font-semibold">{data.trainerName}</div>
-              <a href="#" className="text-blue-500 text-xs mt-1 inline-block">
-                트레이너 프로필 보기 &gt;
-              </a>
+            
             </div>
           </div>
 

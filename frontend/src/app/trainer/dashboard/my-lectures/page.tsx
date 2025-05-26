@@ -128,6 +128,9 @@ export default function MyLecturesPage() {
   const [totalCertificationPages, setTotalCertificationPages] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  // 상태 변수 추가
+  const [myLecturesAverageScore, setMyLecturesAverageScore] = useState<number>(0);
+
   const handleNewLecture = () => {
     router.push("/trainer/dashboard/my-lectures/new");
   };
@@ -323,6 +326,29 @@ export default function MyLecturesPage() {
     }
   };
 
+  // 내 모든 강의의 평균 평점 가져오기 함수
+  const fetchMyLecturesAverageScore = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/like/my-lectures/average`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("평균 평점 조회 실패");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        setMyLecturesAverageScore(result.data.average);
+      }
+    } catch (error) {
+      console.error("평균 평점 조회 실패:", error);
+    }
+  };
+
   // Add useEffect to fetch certifications
   useEffect(() => {
     if (activeTab === "MY 자격증 관리") {
@@ -337,6 +363,7 @@ export default function MyLecturesPage() {
     checkNewConsultations();
     fetchNotifications();
     fetchCompletionRate(); // 수료율도 패칭
+    fetchMyLecturesAverageScore(); // 평균 평점도 가져오기
   }, []);
 
   const tabs = [
@@ -378,38 +405,87 @@ export default function MyLecturesPage() {
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="text-gray-600">총 수강생</span>
-            <div className="flex items-center text-xs text-green-500"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                <span className="text-blue-600 text-lg">👥</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">전체 수강생</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {stats.totalStudents}명
+              </p>
+            </div>
           </div>
-          <div className="text-2xl font-bold">{stats.totalStudents}명</div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="text-gray-600">수료율</span>
-            <div className="flex items-center text-xs text-green-500"></div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+                <span className="text-green-600 text-lg">💰</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">총 수익</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {stats.totalRevenue.toLocaleString()}원
+              </p>
+            </div>
           </div>
-          <div className="text-2xl font-bold">{stats.completionRate}%</div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="text-gray-600">평균 평점</span>
-            <div className="flex items-center text-xs text-green-500"></div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+                <span className="text-purple-600 text-lg">📊</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">완료율</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {stats.completionRate}%
+              </p>
+            </div>
           </div>
-          <div className="text-2xl font-bold">{stats.averageRating}</div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="text-gray-600">총 수익</span>
-            <div className="flex items-center text-xs text-green-500"></div>
-          </div>
-          <div className="text-2xl font-bold">
-            {stats.totalRevenue.toLocaleString()}원
+        {/* 새로 추가: 평균 평점 카드 */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+                <span className="text-yellow-600 text-lg">⭐</span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">평균 평점</p>
+              <div className="flex items-center">
+                <p className="text-2xl font-semibold text-gray-900">
+                  {myLecturesAverageScore.toFixed(1)}
+                </p>
+                <span className="text-sm text-gray-500 ml-1">/5.0</span>
+              </div>
+              {/* 별점 표시 */}
+              <div className="flex items-center mt-1">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <span
+                    key={i}
+                    className={`text-sm ${
+                      i < Math.floor(myLecturesAverageScore)
+                        ? "text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
