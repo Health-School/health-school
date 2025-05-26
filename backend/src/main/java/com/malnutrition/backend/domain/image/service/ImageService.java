@@ -182,11 +182,23 @@ public class ImageService {
     public String getImageUrl(Image image){
         boolean useS3 = imageProperties.isUseS3();
         if(Objects.isNull(image)) return null;
+        String imageUrl;
+        if(useS3){
+            imageUrl = imageS3Service.getViewUrl(image.getPath());
+        } else {
+            imageUrl = "http://localhost:8090" + imageProperties.getViewUrl()+ image.getId();
+        }
+        return imageUrl;
+    }
+
+    @Transactional(readOnly = true)
+    public String getImageUrl(Long imageId, String path){
+        boolean useS3 = imageProperties.isUseS3();
         String profileUrl;
         if(useS3){
-            profileUrl = imageS3Service.getViewUrl(image.getPath());
+            profileUrl = imageS3Service.getViewUrl(path);
         } else {
-            profileUrl = "http://localhost:8090" + imageProperties.getViewUrl()+ image.getId();
+            profileUrl = "http://localhost:8090" + imageProperties.getViewUrl() + imageId;
         }
         return profileUrl;
     }
