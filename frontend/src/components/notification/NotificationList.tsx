@@ -28,7 +28,7 @@ const NotificationList: React.FC<NotificationListProps> = ({
 
       setLoading(true);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureId}/scroll?page=${page}&size=${PAGE_SIZE}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureId}`,
         { credentials: "include" }
       );
       const json = await res.json();

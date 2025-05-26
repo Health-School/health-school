@@ -51,4 +51,7 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
             "HAVING AVG(COALESCE(lk.score, 0)) >= 4.0 " +
             "ORDER BY COUNT(lu.id) DESC")
     List<TrainerInfoProcessDto> findPopularTrainersWithHighScore(Pageable pageable);
+
+
+
 }

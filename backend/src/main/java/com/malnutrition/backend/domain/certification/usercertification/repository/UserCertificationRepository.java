@@ -23,4 +23,7 @@ public interface UserCertificationRepository extends JpaRepository<UserCertifica
             @Param("approveStatus")ApproveStatus approveStatus,
             Pageable pageable);
 
+
+    Page<UserCertification> findByUserId(Long userId, Pageable pageable);
+
 }

@@ -58,6 +58,7 @@ public class LectureService {
     private final CurriculumS3Service curriculumS3Service;
     private final CertificationRepository certificationRepository;
     private final LectureUserRepository lectureUserRepository;
+    private final LectureRankingRedisService lectureRankingRedisService;
 
 
     private final Rq rq;
@@ -258,5 +259,36 @@ public class LectureService {
             double averageScore = scoreMap.getOrDefault(lecture.getId(), 0.0);
             return LectureDto.from(lecture, imageProfileUrl, averageScore);
         }).collect(Collectors.toList());
+    }
+
+    public List<LectureDto> getTodayHotLectures() {
+        List<Long> topIds = lectureRankingRedisService.getTop4LecturesToday();
+        if (topIds.isEmpty()) return List.of();
+
+        // 강의 상세 포함하여 조회 (coverImage, lectureCategory, trainer 등 fetch join 포함)
+        List<Lecture> unorderedLectures = lectureRepository.findWithDetailsByIdIn(topIds);
+
+        // id -> Lecture 맵핑
+        Map<Long, Lecture> lectureMap = unorderedLectures.stream()
+                .collect(Collectors.toMap(Lecture::getId, l -> l));
+
+        // 평균 점수 조회 및 매핑
+        Map<Long, Double> scoreMap = likeRepository.findAverageScoresByLectureIds(topIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],         // lectureId
+                        row -> (Double) row[1]        // averageScore
+                ));
+
+        // 순서 보존 및 DTO 매핑
+        return topIds.stream()
+                .map(id -> {
+                    Lecture lecture = lectureMap.get(id);
+                    if (lecture == null) return null; // 혹시라도 누락된 경우 방어 코드
+                    String imageUrl = imageService.getImageUrl(lecture.getCoverImage());
+                    double averageScore = scoreMap.getOrDefault(id, 0.0);
+                    return LectureDto.from(lecture, imageUrl, averageScore);
+                })
+                .filter(Objects::nonNull) // null 방지
+                .collect(Collectors.toList());
     }
 }

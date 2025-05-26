@@ -59,14 +59,14 @@ async function saveCurriculumProgress(
   );
 }
 
-const LectureListPage = () => {
+export default function LectureDashboard() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
   const params = useParams();
-  const lectureId = params.lectureId;
+  const lectureId = params.lectureId as string;
   const searchParams = useSearchParams();
   const curriculumId = searchParams.get("curriculumId");
 
@@ -378,6 +378,7 @@ const LectureListPage = () => {
     }
   };
 
+
   // 유저 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -395,6 +396,7 @@ const LectureListPage = () => {
     };
     fetchUserInfo();
   }, []);
+
 
   if (!lectureData || !selectedCurriculum) {
     return (
@@ -541,9 +543,9 @@ const LectureListPage = () => {
 
         {/* 오른쪽 사이드 */}
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
-          {/* 탭 */}
+          {/* 탭 - 학습자료 탭 제거 */}
           <div className="flex space-x-6 border-b pb-3">
-            {["curriculum", "materials", "qna", "notifications"].map((tab) => (
+            {["curriculum", "qna", "notifications"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -702,6 +704,4 @@ const LectureListPage = () => {
       </main>
     </div>
   );
-};
-
-export default LectureListPage;
+}

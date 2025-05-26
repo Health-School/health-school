@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.user.exercisesheet.entity;
 
 import com.malnutrition.backend.domain.machine.machineExerciseSheet.entity.MachineExerciseSheet;
+import com.malnutrition.backend.domain.user.exerciseFeedback.entity.ExerciseFeedback;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -37,5 +38,10 @@ public class ExerciseSheet extends BaseEntity {
 
     @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MachineExerciseSheet> machineExerciseSheets;
+
+    @OneToMany(mappedBy = "exerciseSheet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExerciseFeedback> exerciseFeedbacks;
+
+
 
 }
