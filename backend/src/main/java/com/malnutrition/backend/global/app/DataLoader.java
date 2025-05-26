@@ -31,7 +31,7 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if(!userService.isExistProvider("SYSTEM")){
             String email = "admin@health-school.com";
-            String nickname = "joinUser";
+            String nickname = "ADMIN_01";
             String phoneNumber = "01011112222";
             UserJoinRequestDto dto = UserJoinRequestDto.builder()
                     .email(email)
