@@ -45,6 +45,7 @@ public class LikeService {
             Like like = optionalLike.get();
             like.setScore(score);
         }
+
         Double likeAverage = likeRepository.findAverageScoreByLectureId(lectureId);
         if (likeAverage == null) return 0.0;
         return likeAverage;
@@ -53,4 +54,7 @@ public class LikeService {
 
 
 
+
+
 }
+

@@ -69,6 +69,9 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
         """)
     long countCompletedByTrainerId(@Param("trainerId") Long trainerId);
 
+
+    Optional<LectureUser> findByLecture_IdAndUser_Id(Long lectureId, Long userId);
+
     @EntityGraph(attributePaths = {
             "lecture.coverImage",
             "lecture.lectureCategory",
@@ -84,4 +87,5 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     WHERE l.id IN :ids
 """)
     List<Lecture> findWithDetailsByIdIn(@Param("ids") List<Long> ids);
+
 }

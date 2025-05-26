@@ -29,6 +29,21 @@ interface LectureResponseDto {
   averageScore: number;
 }
 
+// Notification 인터페이스 정의 (파일 상단에 추가)
+interface Notification {
+  id: number;
+  title: string;
+  content: string;
+  lectureName: string;
+  createdAt: string;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
 function formatDate(dateString: string) {
   if (!dateString) return "-";
   const date = new Date(dateString.replace(" ", "T"));
@@ -60,6 +75,16 @@ export default function LectureDetailPage() {
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false); //  신고 모달 상태
+
+  // 공지사항 관련 상태
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+
+  // 상단에 상태 변수 추가
+  const [activeTab, setActiveTab] = useState<string>("커리큘럼");
+
+  // 탭 메뉴 정의
+  const tabs = ["커리큘럼", "Q&A", "공지사항"];
 
   useEffect(() => {
     if (!lectureId) return;
@@ -106,6 +131,41 @@ export default function LectureDetailPage() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "공지사항") {
+      const fetchNotifications = async () => {
+        setIsLoadingNotifications(true);
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureId}`,
+            {
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("공지사항 로딩 실패");
+          }
+
+          const result = await response.json();
+          console.log("Notifications API 응답:", result); // 응답 전체 확인
+          console.log("Notifications 데이터:", result.data); // 데이터 배열 확인
+
+          if (result.success) {
+            setNotifications(result.data);
+            console.log("저장된 notifications:", result.data); // 상태 변수에 저장되는 데이터 확인
+          }
+        } catch (error) {
+          console.error("공지사항 로딩 중 오류:", error);
+        } finally {
+          setIsLoadingNotifications(false);
+        }
+      };
+
+      fetchNotifications();
+    }
+  }, [activeTab, lectureId]);
 
   if (isLoading) return <div>로딩 중...</div>;
   if (error || !data) return <div>강의 정보를 불러올 수 없습니다.</div>;

@@ -34,7 +34,7 @@ public class ReportService {
         return reportRepository.save(report);
     }
 
-    // 신고상태 벼경하기!!!!!
+    // 신고상태 변경하기!!!!!
     @Transactional
     public void updateReportStatus(Long reportId, ReportStatus status) {
         Report report = reportRepository.findById(reportId)

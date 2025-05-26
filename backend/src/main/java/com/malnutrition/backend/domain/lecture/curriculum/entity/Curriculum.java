@@ -1,10 +1,14 @@
 package com.malnutrition.backend.domain.lecture.curriculum.entity;
 
+import com.malnutrition.backend.domain.lecture.curriculumProgress.entity.CurriculumProgress;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @SuperBuilder
@@ -36,5 +40,8 @@ public class Curriculum extends BaseEntity {
 
     @Column(name = "s3path", columnDefinition = "TEXT")
     private String s3path;
+
+    @OneToMany(mappedBy = "curriculum", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurriculumProgress> curriculumProgresses;
 }
 
