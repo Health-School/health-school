@@ -215,7 +215,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void confirmOrder(TossPaymentsResponse tossPaymentsResponse){
+    public Long confirmOrder(TossPaymentsResponse tossPaymentsResponse){
         String orderId = tossPaymentsResponse.getOrderId();
         Order order = findById(orderId);
 
@@ -229,6 +229,8 @@ public class OrderService {
         order.setApprovedAt(tossPaymentsResponse.getApprovedAt().toLocalDateTime());
 
         alarmEventService.sendOrderCompleteAlarm();
+
+        return order.getLecture().getId();
     }
 
 
@@ -236,6 +238,11 @@ public class OrderService {
     @Transactional
     public Order findById(String orderId){
         return orderRepository.findById(orderId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 orderId 입니다."));
+    }
+
+    @Transactional
+    public Order findByIdWithLectureId(String orderId){
+        return orderRepository.findWithLectureById(orderId).orElseThrow(() ->  new IllegalArgumentException("존재하지 않는 orderId 입니다."));
     }
 
     public Page<SettlementOrderDto> getTrainerSettlementOrders(User trainer, Pageable pageable) {

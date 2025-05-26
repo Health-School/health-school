@@ -28,6 +28,7 @@ type TrainerInfoDto = {
 export default function Home() {
   const [lectures, setLectures] = useState<LectureDto[]>([]);
   const [trainers, setTrainers] = useState<TrainerInfoDto[]>([]);
+  const [hotLectures, setHotLectures] = useState<LectureDto[]>([]);
 
   useEffect(() => {
     console.log("Fetching popular lectures...");
@@ -43,6 +44,14 @@ export default function Home() {
       .then((data) => {
         console.log("Popular trainers data:", data);
         setTrainers(data.data || []);
+      });
+
+    console.log("Fetching hot lectures...");
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/hot`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Hot lectures data:", data);
+        setHotLectures(data.data || []);
       });
   }, []);
 
@@ -146,8 +155,9 @@ export default function Home() {
           </div>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {lectures.map((course) => (
-              <div
+              <Link
                 key={course.id}
+                href={`/lecture/${course.id}`}
                 className="flex flex-col rounded-lg shadow-lg overflow-hidden"
               >
                 <div className="flex-shrink-0">
@@ -188,7 +198,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -228,10 +238,78 @@ export default function Home() {
                 <p className="text-sm text-gray-500">
                   수강생 {trainer.studentCount}명
                 </p>
-                <div className="mt-2">
+                <div className="mt-2 flex justify-center">
                   <StarRating score={trainer.averageLectureScore} />
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* HOT 강의 Section */}
+      <div className="bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900">
+              🔥 HOT 강의
+            </h2>
+            <p className="mt-4 text-gray-500">
+              오늘 가장 인기 있는 실시간 트렌드 강의들
+            </p>
+          </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {hotLectures.map((course) => (
+              <Link
+                href={`/lecture/${course.id}`}
+                key={course.id}
+                className="flex flex-col rounded-lg shadow-lg overflow-hidden relative"
+              >
+                {/* HOT 배지 */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    🔥 HOT
+                  </span>
+                </div>
+                <div className="flex-shrink-0">
+                  <Image
+                    src={course.coverImageUrl || "/images/default.jpg"}
+                    alt="Class thumbnail"
+                    width={400}
+                    height={300}
+                    className="h-48 w-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 bg-white p-6 flex flex-col justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-red-600">
+                        ₩{course.price.toLocaleString()}
+                      </p>
+                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                        {course.lectureLevel}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 text-xl font-semibold text-gray-900">
+                      {course.title}
+                    </h3>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        강사: {course.trainerName}
+                      </span>
+                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                        {course.category}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <StarRating score={course.averageScore} />
+                      <span className="text-xs text-gray-500">
+                        {new Date(course.createdAt).toLocaleDateString("ko-KR")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

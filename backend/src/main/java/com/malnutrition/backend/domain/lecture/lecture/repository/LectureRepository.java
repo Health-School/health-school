@@ -4,6 +4,7 @@ import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.notification.entity.Notification;
+import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +72,18 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     구매된 강의 수는 lectureId를 기준으로 묶었을 때 가장 많은 count를 갖는 강의
      */
 
+    @Query("SELECT o FROM Order o JOIN FETCH o.lecture WHERE o.id = :id")
+    Optional<Order> findWithLectureById(@Param("id") String id);
+
+
+    @Query("""
+    SELECT l FROM Lecture l
+    LEFT JOIN FETCH l.coverImage
+    LEFT JOIN FETCH l.lectureCategory
+    LEFT JOIN FETCH l.trainer
+    WHERE l.id IN :ids
+""")
+    List<Lecture> findWithDetailsByIdIn(@Param("ids") List<Long> ids);
 
 
 }

@@ -126,8 +126,12 @@ export default function LecturePage() {
   return (
     <main className="bg-white min-h-screen pb-20">
       {/* 카테고리/필터 바 */}
-      <section className="w-full bg-white sticky top-0  mt-10 border-b">
-        <div className=" mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
+      <section
+        className="w-full bg-white sticky top-0 mt-10 border-b"
+        style={{ zIndex: 100 }}
+      >
+        <div className="mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
+          {/* 카테고리 버튼들 */}
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -141,7 +145,8 @@ export default function LecturePage() {
               {cat.categoryName}
             </button>
           ))}
-          <div ref={levelRef} className="relative ml-2">
+
+          <div ref={levelRef} className="relative ml-2" style={{ zIndex: 200 }}>
             <button
               onClick={() => setLevelDropdownOpen((v) => !v)}
               className="border px-4 py-2 rounded-full cursor-pointer text-gray-700 flex items-center gap-2 bg-white"
@@ -155,11 +160,19 @@ export default function LecturePage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
             {levelDropdownOpen && (
-              <div className="absolute left-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10 py-2">
+              <div
+                className="absolute left-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2"
+                style={{ zIndex: 300 }}
+              >
                 {LEVEL_OPTIONS.map((opt) => (
                   <label
                     key={opt.label}
