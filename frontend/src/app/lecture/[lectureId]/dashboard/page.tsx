@@ -101,12 +101,11 @@ export default function LectureDashboard() {
         }
       );
       if (!res.ok) throw new Error("평점 등록 실패");
-      const result = await res.json();
+
+      // 평점 등록 후 새로운 평균 점수 가져오기
+      await fetchLectureScore();
       setUserScore(score);
-      // 서버에서 받은 새로운 평균 평점으로 갱신
-      setLectureData((prev) =>
-        prev ? { ...prev, averageScore: result.data.average } : prev
-      );
+
       // userScore를 잠깐 보여주고 평균점수로 다시 반영
       setTimeout(() => setUserScore(null), 300);
       alert("평점이 등록되었습니다!");
@@ -114,6 +113,28 @@ export default function LectureDashboard() {
       alert("평점 등록에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // 강의 평점 가져오기 함수 추가
+  const fetchLectureScore = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/like?lectureId=${lectureId}`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!res.ok) throw new Error("평점 조회 실패");
+      const result = await res.json();
+
+      if (result.success) {
+        setLectureData((prev) =>
+          prev ? { ...prev, averageScore: result.data.average } : prev
+        );
+      }
+    } catch (error) {
+      console.error("평점 조회 실패:", error);
     }
   };
 
@@ -129,22 +150,22 @@ export default function LectureDashboard() {
       const json = await res.json();
       setLectureData(json.data);
 
+      // 평점 정보도 함께 가져오기
+      await fetchLectureScore();
+
       // lastWatchedAt이 있는 강의 중 가장 최근 시청한 강의를 기본 선택
       if (json.data?.curriculumDetailDtoList?.length) {
         const list = json.data.curriculumDetailDtoList;
-        // lastWatchedAt이 있는 강의만 필터
         const watchedList = list.filter(
           (c: CurriculumDetailDto) => c.lastWatchedAt
         );
         let defaultCurriculum = null;
         if (watchedList.length > 0) {
-          // 가장 최근(lastWatchedAt이 가장 큰) 강의 선택
           defaultCurriculum = watchedList.reduce(
             (a: CurriculumDetailDto, b: CurriculumDetailDto) =>
               new Date(a.lastWatchedAt!) > new Date(b.lastWatchedAt!) ? a : b
           );
         } else {
-          // 없으면 첫 번째 강의 선택
           defaultCurriculum = list[0];
         }
         setSelectedCurriculum(defaultCurriculum);
