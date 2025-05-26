@@ -50,7 +50,7 @@ export default function Header({ hideDropdownMenus = false }) {
 
     {isAdmin && (
         <Link
-        href="/admin"
+        href="/admin/dashboard"
         className="ml-3 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
         > 관리자
         </Link>
