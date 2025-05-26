@@ -5,12 +5,14 @@ import com.malnutrition.backend.domain.image.entity.Image;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserCertificationResponseDto {
 
     private Long certificationId;

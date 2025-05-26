@@ -3,11 +3,13 @@ package com.malnutrition.backend.domain.lecture.curriculum.dto;
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class CurriculumResponseDto {
     private Long id;
     private String title;

@@ -4,12 +4,14 @@ import com.malnutrition.backend.domain.chatroom.chatmessage.enums.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ChatResponseDto {
     private Long id;               // 메시지 ID
     private String writerName;     // 작성자 닉네임

@@ -2,15 +2,15 @@ package com.malnutrition.backend.domain.alarm.alarm.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.malnutrition.backend.domain.alarm.alarm.entity.Alarm;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AlarmResponseDto {
 
     Long id;

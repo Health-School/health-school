@@ -1,15 +1,13 @@
 package com.malnutrition.backend.domain.chatroom.chatroom.dto;
 
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class ChatRoomResponseDto {
     private Long id;
     private String title;
