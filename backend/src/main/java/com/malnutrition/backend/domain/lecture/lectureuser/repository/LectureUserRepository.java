@@ -1,10 +1,12 @@
 package com.malnutrition.backend.domain.lecture.lectureuser.repository;
 
+import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -66,5 +68,12 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
         AND lu.completionStatus = com.malnutrition.backend.domain.lecture.lectureuser.enums.CompletionStatus.COMPLETED
         """)
     long countCompletedByTrainerId(@Param("trainerId") Long trainerId);
+
+    @EntityGraph(attributePaths = {
+            "lecture.coverImage",
+            "lecture.lectureCategory",
+            "lecture.trainer"
+    })    @Query("SELECT l FROM LectureUser lu JOIN lu.lecture l GROUP BY l ORDER BY COUNT(lu.lecture) DESC")
+    List<Lecture> findPopularLecturesWithEntityGraph(Pageable pageable);
 
 }

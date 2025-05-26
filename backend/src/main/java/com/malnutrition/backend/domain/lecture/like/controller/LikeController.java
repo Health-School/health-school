@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.lecture.like.controller;
 
 import com.malnutrition.backend.domain.lecture.like.dto.LikeRequestDto;
 import com.malnutrition.backend.domain.lecture.like.dto.LikeResponseDto;
+import com.malnutrition.backend.domain.lecture.like.dto.LikeUpdateRequestDto;
 import com.malnutrition.backend.domain.lecture.like.service.LikeService;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,10 @@ public class LikeController {
         return ResponseEntity.ok(ApiResponse.success(likeResponseDto, "average 조회 완료"));
     }
     @PostMapping
-    public ResponseEntity<ApiResponse<LikeResponseDto>> updateLike (@RequestBody LikeRequestDto likeRequestDto){
-        double score = likeService.updateLikeScore(likeRequestDto.getLectureId(), likeRequestDto.getScore());
-        LikeResponseDto likeResponseDto = new LikeResponseDto(score);
+    public ResponseEntity<ApiResponse<LikeResponseDto>> saveOrUpdateLikeScore(@RequestBody LikeUpdateRequestDto likeRequestDto){
+        double score = likeService.saveOrUpdateLikeScore(likeRequestDto.getLectureId(), likeRequestDto.getScore());
 
+        LikeResponseDto likeResponseDto = new LikeResponseDto(score);
         return ResponseEntity.ok(ApiResponse.success(likeResponseDto, "존재하지 않는 lectureId, userId 입니다."));
     }
 }

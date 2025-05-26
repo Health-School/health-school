@@ -22,7 +22,7 @@ public class PermitUrl {
             "/api/v1/curriculum-progress/**",
             "/api/v1/lecture_categories",
             "/api/v1/reports","/api/v1/reports/*",
-            "/api/v1/like"
+            "/api/v1/like", "/api/v1/lectures/popular", "/api/v1/trainers/popular"
     };
 
     public static final String[] POST_URLS = {

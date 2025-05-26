@@ -66,6 +66,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
             countQuery = "SELECT count(l) FROM Lecture l WHERE l.trainer = :trainer")
     Page<Lecture> findByTrainer(@Param("trainer") User trainer, Pageable pageable);
 
+    /*
+    인기 강의 = 가장 많이 구매된 강의
+    구매된 강의 수는 lectureId를 기준으로 묶었을 때 가장 많은 count를 갖는 강의
+     */
 
 
 

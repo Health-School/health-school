@@ -1,14 +1,20 @@
 package com.malnutrition.backend.domain.lecture.lecture.dto;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
+import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Builder
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class LectureDto {
     private Long id;
     private String title;
@@ -37,5 +43,8 @@ public class LectureDto {
                 .createdAt(lecture.getCreatedDate())
                 .build();
     }
+
+
+
 }
 

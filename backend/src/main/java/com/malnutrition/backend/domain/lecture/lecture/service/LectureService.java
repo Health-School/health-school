@@ -22,6 +22,7 @@ import com.malnutrition.backend.domain.lecture.lecture.repository.LectureReposit
 import com.malnutrition.backend.domain.lecture.lectureCategory.entity.LectureCategory;
 import com.malnutrition.backend.domain.lecture.lectureCategory.repository.LectureCategoryRepository;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.lecture.like.repository.LikeRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 
@@ -31,6 +32,7 @@ import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,6 +57,7 @@ public class LectureService {
     private final CurriculumRepository curriculumRepository;
     private final CurriculumS3Service curriculumS3Service;
     private final CertificationRepository certificationRepository;
+    private final LectureUserRepository lectureUserRepository;
 
 
     private final Rq rq;
@@ -203,7 +206,6 @@ public class LectureService {
 
     @Transactional(readOnly = true)
     public LectureCurriculumDetailDto getLectureCurriculumDetailDto(Long lectureId) {
-
         // 1. lectrue 데이터 가져오기, 강사, 카테고리 까지
         Lecture lecture = lectureRepository.findByIdWithAllDetails(lectureId).
                 orElseThrow(() -> new IllegalArgumentException("존재하지 않는 lectureId 입니다."));
@@ -232,8 +234,29 @@ public class LectureService {
                 .averageScore(averageScore)
                 .curriculumDetailDtoList(curriculumDetailDtoList)
                 .build();
-
     }
 
+    @Transactional(readOnly = true)
+    public List<LectureDto> findPopularityLectures(){
+        PageRequest pageRequest = PageRequest.of(0, 4);
+        //인기 강의 4개 추출
+        List<Lecture> lectures = lectureUserRepository.findPopularLecturesWithEntityGraph(pageRequest);
 
+        List<Long> lectureIds = lectures.stream()
+                .map(Lecture::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Double> scoreMap = likeRepository.findAverageScoresByLectureIds(lectureIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],         // lectureId
+                        row -> (Double) row[1]        // averageScore
+                ));
+
+        // 최종: DTO 매핑
+        return lectures.stream().map(lecture -> {
+            String imageProfileUrl = imageService.getImageUrl(lecture.getCoverImage());
+            double averageScore = scoreMap.getOrDefault(lecture.getId(), 0.0);
+            return LectureDto.from(lecture, imageProfileUrl, averageScore);
+        }).collect(Collectors.toList());
+    }
 }

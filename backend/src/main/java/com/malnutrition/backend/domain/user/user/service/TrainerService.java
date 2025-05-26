@@ -1,0 +1,35 @@
+package com.malnutrition.backend.domain.user.user.service;
+
+import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.user.user.dto.TrainerInfoDto;
+import com.malnutrition.backend.domain.user.user.dto.TrainerInfoProcessDto;
+import com.malnutrition.backend.domain.user.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class TrainerService {
+
+    private final UserRepository userRepository;
+    private final ImageService imageService;
+    @Transactional(readOnly = true)
+    public List<TrainerInfoDto> findPopularTrainersWithHighScore(){
+        Pageable pageable = PageRequest.of(0, 5);
+
+        List<TrainerInfoProcessDto> trainerInfoProcessDtos = userRepository.findPopularTrainersWithHighScore(pageable);
+        log.info("TrainerInfoProceessDto {}", trainerInfoProcessDtos);
+        return trainerInfoProcessDtos.stream().map((trainerInfoProcessDto ->{
+            String imageUrl = imageService.getImageUrl(trainerInfoProcessDto.getImageId(), trainerInfoProcessDto.getImagePath());
+            return TrainerInfoDto.from(trainerInfoProcessDto, imageUrl);
+        })).collect(Collectors.toList());
+    }
+}
