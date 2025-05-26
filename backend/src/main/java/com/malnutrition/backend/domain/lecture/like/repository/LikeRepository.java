@@ -19,4 +19,5 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             "WHERE l.lectureUser.lecture.id IN :lectureIds GROUP BY l.lectureUser.lecture.id")
     List<Object[]> findAverageScoresByLectureIds(@Param("lectureIds") List<Long> lectureIds);
 
+
 }

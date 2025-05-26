@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.lecture.like.service;
 
+import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
+import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.lecture.like.entity.Like;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -18,6 +22,7 @@ public class LikeService {
     private final Rq rq;
     private final LikeRepository likeRepository;
     private final LectureUserRepository lectureUserRepository;
+    private final LectureRepository lectureRepository;
     //조회
     @Transactional(readOnly = true)
     public double getLikeAverageScore(Long lectureId){
@@ -49,6 +54,21 @@ public class LikeService {
         Double likeAverage = likeRepository.findAverageScoreByLectureId(lectureId);
         if (likeAverage == null) return 0.0;
         return likeAverage;
+    }
+
+    @Transactional(readOnly = true)
+    public double getOverallAverageScoreForTrainer(Long trainerId) {
+        List<Lecture> lectures = lectureRepository.findByTrainerId(trainerId);
+
+        List<Double> averages = lectures.stream()
+                .map(lecture -> likeRepository.findAverageScoreByLectureId(lecture.getId()))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (averages.isEmpty()) return 0.0;
+
+        double total = averages.stream().mapToDouble(Double::doubleValue).sum();
+        return total / averages.size();
     }
 
 
