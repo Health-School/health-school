@@ -154,12 +154,18 @@ export default function Home() {
             </p>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {lectures.map((course) => (
+            {lectures.map((course, index) => (
               <Link
                 key={course.id}
                 href={`/lecture/${course.id}`}
-                className="flex flex-col rounded-lg shadow-lg overflow-hidden"
+                className="flex flex-col rounded-lg shadow-lg overflow-hidden relative"
               >
+                {/* 순위 배지 */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-blue-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                    {index + 1}위
+                  </span>
+                </div>
                 <div className="flex-shrink-0">
                   <Image
                     src={course.coverImageUrl || "/images/default.jpg"}

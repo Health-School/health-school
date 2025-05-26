@@ -186,16 +186,18 @@ public class OrderService {
         String orderId = UUID.randomUUID().toString();
 
         Lecture lecture = lectureService.findLectureById(saveAmountRequest.getLectureId());
-        boolean isAttending = lectureUserService.existsAttendingLecture(actor.getId(), lecture.getId());
-        if(isAttending){
+        boolean isOrder = orderRepository.existsByUser_IdAndLecture_IdAndOrderStatus(actor.getId(), lecture.getId(), OrderStatus.COMPLETED);
+        //lecture id와 order id와 관련된 order 의 상태를 구해와서 확인한다.
+        if(isOrder){
             throw new AccessDeniedException("이미 수강중인 강의입니다.");
         } else if( actor.getId().equals(lecture.getId())){
             throw new AccessDeniedException("자신의 강의는 수강할 수 없습니다.");
 
         }
+        //여기서 필요한 key point 는 무엇일까요??
+        //isAttending ?
 
         //강사는 결제 못하게 하기
-
 
         lectureUserService.registerLectureUser(lecture, actor);
         Order order = Order.builder()
