@@ -311,12 +311,6 @@ export default function LectureDetailPage() {
             >
               수강하기
             </button>
-            <button className="w-full border border-green-600 text-green-600 py-2 rounded mb-2">
-              장바구니에 담기
-            </button>
-            <button className="w-full border text-gray-600 py-2 rounded">
-              찜하기
-            </button>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold mb-2">강의 정보</h3>
