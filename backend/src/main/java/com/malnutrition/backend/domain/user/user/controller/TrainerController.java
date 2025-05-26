@@ -22,7 +22,6 @@ public class TrainerController {
 
     @GetMapping("/popular")
     public ResponseEntity<ApiResponse< List<TrainerInfoDto>>> getPopularTrainers() {
-        log.info("요청 오긴함????");
         List<TrainerInfoDto> trainerInfoDtos = trainerService.findPopularTrainersWithHighScore();
         return ResponseEntity.ok(ApiResponse.success(trainerInfoDtos, "전문 트레이너 조회 성공"));
     }

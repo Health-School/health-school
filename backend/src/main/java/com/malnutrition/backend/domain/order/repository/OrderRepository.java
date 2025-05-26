@@ -67,4 +67,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             LocalDateTime endTime
     );
 
+    @Query("SELECT o FROM Order o JOIN FETCH o.lecture WHERE o.id = :id")
+    Optional<Order> findWithLectureById(@Param("id") String id);
+
 }

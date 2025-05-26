@@ -1,5 +1,6 @@
 package com.malnutrition.backend.domain.order.controller;
 
+import com.malnutrition.backend.domain.lecture.lecture.service.LectureRankingRedisService;
 import com.malnutrition.backend.domain.order.dto.ConfirmPaymentRequestDto;
 import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
 import com.malnutrition.backend.domain.order.service.OrderService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ public class TossPaymentsController {
 
     private final TossPaymentService tossPaymentsService;
     private final OrderService orderService;
+    private final LectureRankingRedisService lectureRankingRedisService;
+
 
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmPayment (@RequestBody ConfirmPaymentRequestDto confirmPaymentRequestDto) throws IOException, InterruptedException {
@@ -37,7 +41,11 @@ public class TossPaymentsController {
             try{
                 TossPaymentsResponse tossPaymentsResponse = response.getBody();
                 log.info("tossPayments body: {}", tossPaymentsResponse);
-                orderService.confirmOrder(tossPaymentsResponse);
+                Long lectureId = orderService.confirmOrder(tossPaymentsResponse);
+
+                // 🔥 강의 인기 점수 반영
+                lectureRankingRedisService.incrementLectureScore(lectureId);
+
 
                 return ResponseEntity.ok().body(ApiResponse.success(null, "결제 성공"));
             } catch (Exception e){

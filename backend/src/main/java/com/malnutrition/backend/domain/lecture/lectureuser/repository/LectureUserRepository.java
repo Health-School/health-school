@@ -79,5 +79,13 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
     })    @Query("SELECT l FROM LectureUser lu JOIN lu.lecture l GROUP BY l ORDER BY COUNT(lu.lecture) DESC")
     List<Lecture> findPopularLecturesWithEntityGraph(Pageable pageable);
 
+    @Query("""
+    SELECT l FROM Lecture l
+    LEFT JOIN FETCH l.coverImage
+    LEFT JOIN FETCH l.lectureCategory
+    LEFT JOIN FETCH l.trainer
+    WHERE l.id IN :ids
+""")
+    List<Lecture> findWithDetailsByIdIn(@Param("ids") List<Long> ids);
 
 }

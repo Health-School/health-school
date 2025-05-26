@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.lecture.lecture.controller;
 import com.malnutrition.backend.domain.lecture.lecture.dto.*;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
+import com.malnutrition.backend.domain.lecture.lecture.service.LectureRankingRedisService;
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
@@ -35,6 +36,8 @@ public class LectureController {
     private final LectureService lectureService;
     private final Rq rq;
     private final UserService userService;
+    private final LectureRankingRedisService lectureRankingRedisService;
+
 
     @Operation(summary = "특정 강의 조회", description = "강의 상세 페이지 조회")
     @GetMapping("/{lectureId}")
@@ -107,5 +110,11 @@ public class LectureController {
         log.info("요청 오는거 맞냐??");
         List<LectureDto> popularityLectures = lectureService.findPopularityLectures();
         return ResponseEntity.ok(ApiResponse.success(popularityLectures, "인기 강의 TOP 4 조회"));
+    }
+
+    @GetMapping("/hot")
+    public ResponseEntity<?> getHotLectures() {
+        List<LectureDto> todayHotLectures = lectureService.getTodayHotLectures();
+        return ResponseEntity.ok(ApiResponse.success(todayHotLectures, "hot lecture 조회 성공"));
     }
 }
