@@ -26,6 +26,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 
     List<Lecture> findByTrainerId(Long trainerId);
 
+    List<Lecture> findByTitleContaining(String keyword);
+
     @Query(value = """
     SELECT l FROM Lecture l
     JOIN l.trainer t
