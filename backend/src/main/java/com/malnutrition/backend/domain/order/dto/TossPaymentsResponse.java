@@ -3,7 +3,9 @@ package com.malnutrition.backend.domain.order.dto;
 
 import com.malnutrition.backend.domain.order.enums.TossPaymentMethod;
 import com.malnutrition.backend.domain.order.enums.TossPaymentStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.time.ZonedDateTime;
 
 @Getter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class TossPaymentsResponse {
 
     private String mId;

@@ -2,11 +2,15 @@ package com.malnutrition.backend.domain.chatroom.chatroom.dto;
 
 import com.malnutrition.backend.domain.chatroom.chatroom.entity.ChatRoom;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatRoomSummaryDto {
     private Long roomId;
     private String title;

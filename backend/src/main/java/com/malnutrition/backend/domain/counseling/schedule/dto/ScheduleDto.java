@@ -4,12 +4,14 @@ import com.malnutrition.backend.domain.counseling.schedule.entity.Schedule;
 import com.malnutrition.backend.domain.counseling.schedule.enums.ApprovalStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ScheduleDto {
     private Long id;
     private Long userId;
