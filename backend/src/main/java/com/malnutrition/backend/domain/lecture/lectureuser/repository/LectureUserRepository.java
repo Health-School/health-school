@@ -69,11 +69,15 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
         """)
     long countCompletedByTrainerId(@Param("trainerId") Long trainerId);
 
+
+    Optional<LectureUser> findByLecture_IdAndUser_Id(Long lectureId, Long userId);
+
     @EntityGraph(attributePaths = {
             "lecture.coverImage",
             "lecture.lectureCategory",
             "lecture.trainer"
     })    @Query("SELECT l FROM LectureUser lu JOIN lu.lecture l GROUP BY l ORDER BY COUNT(lu.lecture) DESC")
     List<Lecture> findPopularLecturesWithEntityGraph(Pageable pageable);
+
 
 }
