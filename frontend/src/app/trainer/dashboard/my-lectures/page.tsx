@@ -143,7 +143,7 @@ export default function MyLecturesPage() {
       );
 
       if (!response.ok) {
-        throw new Error("강의 목록 조회에 실패했습니다.");
+        throw new Error("강의 목록 조회에 실패했습니다!");
       }
 
       const apiResponse: ApiResponse<LecturePage> = await response.json();

@@ -17,6 +17,7 @@ type LayoutProps = {
 export default function ClientLayout({ children }: LayoutProps) {
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith("/admin");
+  const isRootPage = pathname === "/";
 
   // ✅ QueryClient 추가
 
@@ -64,9 +65,21 @@ export default function ClientLayout({ children }: LayoutProps) {
     // ✅ QueryClientProvider로 전체 감싸기
     <LoginUserContext value={loginUserContextValue}>
       <div className="flex flex-col min-h-screen">
-        <main className="container mx-auto px-2 py-8 flex-1">
-          <Header />
-          {children}
+        <main className="py-2 flex-1">
+          {/* 헤더도 루트 페이지가 아니면 container mx-auto px-2 적용 */}
+          {isRootPage ? (
+            <Header />
+          ) : (
+            <div className="container mx-auto px-2">
+              <Header />
+            </div>
+          )}
+          {/* 루트 페이지가 아니면 container mx-auto px-2 적용 */}
+          {isRootPage ? (
+            children
+          ) : (
+            <div className="container mx-auto px-2">{children}</div>
+          )}
         </main>
         <Footer />
       </div>

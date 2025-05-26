@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.lecture.like.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class LikeUpdateRequestDto {
-    Long likeId;
+    Long lectureId;
+    @Min(0)
+    @Max(5)
     int score;
 }

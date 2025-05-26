@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -100,5 +101,11 @@ public class LectureController {
         return ResponseEntity.ok(ApiResponse.success(lectureCurriculumDetailDto, "강의 대시보드 조회"));
     }
 
-
+    @Operation(summary = "인기 강의 조회 ", description = "인기 강의 TOP 4 조회")
+    @GetMapping("/popular")
+    public ResponseEntity<ApiResponse<List<LectureDto>>> getPopularLectures() {
+        log.info("요청 오는거 맞냐??");
+        List<LectureDto> popularityLectures = lectureService.findPopularityLectures();
+        return ResponseEntity.ok(ApiResponse.success(popularityLectures, "인기 강의 TOP 4 조회"));
+    }
 }
