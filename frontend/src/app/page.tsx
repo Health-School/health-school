@@ -1,32 +1,139 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+type LectureDto = {
+  id: number;
+  title: string;
+  content: string;
+  price: number;
+  lectureStatus: string;
+  lectureLevel: string;
+  trainerName: string;
+  coverImageUrl: string;
+  category: string;
+  averageScore: number;
+  createdAt: string;
+};
+
+type TrainerInfoDto = {
+  name: string;
+  studentCount: number;
+  averageLectureScore: number;
+  profileImagePath: string;
+};
+
 export default function Home() {
+  const [lectures, setLectures] = useState<LectureDto[]>([]);
+  const [trainers, setTrainers] = useState<TrainerInfoDto[]>([]);
+
+  useEffect(() => {
+    console.log("Fetching popular lectures...");
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/popular`)
+      .then((res) => res.json())
+      .then((data) => {
+        setLectures(data.data || []);
+      });
+
+    console.log("Fetching popular trainers...");
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/trainers/popular`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Popular trainers data:", data);
+        setTrainers(data.data || []);
+      });
+  }, []);
+
+  // 별점 렌더링 컴포넌트 추가
+  function StarRating({ score }: { score: number }) {
+    // 0~5 사이로 보정
+    const clamped = Math.max(0, Math.min(5, score));
+    return (
+      <div className="flex items-center">
+        <div className="flex">
+          {[0, 1, 2, 3, 4].map((i) => {
+            if (clamped >= i + 1) {
+              // 가득 찬 별
+              return (
+                <svg
+                  key={i}
+                  className="h-5 w-5 text-yellow-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              );
+            } else if (clamped > i && clamped < i + 1) {
+              // 반 별(소수점)
+              return (
+                <svg
+                  key={i}
+                  className="h-5 w-5 text-yellow-400"
+                  viewBox="0 0 20 20"
+                >
+                  <defs>
+                    <linearGradient id={`half${i}`}>
+                      <stop
+                        offset={`${(clamped - i) * 100}%`}
+                        stopColor="currentColor"
+                      />
+                      <stop
+                        offset={`${(clamped - i) * 100}%`}
+                        stopColor="#e5e7eb"
+                      />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    fill={`url(#half${i})`}
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
+                </svg>
+              );
+            } else {
+              // 빈 별
+              return (
+                <svg
+                  key={i}
+                  className="h-5 w-5 text-gray-300"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              );
+            }
+          })}
+        </div>
+        <span className="ml-2 text-sm text-gray-600">{score.toFixed(1)}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl md:text-6xl">
-              건강한 삶을 위한 첫걸음
+      <section className="relative h-[650px]  overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent z-10 "></div>
+        <img
+          src="https://readdy.ai/api/search-image?query=Modern%20luxury%20fitness%20center%20interior%20with%20panoramic%20windows%2C%20state%20of%20the%20art%20equipment%2C%20natural%20lighting%2C%20minimalist%20design%2C%20people%20exercising%2C%20professional%20gym%20environment%2C%20cinematic%20wide%20shot&width=1440&height=400&seq=17&orientation=landscape"
+          alt="건강한 삶을 위한 전문 트레이닝"
+          className="absolute inset-0 w-full h-full object-cover object-top"
+        />
+        <div className="container mx-auto px-4 h-full flex items-center relative z-20">
+          <div className="max-w-lg text-white">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              건강한 삶을 위한 전문 트레이닝
             </h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              건강 트레이너와의 맞춤형으로 누구나 쉽고 효과적으로 달성하는 꿈
+            <p className="text-lg mb-8">
+              전문 트레이너와 함께 과학적인 방법으로 당신의 목표를 달성하세요.
+              지금 시작하세요.
             </p>
-            <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-              <div className="rounded-md shadow">
-                <Link
-                  href="/trainers"
-                  className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10"
-                >
-                  무료 체험 신청하기
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Popular Classes Section */}
       <div className="bg-white py-12">
@@ -38,39 +145,14 @@ export default function Home() {
             </p>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                title: "요가 기초 마스터하기",
-                price: "49,000",
-                image: "yoga.jpg",
-                rating: 4.5,
-              },
-              {
-                title: "효과적인 웨이트 트레이닝",
-                price: "59,000",
-                image: "weight.jpg",
-                rating: 4.8,
-              },
-              {
-                title: "코어 강화 클래스",
-                price: "45,000",
-                image: "core.jpg",
-                rating: 4.3,
-              },
-              {
-                title: "비앤애프터 HIIT 트레이닝",
-                price: "55,000",
-                image: "hiit.jpg",
-                rating: 4.7,
-              },
-            ].map((course, index) => (
+            {lectures.map((course) => (
               <div
-                key={index}
+                key={course.id}
                 className="flex flex-col rounded-lg shadow-lg overflow-hidden"
               >
                 <div className="flex-shrink-0">
                   <Image
-                    src={`/images/${course.image}`}
+                    src={course.coverImageUrl || "/images/default.jpg"}
                     alt="Class thumbnail"
                     width={400}
                     height={300}
@@ -79,33 +161,35 @@ export default function Home() {
                 </div>
                 <div className="flex-1 bg-white p-6 flex flex-col justify-between">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-green-600">
-                      ₩{course.price}/월
-                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-green-600">
+                        ₩{course.price.toLocaleString()}
+                      </p>
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        {course.lectureLevel}
+                      </span>
+                    </div>
                     <h3 className="mt-2 text-xl font-semibold text-gray-900">
                       {course.title}
                     </h3>
-                    <div className="mt-2 flex items-center">
-                      {[...Array(Math.round(course.rating))].map((_, star) => (
-                        <svg
-                          key={star}
-                          className="h-5 w-5 text-yellow-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        강사: {course.trainerName}
+                      </span>
+                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                        {course.category}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <StarRating score={course.averageScore} />
+                      <span className="text-xs text-gray-500">
+                        {new Date(course.createdAt).toLocaleDateString("ko-KR")}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-          <div className="text-center mt-8">
-            <button className="text-green-600 hover:text-green-700 font-medium">
-              더 많은 보기 →
-            </button>
           </div>
         </div>
       </div>
@@ -122,47 +206,31 @@ export default function Home() {
             </p>
           </div>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              {
-                name: "박준혁",
-                role: "웨이트 트레이닝 2급",
-                image: "trainer1.jpg",
-              },
-              {
-                name: "김지연",
-                role: "요가 강사",
-                image: "trainer2.jpg",
-              },
-              {
-                name: "이수지",
-                role: "필라테스 강사",
-                image: "trainer3.jpg",
-              },
-              {
-                name: "최동철",
-                role: "HIIT 트레이닝 전문",
-                image: "trainer4.jpg",
-              },
-              {
-                name: "한미영",
-                role: "요가 강사",
-                image: "trainer5.jpg",
-              },
-            ].map((trainer, index) => (
+            {trainers.map((trainer, index) => (
               <div key={index} className="text-center">
                 <div className="relative">
                   <Image
-                    src={`/images/trainers/${trainer.image}`}
+                    src={
+                      trainer.profileImagePath || "/images/default-trainer.jpg"
+                    }
                     alt={trainer.name}
                     width={200}
                     height={200}
-                    className="rounded-lg mx-auto"
+                    className="rounded-full mx-auto w-32 h-32 object-cover"
                   />
+                  <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    ⭐ {trainer.averageLectureScore.toFixed(1)}
+                  </div>
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
                   {trainer.name}
                 </h3>
-                <p className="text-sm text-gray-500">{trainer.role}</p>
+                <p className="text-sm text-gray-500">
+                  수강생 {trainer.studentCount}명
+                </p>
+                <div className="mt-2">
+                  <StarRating score={trainer.averageLectureScore} />
+                </div>
               </div>
             ))}
           </div>
@@ -183,14 +251,14 @@ export default function Home() {
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
-                icon: "🧘‍♀️",
-                title: "요가",
-                description: "바디밸런스 개선과 스트레스 해소",
+                icon: "👨‍🏫",
+                title: "전문 트레이너",
+                description: "전문가의 맞춤형 코칭",
               },
               {
-                icon: "💪",
-                title: "필라테스",
-                description: "코어 강화와 자세 교정",
+                icon: "🗣️",
+                title: "실시간 1대1 코칭",
+                description: "강사와의 실시간 소통",
               },
               {
                 icon: "🏋️‍♂️",
@@ -216,112 +284,6 @@ export default function Home() {
                 </p>
               </div>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">회원 후기</h2>
-            <p className="mt-4 text-gray-500">
-              실제 회원들의 생생한 후기를 확인해보세요
-            </p>
-          </div>
-          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
-            {[
-              {
-                name: "김미나",
-                image: "review1.jpg",
-                text: "매일 트레이너님의 지도로 운동하면서 체중감량에 성공했어요. 운동이 이제는 습관이 되었고, 매일이 즐거워요!",
-                rating: 5,
-              },
-              {
-                name: "박상우",
-                image: "review2.jpg",
-                text: "건강해지고 싶어서 시작한 PT인데, 생각보다 더 많은 것을 배우고 있어요. 자세교정부터 식단까지 꼼꼼하게 봐주셔서 감사합니다.",
-                rating: 5,
-              },
-            ].map((review, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-lg">
-                <div className="flex items-center">
-                  <Image
-                    src={`/images/reviews/${review.image}`}
-                    alt={review.name}
-                    width={50}
-                    height={50}
-                    className="rounded-full"
-                  />
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {review.name}
-                    </h3>
-                    <div className="flex items-center">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className="h-5 w-5 text-yellow-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-4 text-gray-600">{review.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Statistics */}
-      <div className="bg-gray-800 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-white">
-              헬스쿨과 함께하는 건강한 변화
-            </h2>
-          </div>
-          <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-4">
-            {[
-              { number: "5,000+", label: "누적 회원" },
-              { number: "50+", label: "전문 트레이너" },
-              { number: "200+", label: "다양한 강의" },
-              { number: "98%", label: "만족도" },
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <p className="text-4xl font-extrabold text-green-500">
-                  {stat.number}
-                </p>
-                <p className="mt-2 text-sm text-gray-400">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="bg-green-600 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-white">
-              지금 바로 시작하세요
-            </h2>
-            <p className="mt-4 text-lg text-green-100">
-              건강한 삶으로 향하는 첫걸음, 지금 함께하세요.
-            </p>
-            <div className="mt-8 flex justify-center gap-4">
-              <button className="bg-white text-green-600 px-6 py-3 rounded-md font-medium hover:bg-gray-100">
-                무료 체험 신청하기
-              </button>
-              <button className="border border-white text-white px-6 py-3 rounded-md font-medium hover:bg-green-700">
-                프로그램 살펴보기
-              </button>
-            </div>
           </div>
         </div>
       </div>
