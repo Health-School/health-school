@@ -73,6 +73,25 @@ interface NotificationDetail {
   createdAt: string;
 }
 
+// Add these interfaces at the top with other interfaces
+interface UserCertification {
+  certificationId: number;
+  certificationName: string;
+  approveStatus: "PENDING" | "APPROVED" | "REJECTED";
+  imageUrl: string;
+  acquisitionDate: string;
+  expirationDate: string;
+  adminComment: string | null;
+}
+
+interface CertificationPage {
+  content: UserCertification[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+}
+
 export default function MyLecturesPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -91,17 +110,23 @@ export default function MyLecturesPage() {
   // Add state for consultation notification
   const [hasNewConsultation, setHasNewConsultation] = useState(false);
 
-  // Add to component state definitions
+  // 상태 정의 부분에 notifications 추가
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Add near other state declarations
+  // Add these state variables
   const [notificationPage, setNotificationPage] = useState(0);
-  const [totalNotificationPages, setTotalNotificationPages] = useState(0);
+  const [notificationTotalPages, setNotificationTotalPages] = useState(0);
 
   // Add state for notification modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationDetail | null>(null);
+
+  // Add these state variables in the component
+  const [certifications, setCertifications] = useState<UserCertification[]>([]);
+  const [certificationPage, setCertificationPage] = useState(0);
+  const [totalCertificationPages, setTotalCertificationPages] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleNewLecture = () => {
     router.push("/trainer/dashboard/my-lectures/new");
@@ -215,24 +240,27 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add function to fetch notifications
+  // fetchNotifications 함수 수정
   const fetchNotifications = async (page: number = 0) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications?page=${page}&size=5`,
-        { credentials: "include" }
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications?page=${page}&size=10`,
+        {
+          credentials: "include",
+        }
       );
 
       if (!response.ok) {
-        throw new Error("공지사항 조회에 실패했습니다.");
+        throw new Error("공지사항 조회 실패");
       }
 
       const result = await response.json();
-      console.log("Notifications response:", result);
-
-      setNotifications(result.content);
-      setTotalNotificationPages(result.totalPages);
-      setNotificationPage(page);
+      console.log("Notifications response:", result); // 디버깅용
+      if (result.success) {
+        setNotifications(result.data);
+        setNotificationPage(page);
+        setNotificationTotalPages(result.totalPages || 1);
+      }
     } catch (error) {
       console.error("공지사항 조회 실패:", error);
     }
@@ -271,6 +299,36 @@ export default function MyLecturesPage() {
       console.error("수료율 조회 실패:", e);
     }
   };
+
+  // Add this function to fetch certifications
+  const fetchCertifications = async (page: number = 0) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/usercertifications/me?page=${page}&size=10`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("자격증 목록 조회에 실패했습니다.");
+      }
+
+      const result = await response.json();
+      setCertifications(result.content);
+      setTotalCertificationPages(result.totalPages);
+      setCertificationPage(page);
+    } catch (error) {
+      console.error("자격증 목록 조회 실패:", error);
+    }
+  };
+
+  // Add useEffect to fetch certifications
+  useEffect(() => {
+    if (activeTab === "MY 자격증 관리") {
+      fetchCertifications();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     fetchLectures();
@@ -441,41 +499,31 @@ export default function MyLecturesPage() {
               </div>
             )}
           </div>
-          {totalNotificationPages >= 1 && (
-            <div className="flex justify-center mt-4 items-center gap-2">
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    fetchNotifications(Math.max(0, notificationPage - 1))
-                  }
-                  disabled={notificationPage === 0}
-                  className={`px-3 py-1 rounded ${
-                    notificationPage === 0
-                      ? "bg-gray-100 text-gray-400"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  이전
-                </button>
-                <span className="text-sm text-gray-500">
-                  {notificationPage + 1} / {totalNotificationPages}
-                </span>
-                <button
-                  onClick={() =>
-                    fetchNotifications(
-                      Math.min(totalNotificationPages - 1, notificationPage + 1)
-                    )
-                  }
-                  disabled={notificationPage === totalNotificationPages - 1}
-                  className={`px-3 py-1 rounded ${
-                    notificationPage === totalNotificationPages - 1
-                      ? "bg-gray-100 text-gray-400"
-                      : "bg-green-500 text-white hover:bg-green-600"
-                  }`}
-                >
-                  다음
-                </button>
-              </div>
+          {notificationTotalPages > 1 && (
+            <div className="flex justify-center mt-4 gap-2">
+              <button
+                onClick={() =>
+                  fetchNotifications(Math.max(0, notificationPage - 1))
+                }
+                disabled={notificationPage === 0}
+                className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+              >
+                이전
+              </button>
+              <span className="px-3 py-1">
+                {notificationPage + 1} / {notificationTotalPages}
+              </span>
+              <button
+                onClick={() =>
+                  fetchNotifications(
+                    Math.min(notificationTotalPages - 1, notificationPage + 1)
+                  )
+                }
+                disabled={notificationPage === notificationTotalPages - 1}
+                className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+              >
+                다음
+              </button>
             </div>
           )}
         </div>
@@ -558,6 +606,8 @@ export default function MyLecturesPage() {
         isOpen={isModalOpen}
         onClose={closeNotificationModal}
       />
+
+      {/* Add ImageModal component here if needed */}
     </div>
   );
 }
@@ -606,6 +656,23 @@ const NotificationModal = ({
             닫기
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// Add this component for the image modal
+const ImageModal = ({ url, onClose }: { url: string; onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="relative max-w-4xl max-h-[90vh] overflow-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white text-xl hover:text-gray-300"
+        >
+          ✕
+        </button>
+        <img src={url} alt="자격증" className="max-w-full h-auto" />
       </div>
     </div>
   );
