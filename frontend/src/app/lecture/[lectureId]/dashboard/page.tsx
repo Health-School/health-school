@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import NotificationList from "@/components/notification/NotificationList";
 import NotificationModal from "@/components/notification/NotificationModal";
 import { Notification } from "@/components/notification/Notification";
+import QnaTab from "@/components/qna/QnaTab";
 
 interface CurriculumDetailDto {
   curriculumId: number;
@@ -81,6 +82,7 @@ const LectureListPage = () => {
   const [hoverScore, setHoverScore] = useState<number | null>(null);
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
 
   // 별 클릭 시 서버에 평점 등록
   const handleStarClick = async (score: number) => {
@@ -265,6 +267,135 @@ const LectureListPage = () => {
     Promise.all(promises).then(setVideoDurations);
   }, [lectureData]);
 
+  // 상태 추가
+  const [activeTab, setActiveTab] = useState("공지사항");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+
+  // 공지사항 가져오는 함수
+  const fetchNotifications = async () => {
+    console.log("=== 공지사항 API 호출 시작 ===");
+    console.log("lectureId:", lectureId);
+    console.log("activeTab:", activeTab);
+
+    setIsLoadingNotifications(true);
+
+    try {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureId}`;
+      console.log("API URL:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("=== API 응답 분석 ===");
+      console.log("전체 응답:", result);
+      console.log("result.success:", result.success);
+      console.log("result.data:", result.data);
+      console.log("result.data 타입:", typeof result.data);
+      console.log("result.data.length:", result.data?.length);
+
+      // 조건 확인
+      if (result.success) {
+        console.log("✅ result.success는 true");
+        if (result.data) {
+          console.log("✅ result.data 존재");
+          console.log("설정할 데이터:", result.data);
+
+          setNotifications(result.data);
+
+          // 상태 설정 직후 확인 (비동기이므로 다음 렌더링에서 확인됨)
+          console.log("setNotifications 호출 완료");
+        } else {
+          console.log("❌ result.data가 없음");
+          setNotifications([]);
+        }
+      } else {
+        console.log("❌ result.success가 false");
+        console.log("error message:", result.message);
+        setNotifications([]);
+      }
+    } catch (error) {
+      console.error("=== API 호출 에러 ===");
+      console.error("Error:", error);
+      setNotifications([]);
+    } finally {
+      setIsLoadingNotifications(false);
+      console.log("=== API 호출 완료 ===");
+    }
+  };
+
+  // 공지사항 탭 클릭 시 데이터 로드
+  useEffect(() => {
+    if (activeTab === "공지사항" && lectureId) {
+      fetchNotifications();
+    }
+  }, [activeTab, lectureId]);
+
+  // 렌더링 시점의 상태 확인
+  console.log("렌더링 시점 - activeTab:", activeTab);
+  console.log("렌더링 시점 - notifications:", notifications);
+  console.log("렌더링 시점 - isLoadingNotifications:", isLoadingNotifications);
+
+  // 상태 변화 감지용 useEffect 추가
+  useEffect(() => {
+    console.log("🔄 notifications 상태 변경됨:", notifications);
+    console.log("notifications.length:", notifications.length);
+  }, [notifications]);
+
+  // 단순한 데이터 가져오기 함수
+  const testFetchNotifications = async () => {
+    try {
+      console.log("=== 단순 데이터 가져오기 테스트 ===");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/notifications/lecture/${lectureId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      console.log("Response status:", response.status);
+
+      const data = await response.json();
+      console.log("받아온 데이터:", data);
+
+      return data;
+    } catch (error) {
+      console.error("에러:", error);
+      return null;
+    }
+  };
+
+  // 유저 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/me`,
+          { credentials: "include" }
+        );
+        if (!response.ok) throw new Error("Failed to fetch user info");
+        const data = await response.json();
+        setUserId(data.data.id);
+      } catch (e) {
+        setUserId(null);
+      }
+    };
+    fetchUserInfo();
+  }, []);
+
   if (!lectureData || !selectedCurriculum) {
     return (
       <div className="flex items-center justify-center min-h-screen text-xl text-gray-500">
@@ -425,7 +556,6 @@ const LectureListPage = () => {
                 {
                   {
                     curriculum: "커리큘럼",
-                    materials: "학습자료",
                     qna: "Q&A",
                     notifications: "공지사항",
                   }[tab]
@@ -554,6 +684,11 @@ const LectureListPage = () => {
                 </ul>
               </div>
             </div>
+          )}
+
+          {/* Q&A 탭일 때 QnaTab 보여주기 */}
+          {selectedTab === "qna" && userId !== null && (
+            <QnaTab lectureId={Number(lectureId)} userId={userId} />
           )}
         </aside>
 

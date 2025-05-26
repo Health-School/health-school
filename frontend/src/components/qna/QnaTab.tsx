@@ -24,6 +24,7 @@ interface QnaTabProps {
 }
 
 export default function QnaTab({ lectureId, userId }: QnaTabProps) {
+  console.log("QnaTab lectureId:", lectureId)
   const [qnaList, setQnaList] = useState<QnaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [openCommentQnaId, setOpenCommentQnaId] = useState<number | null>(null);
@@ -31,6 +32,7 @@ export default function QnaTab({ lectureId, userId }: QnaTabProps) {
   const [commentInput, setCommentInput] = useState<Record<number, string>>({});
   const [commentLoading, setCommentLoading] = useState<Record<number, boolean>>(
     {}
+    
   );
 
   const fetchQnaList = async () => {
