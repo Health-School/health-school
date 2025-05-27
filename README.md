@@ -94,7 +94,7 @@
 - 인증 상태 및 이력 확인 가능
 
 
-# <details>
+ <details>
  <summary>📁 프로젝트 구조 보기 (클릭)</summary>
 
 ```plaintext
