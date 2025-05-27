@@ -54,6 +54,7 @@
 
 ---
 
+
 ## 주요 기능
 
 ### 🎓 강의 및 커리큘럼 관리
@@ -93,8 +94,12 @@
 - 사용자 인증서 업로드 및 관리자 검수
 - 인증 상태 및 이력 확인 가능
 
-<details> <summary>📁 프로젝트 구조 보기 (클릭)</summary>
-```
+---
+
+ <details>
+ <summary>📁 프로젝트 구조 보기 (클릭)</summary>
+
+```plaintext
 health-school/
 ├── .gitignore
 ├── build.gradle.kts
@@ -108,7 +113,6 @@ health-school/
 │       ├── java/com/malnutrition/backend/
 │       │   ├── domain/                    # 비즈니스 도메인 계층
 │       │   │   ├── admin/                 # 관리자 대시보드, 사용자 관리
-│       │   │   │   └── dashboard/controller, dto, service
 │       │   │   ├── alarm/                 # 알림 기능
 │       │   │   ├── certification/         # 자격 인증 (유저, 카테고리 포함)
 │       │   │   ├── chatbotmessage/        # 챗봇 메시지 관리
@@ -120,14 +124,9 @@ health-school/
 │       │   │   ├── order/                 # 주문, 결제, 수강 등록
 │       │   │   └── user/                  # 사용자 도메인
 │       │   ├── global/                    # 전역 설정 및 공통 기능
-│       │   │   ├── app/
 │       │   │   ├── config/                # Spring, Security 설정
-│       │   │   ├── converter/
 │       │   │   ├── exception/
-│       │   │   ├── jpa/
-│       │   │   ├── rp/                    # Request Parameter 처리
 │       │   │   ├── rq/                    # 로그인 유저 처리
-│       │   │   ├── security/
 │       │   │   └── ut/
 │       │   └── maincontroller/
 │       │       └── HealthSchoolApplication.java  # Spring Boot 메인 클래스
@@ -139,5 +138,3 @@ health-school/
 │           ├── application-test.yml
 │           ├── application-secret.yml
 │           └── application-secret.yml.default
-</details>
-```
