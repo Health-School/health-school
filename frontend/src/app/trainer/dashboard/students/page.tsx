@@ -802,12 +802,12 @@ export default function StudentsPage() {
                           <p className="text-gray-600 p-3 bg-gray-50 rounded mb-2">
                             {qna.content}
                           </p>
-                          <button
+                          {/* <button
                             onClick={() => handleLectureClick(qna.lectureId)}
                             className="text-green-600 hover:text-green-700 text-xs underline"
                           >
                             해당 강의 QnA 게시판으로 이동
-                          </button>
+                          </button> */}
                         </div>
                       )}
                       <div className="flex justify-between items-center text-xs text-gray-500">

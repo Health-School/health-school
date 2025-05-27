@@ -265,27 +265,6 @@ export default function LectureDetailPage() {
             강의 신고하기
           </button>
 
-          {/* 트레이너 정보 */}
-          <div className="bg-white rounded-lg p-4 shadow mb-6 flex items-center gap-4">
-            {data.trainerProfileImageUrl ? (
-              <Image
-                src={data.trainerProfileImageUrl}
-                alt="트레이너"
-                width={48}
-                height={48}
-                className="rounded-full"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-500">
-                {data.trainerName ? data.trainerName.charAt(0) : "?"}
-              </div>
-            )}
-            <div>
-              <div className="font-semibold">{data.trainerName}</div>
-            
-            </div>
-          </div>
-
           {/* 강의 소개 */}
           <section className="mb-8">
             <h2 className="font-bold text-lg mb-2">강의 소개</h2>
@@ -296,6 +275,31 @@ export default function LectureDetailPage() {
         {/* 오른쪽: 결제/강의 정보 */}
         <aside className="w-full md:w-80">
           <div className="bg-white rounded-lg shadow p-6 mb-6">
+            {/* 트레이너 정보를 결제 금액 위로 이동 */}
+            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
+              <div className="relative w-12 h-12 overflow-hidden rounded-full border-2 border-green-100">
+                {data.trainerProfileImageUrl ? (
+                  <Image
+                    src={data.trainerProfileImageUrl}
+                    alt={data.trainerName || "트레이너"}
+                    width={48}
+                    height={48}
+                    className="rounded-full object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-green-50 flex items-center justify-center text-xl font-bold text-green-600">
+                    {data.trainerName ? data.trainerName.charAt(0) : "?"}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="font-semibold text-gray-800">
+                  {data.trainerName}
+                </div>
+                <div className="text-xs text-gray-500">트레이너</div>
+              </div>
+            </div>
+
             <div className="text-2xl font-bold text-green-600 mb-2">
               ₩{data.price?.toLocaleString()}
             </div>
