@@ -2,9 +2,9 @@ server:
   port: 8080
 spring:
   datasource:
-    url: jdbc:mysql://mysql_1:3306/blog_prod
+    url: jdbc:mysql://mysql_1:3306/health_school
     username: ll_local
-    password: ${custom.prod.db.password}
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       auto-commit: false
@@ -29,13 +29,6 @@ custom:
     backUrl: "https://api.healthschool.site"
   genFile:
     dirPath: /gen
-
-db:
-  datasource:
-    url: "jdbc:mysql://mysql_1:3306/health_school"
-    username: "root"
-    password: "1234"
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
 
 cookie:
