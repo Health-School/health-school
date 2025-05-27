@@ -139,5 +139,5 @@ health-school/
 │           ├── application-test.yml
 │           ├── application-secret.yml
 │           └── application-secret.yml.default
-```
 </details>
+```
