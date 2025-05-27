@@ -62,13 +62,11 @@ async function saveCurriculumProgress(
 export default function LectureDashboard() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [selectedTab, setSelectedTab] = useState("curriculum");
-  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
   const params = useParams();
   const lectureId = params.lectureId as string;
   const searchParams = useSearchParams();
-  const curriculumId = searchParams.get("curriculumId");
 
   const [lectureData, setLectureData] =
     useState<LectureCurriculumDetailDto | null>(null);
@@ -77,7 +75,6 @@ export default function LectureDashboard() {
   const [videoDurations, setVideoDurations] = React.useState<string[]>([]);
 
   // 누적 시청 시간 관리용 state
-  const [watchedSeconds, setWatchedSeconds] = useState(0);
 
   const [hoverScore, setHoverScore] = useState<number | null>(null);
   const [userScore, setUserScore] = useState<number | null>(null);
@@ -112,7 +109,10 @@ export default function LectureDashboard() {
       setTimeout(() => setUserScore(null), 300);
       alert("평점이 등록되었습니다!");
     } catch (e) {
-      alert("평점 등록에 실패했습니다.");
+      if (e instanceof Error) {
+        console.error("에러 메시지:", e.message);
+        alert("평점 등록에 실패했습니다.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -399,7 +399,6 @@ export default function LectureDashboard() {
     }
   };
 
-
   // 유저 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -417,7 +416,6 @@ export default function LectureDashboard() {
     };
     fetchUserInfo();
   }, []);
-
 
   if (!lectureData || !selectedCurriculum) {
     return (
