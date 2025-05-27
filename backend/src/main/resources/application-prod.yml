@@ -3,6 +3,14 @@ custom:
     frontUrl: "https://www.healthschool.site"
     backUrl: "https://api.healthschool.site"
 
+db:
+  datasource:
+    url: "jdbc:mysql://mysql_1:3306/health_school"
+    username: "root"
+    password: "1234"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
 cookie:
   domain: ".healthschool.site"
 
