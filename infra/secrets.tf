@@ -1,6 +1,6 @@
 variable "password_1" {
   description = "password_1"
-  default     = "NEED_TO_INPUT" # 데이터베이스 비번
+  default     = "123414" # 데이터베이스 비번
 }
 
 variable "github_access_token_1" {
