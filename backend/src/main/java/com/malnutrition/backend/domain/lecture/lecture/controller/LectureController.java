@@ -47,6 +47,11 @@ public class LectureController {
         return ResponseEntity.ok(ApiResponse.success(lecture, "강의 추가 완료"));
     }
 
+    @GetMapping("/search")
+    public List<LectureSearchResponseDto> searchLectures(@RequestParam String keyword) {
+        return lectureService.searchLecturesByTitle(keyword);
+    }
+
 
     @Operation(summary = "강의 추가", description = "새로운 강의를 추가합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식

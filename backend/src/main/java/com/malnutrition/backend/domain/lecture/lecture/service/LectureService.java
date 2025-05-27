@@ -11,10 +11,7 @@ import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumS3Se
 import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumService;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.entity.CurriculumProgress;
 import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureCurriculumDetailDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDetailDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureDto;
-import com.malnutrition.backend.domain.lecture.lecture.dto.LectureRequestDto;
+import com.malnutrition.backend.domain.lecture.lecture.dto.*;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureLevel;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
@@ -62,7 +59,17 @@ public class LectureService {
 
 
     private final Rq rq;
+    @Transactional
+    public List<LectureSearchResponseDto> searchLecturesByTitle(String keyword) {
+        List<Lecture> lectures = lectureRepository.findByTitleContaining(keyword);
 
+        return lectures.stream()
+                .map(lecture -> {
+                    Double averageScore = likeRepository.findAverageScoreByLectureId(lecture.getId());
+                    return LectureSearchResponseDto.transDto(lecture, imageService, averageScore);
+                })
+                .collect(Collectors.toList());
+    }
     @Transactional(readOnly = true)
     public LectureDetailDto getLecture(Long lectureId){
         Lecture lecture = lectureRepository.findByIdWithAllDetails(lectureId).

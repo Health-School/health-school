@@ -34,6 +34,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/date-fns": "^2.6.3",
+    "@types/echarts": "^4.9.22",
     "@types/event-source-polyfill": "^1.0.5",
     "@types/node": "^20",
     "@types/react": "^19",

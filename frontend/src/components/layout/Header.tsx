@@ -8,12 +8,23 @@ import { useGlobalLoginUser } from "@/stores/auth/loginUser";
 import AlarmBell from "@/components/alarm/AlarmBell";
 export default function Header({ hideDropdownMenus = false }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
   console.log("loginUser:::" + JSON.stringify(loginUser));
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   const handleSearchClick = () => {
-    router.push("/search");
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   const toggleDropdown = () => {
@@ -65,22 +76,31 @@ export default function Header({ hideDropdownMenus = false }) {
             {isLogin ? <AlarmBell /> : null}
             <div className="flex items-center space-x-4">
               {!hideDropdownMenus && (
-                <button
-                  onClick={handleSearchClick}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
-                  title="검색"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                    className="text-gray-600"
-                    viewBox="0 0 16 16"
+                <form onSubmit={handleSearch} className="flex items-center">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="강의를 검색하세요"
+                    className="px-3 py-1 border border-gray-300 rounded-l-md focus:outline-none focus:border-green-500"
+                  />
+                  <button
+                    type="submit"
+                    className="p-2 bg-gray-100 hover:bg-gray-200 rounded-r-md transition-colors cursor-pointer"
+                    title="검색"
                   >
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
-                  </svg>
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      fill="currentColor"
+                      className="text-gray-600"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                    </svg>
+                  </button>
+                </form>
               )}
 
               {isLogin ? (

@@ -1248,13 +1248,21 @@ export default function LectureManagePage({
               {filteredStudents.map((student) => (
                 <tr key={student.id} className="border-b hover:bg-gray-50">
                   <td className="py-3 px-4">
-                    <Image
-                      src={student.profileImage || "/default-profile.png"}
-                      alt={`${student.name}의 프로필`}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
+                    <div className="relative w-10 h-10 overflow-hidden rounded-full border-2 border-green-100">
+                      {student.profileImage ? (
+                        <Image
+                          src={student.profileImage}
+                          alt={`${student.name}의 프로필`}
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-green-50 flex items-center justify-center text-lg font-bold text-green-600">
+                          {student.name ? student.name.charAt(0) : "?"}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4">{student.name}</td>
                   <td className="py-3 px-4 text-gray-600">{student.email}</td>
