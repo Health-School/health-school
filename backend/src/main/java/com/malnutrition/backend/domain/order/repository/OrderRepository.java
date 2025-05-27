@@ -70,4 +70,6 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query("SELECT o FROM Order o JOIN FETCH o.lecture WHERE o.id = :id")
     Optional<Order> findWithLectureById(@Param("id") String id);
 
+    List<Order> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+
 }

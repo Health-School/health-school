@@ -16,6 +16,7 @@ import com.malnutrition.backend.domain.lecture.lectureuser.entity.LectureUser;
 import com.malnutrition.backend.domain.lecture.lectureuser.enums.CompletionStatus;
 import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.order.entity.Order;
+import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
@@ -23,11 +24,13 @@ import com.malnutrition.backend.global.rq.Rq;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,35 +52,46 @@ public class LectureUserService {
         // 1) 페이징된 LectureUser 리스트 조회
         Page<LectureUser> lectureUsers = lectureUserRepository.findByUser(user, pageable);
 
-        // 2) 한 번에 user의 모든 Order 조회
-        List<Order> orderList = orderRepository.findByUser(user);
+        // 2) COMPLETED 상태의 Order만 조회
+        List<Order> orderList = orderRepository.findByUserAndOrderStatus(user, OrderStatus.COMPLETED);
 
-        // 3) LectureUser(Page<LectureUser>)를 EnrollDto(Page<EnrollDto>)로 변환
-        return lectureUsers.map(lu -> {
-            // 해당 Lecture에 대한 Order 찾기
-            Order matchedOrder = orderList.stream()
-                    .filter(o -> o.getLecture().getId().equals(lu.getLecture().getId()))
-                    .findFirst()
-                    .orElse(null);
-            int total = curriculumRepository.countByLecture(lu.getLecture()); // 커리큘럼(영상) 갯수 세기
-            int completedVideo = curriculumProgressRepository.findByUserAndLecture(user, lu.getLecture()).stream()
-                    .filter(curriculumProgress -> curriculumProgress.getStatus() == ProgressStatus.COMPLETED)
-                    .map(curriculumProgress -> curriculumProgress.getCurriculum().getId())
-                    .collect(Collectors.toSet()).size(); // 중복 제거
-            int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
+        // 3) COMPLETED 주문이 있는 강의 ID 목록 추출
+        Set<Long> completedLectureIds = orderList.stream()
+                .map(o -> o.getLecture().getId())
+                .collect(Collectors.toSet());
 
-            return  EnrollDto.builder()
-                    .lectureId (lu.getLecture().getId())
-                    .lectureName(lu.getLecture().getTitle())
-                    .lectureLevel(lu.getLecture().getLectureLevel().getDescription())
-                    .userName(lu.getLecture().getTrainer().getNickname())
-                    .startDate(matchedOrder != null ? matchedOrder.getApprovedAt() : null)
-                    .progressRate(progressRate)
-                    .createdDate(lu.getCreatedDate())
-                    .coverImageUrl(imageService.getImageUrl(lu.getLecture().getCoverImage()))
-                    .build();
-        });
+        // 4) COMPLETED 주문이 있는 강의만 필터링 후 EnrollDto로 변환
+        List<EnrollDto> enrollDtoList = lectureUsers.stream()
+                .filter(lu -> completedLectureIds.contains(lu.getLecture().getId()))
+                .map(lu -> {
+                    Order matchedOrder = orderList.stream()
+                            .filter(o -> o.getLecture().getId().equals(lu.getLecture().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    int total = curriculumRepository.countByLecture(lu.getLecture());
+                    int completedVideo = curriculumProgressRepository.findByUserAndLecture(user, lu.getLecture()).stream()
+                            .filter(cp -> cp.getStatus() == ProgressStatus.COMPLETED)
+                            .map(cp -> cp.getCurriculum().getId())
+                            .collect(Collectors.toSet()).size();
+                    int progressRate = total > 0 ? (completedVideo * 100 / total) : 0;
+
+                    return EnrollDto.builder()
+                            .lectureId(lu.getLecture().getId())
+                            .lectureName(lu.getLecture().getTitle())
+                            .lectureLevel(lu.getLecture().getLectureLevel().getDescription())
+                            .userName(lu.getLecture().getTrainer().getNickname())
+                            .startDate(matchedOrder != null ? matchedOrder.getApprovedAt() : null)
+                            .progressRate(progressRate)
+                            .createdDate(lu.getCreatedDate())
+                            .coverImageUrl(imageService.getImageUrl(lu.getLecture().getCoverImage()))
+                            .build();
+                })
+                .toList();
+
+        // 5) 수동으로 Page 객체 반환
+        return new PageImpl<>(enrollDtoList, pageable, enrollDtoList.size());
     }
+
 
     @Transactional
     public void registerLectureUser(Lecture lecture, User user){

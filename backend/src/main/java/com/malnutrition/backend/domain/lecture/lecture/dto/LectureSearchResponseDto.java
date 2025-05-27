@@ -1,6 +1,5 @@
 package com.malnutrition.backend.domain.lecture.lecture.dto;
 
-package com.malnutrition.backend.domain.lecture.lecture.dto;
 
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import lombok.AllArgsConstructor;
