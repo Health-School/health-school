@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.lecture.lecture.dto;
 
 
+import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +21,14 @@ public class LectureSearchResponseDto {
     private String lectureLevelDescription;
     private String lectureStatus;
     private String lectureStatusDescription;
+    private String lectureImageUrl;
+    private String trainerName;
+    private String trainerEmail;
+    private String trainerImageUrl;
+    private Double averageScore;
 
-    public static LectureSearchResponseDto transDto(Lecture lecture) {
+
+    public static LectureSearchResponseDto transDto(Lecture lecture, ImageService imageService, Double averageScore) {
         return LectureSearchResponseDto.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
@@ -31,6 +38,12 @@ public class LectureSearchResponseDto {
                 .lectureLevelDescription(lecture.getLectureLevel().getDescription())
                 .lectureStatus(lecture.getLectureStatus().name())
                 .lectureStatusDescription(lecture.getLectureStatus().getDescription())
+                .lectureImageUrl(imageService.getImageUrl(lecture.getCoverImage()))
+                .trainerName(lecture.getTrainer().getNickname())
+                .trainerEmail(lecture.getTrainer().getEmail())
+                .trainerImageUrl(imageService.getImageUrl(lecture.getTrainer().getProfileImage()))
+                .averageScore(averageScore != null ? averageScore : 0.0) // null 방지
                 .build();
     }
+
 }

@@ -60,11 +60,14 @@ public class LectureService {
 
     private final Rq rq;
     @Transactional
-    public List<LectureResponseDto> searchLecturesByTitle(String keyword) {
+    public List<LectureSearchResponseDto> searchLecturesByTitle(String keyword) {
         List<Lecture> lectures = lectureRepository.findByTitleContaining(keyword);
 
         return lectures.stream()
-                .map(LectureResponseDto::transDto)
+                .map(lecture -> {
+                    Double averageScore = likeRepository.findAverageScoreByLectureId(lecture.getId());
+                    return LectureSearchResponseDto.transDto(lecture, imageService, averageScore);
+                })
                 .collect(Collectors.toList());
     }
     @Transactional(readOnly = true)
