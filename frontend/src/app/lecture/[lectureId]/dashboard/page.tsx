@@ -399,7 +399,6 @@ export default function LectureDashboard() {
     }
   };
 
-
   // 유저 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -417,7 +416,6 @@ export default function LectureDashboard() {
     };
     fetchUserInfo();
   }, []);
-
 
   if (!lectureData || !selectedCurriculum) {
     return (
