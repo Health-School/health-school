@@ -54,274 +54,86 @@
 
 ---
 
-# 🔥주요기능
 
-최종발표 전 기능별 영상 나오면 추가 예정 
+## 주요 기능
 
----
+### 🎓 강의 및 커리큘럼 관리
+- 트레이너가 강의를 등록하고 사용자에게 노출
+- 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장
+- 수강률 기반 진도율 관리 및 완료 체크 기능
 
-#  ⚙️ 프로젝트 구조
+### 🏋️‍♀️ 운동 루틴 및 기구 추천
+- 운동기구/부위별 연관성 기반 루틴 추천
+- 운동기구와 사용자 목표(근성장, 다이어트 등)에 맞춘 콘텐츠 제공
+
+### 📦 주문 및 결제 시스템
+- 강의 결제 및 수강 신청 처리
+- Toss Payments API 연동을 통한 안전한 결제 지원
+
+### 👥 사용자 권한 및 인증
+- 일반 사용자 / 트레이너 / 관리자 권한 구분
+- 소셜 로그인 (카카오) 및 JWT 기반 인증 처리
+
+### 🧑‍💬 실시간 상담 및 챗봇
+- WebSocket 기반 1:1 상담 채팅
+- 챗봇을 통한 기본 질문 응답 기능 제공
+
+### 💬 커뮤니티 및 QnA
+- 강의별 QnA 게시판 운영
+- 댓글 및 좋아요 기능 제공
+
+### 📩 알림 시스템
+- 강의 등록, 댓글 작성 등 이벤트 기반 알림 제공
+- Redis 기반 빠른 푸시/실시간 처리
+
+### 📁 파일 업로드 (이미지 & 영상)
+- Amazon S3를 이용한 이미지/강의영상 업로드 및 스트리밍
+- 이미지 업로드 시 전역 관리 시스템 포함
+
+### 🧾 사용자 인증 관리
+- 사용자 인증서 업로드 및 관리자 검수
+- 인증 상태 및 이력 확인 가능
+
+
+<details>
+# <summary>📁 프로젝트 구조 보기 (클릭)</summary>
 
 ```plaintext
 health-school/
-├── .gitignore                       # Git에서 추적하지 않을 파일 정의
-├── build.gradle.kts                # Gradle 빌드 설정 파일
-├── settings.gradle.kts             # Gradle 멀티 모듈 설정
-├── gradlew*                        # Gradle Wrapper 실행 스크립트
-├── uploads/                        # 업로드된 파일 저장 디렉토리
-├── test/                           # 테스트 코드 디렉토리
-│
+├── .gitignore
+├── build.gradle.kts
+├── settings.gradle.kts
+├── gradlew*                          # Gradle 실행 스크립트
+├── uploads/                          # 업로드된 파일 저장 디렉토리
+├── test/                             # 테스트 코드 디렉토리
+
 ├── src/
 │   └── main/
-│       ├── java/
-│       │   └── com.malnutrition.backend/
-│       │       ├── domain/                    # 도메인 계층 - 비즈니스 기능 중심 구성
-│       │       │   ├── admin/                 # 관리자 기능 (대시보드, 로그 등)
-│       │       │   │   └── dashboard/
-│       │       │   │       ├── controller/
-│       │       │   │       ├── dto/
-│       │       │   │       └── service/
-│       │       │   ├── alarm/                 # 알람 기능
-│       │       │   │   ├── alarm/
-│       │       │   │   └── alarmsetting.entity/
-│       │       │   ├── certification/         # 자격 인증 관련 기능
-│       │       │   │   ├── category/
-│       │       │   │   ├── certification/
-│       │       │   │   └── usercertification/
-│       │       │   ├── chatbotmessage/        # 챗봇 메시지 처리
-│       │       │   │   ├── config/
-│       │       │   │   ├── controller/
-│       │       │   │   ├── dto/
-│       │       │   │   ├── entity/
-│       │       │   │   ├── enums/
-│       │       │   │   ├── repository/
-│       │       │   │   └── service/
-│       │       │   ├── chatroom/              # 채팅방 관리
-│       │       │   │   ├── chatmessage/
-│       │       │   │   └── chatroom/
-│       │       │   ├── counseling/            # 상담 기능
-│       │       │   │   ├── counseling/
-│       │       │   │   └── schedule/
-│       │       │   ├── image/                 # 이미지 업로드/조회 기능
-│       │       │   │   ├── config/
-│       │       │   │   ├── controller/
-│       │       │   │   ├── dto/
-│       │       │   │   ├── entity/
-│       │       │   │   ├── repository/
-│       │       │   │   └── service/
-│       │       │   ├── lecture/               # 강의 기능
-│       │       │   │   ├── comment/
-│       │       │   │   ├── curriculum/
-│       │       │   │   ├── curriculumProgress/
-│       │       │   │   ├── lecture/
-│       │       │   │   ├── lectureCategory/
-│       │       │   │   ├── lectureuser/
-│       │       │   │   ├── like/
-│       │       │   │   ├── notification/
-│       │       │   │   ├── qnaboard/
-│       │       │   │   └── report/
-│       │       │   ├── machine/               # 운동 기구 관련 기능
-│       │       │   │   ├── body/
-│       │       │   │   ├── machine/
-│       │       │   │   ├── machinebody/
-│       │       │   │   ├── machineExerciseSheet/
-│       │       │   │   └── machinetype/
-│       │       │   ├── order/                 # 주문 및 결제 관련
-│       │       │   │   ├── controller/
-│       │       │   │   ├── dto/
-│       │       │   │   ├── entity/
-│       │       │   │   ├── enums/
-│       │       │   │   ├── repository/
-│       │       │   │   └── service/
-│       │       │   └── user/                  # 사용자 도메인
-│       │
-│       │   ├── global/                        # 전역 설정 및 공통 컴포넌트
-│       │   │   ├── app/
-│       │   │   ├── config/                    # Spring 설정 클래스
-│       │   │   ├── converter/                 # 커스텀 컨버터
-│       │   │   ├── exception/                 # 전역 예외 처리
-│       │   │   ├── jpa/                       # JPA 공통 유틸
-│       │   │   ├── rp/                        # Request Parameter 처리
-│       │   │   ├── rq/                        # 로그인 유저 객체 처리
-│       │   │   ├── security/                  # Spring Security 설정
-│       │   │   └── ut/                        # 유틸성 클래스
-│       │
+│       ├── java/com/malnutrition/backend/
+│       │   ├── domain/                    # 비즈니스 도메인 계층
+│       │   │   ├── admin/                 # 관리자 대시보드, 사용자 관리
+│       │   │   ├── alarm/                 # 알림 기능
+│       │   │   ├── certification/         # 자격 인증 (유저, 카테고리 포함)
+│       │   │   ├── chatbotmessage/        # 챗봇 메시지 관리
+│       │   │   ├── chatroom/              # 채팅방 및 메시지
+│       │   │   ├── counseling/            # 상담 및 스케줄링
+│       │   │   ├── image/                 # 이미지 업로드/조회
+│       │   │   ├── lecture/               # 강의 기능 (강의, 커리큘럼 등)
+│       │   │   ├── machine/               # 운동기구 및 부위
+│       │   │   ├── order/                 # 주문, 결제, 수강 등록
+│       │   │   └── user/                  # 사용자 도메인
+│       │   ├── global/                    # 전역 설정 및 공통 기능
+│       │   │   ├── config/                # Spring, Security 설정
+│       │   │   ├── exception/
+│       │   │   ├── rq/                    # 로그인 유저 처리
+│       │   │   └── ut/
 │       │   └── maincontroller/
-│       │       └── HealthSchoolApplication.java  # 메인 애플리케이션 클래스
+│       │       └── HealthSchoolApplication.java  # Spring Boot 메인 클래스
 │
 │       └── resources/
-│           ├── application.yml                    # 공통 설정
-│           ├── application-dev.yml                # 개발 환경 설정
-│           ├── application-prod.yml               # 운영 환경 설정
-│           ├── application-test.yml               # 테스트 환경 설정
-│           ├── application-secret.yml             # 민감 정보 설정
-│           └── application-secret.yml.default     # 민감 정보 템플릿
-```
-# 🚀 개발 워크플로우
-
-협업의 일관성과 품질 유지를 위해 아래와 같은 개발 프로세스 및 브랜치 전략을 따릅니다.
-
-
-### 전체 개발 흐름 요약
-
-```text
-1. 기능 브랜치 생성 (feature/* 등)
-2. 개발 진행 (로컬)
-3. dev 브랜치로 Pull Request 생성
-4. 코드 리뷰 및 테스트
-5. dev → main 병합 (배포 시점)
-```
-### 브랜치 전략
-🔵 main </br>
-용도: 운영 환경에 배포되는 코드</br>
-규칙: 항상 안정적인 상태 유지 </br>
-병합 대상: dev 브랜치에서 충분히 테스트된 코드 </br>
-
-🟢 dev
-용도: 개발 통합 브랜치 </br>
-규칙: PR을 통해서만 병합 </br>
-병합 대상: 기능 단위 작업 브랜치 (feature/*, fix/* 등) </br>
-
-🟡 기능 브랜치 (예: feature/12-login, fix/13-login-bug) </br>
-용도: 개별 작업 브랜치</br>
-규칙: 작업 단위별로 분기 </br>
-dev 브랜치를 기준으로 생성 </br>
-
-완료 후 PR로 dev에 병합
-
----
-# 📌 커밋 컨벤션
-
-### 브랜치 네이밍 규칙
-
-🧱 형식
-
-```
-<타입>/번호-작업내용
-```
-
-💡 예시
-
-```
-feat/12-add-login
-fix/8-fix-signup-error
-refactor/23-cleanup-profile
-```
-
-### 커밋 메시지 규칙
-
-🧱 형식
-
-```
-<타입>: <간단한 설명> #번호
-```
-
-💡 예시
-
-```
-feat: 게시글 작성 기능 추가 #1
-fix: 로그인 오류 수정 #1
-refactor: 유저 서비스 리팩토링 #1
-style: 코드 포맷 정리 #1
-docs: README에 실행 방법 추가 #1
-chore: .gitignore에 .env 추가 #1
-test: 회원가입 유닛 테스트 추가 #1
-```
-
-### 이슈 규칙
-
-🧱 형식
-
-```
-<타입>: <간단한 설명>
-```
-
-💡 예시
-
-```
-feat: 로그인 기능 구현
-feat: 회원가입 유효성 검사
-feat: 비밀번호 재설정 로직
-```
-
-### 작업 유형 (자주 쓰는 것만)
-
-| 타입       | 설명                                 |
-| ---------- | ------------------------------------ |
-| `feat`     | 새로운 기능 추가                     |
-| `fix`      | 버그 수정                            |
-| `refactor` | 코드 리팩터링 (기능 변화 없음)       |
-| `style`    | 코드 스타일 수정 (세미콜론, 공백 등) |
-| `docs`     | 문서 변경 (README, 주석 등)          |
-| `chore`    | 기타 설정, 빌드, 패키지 등           |
-| `test`     | 테스트 코드 추가/수정                |
-
----
-### 브랜치 네이밍 규칙
-
-🧱 형식
-
-```
-<타입>/번호-작업내용
-```
-
-💡 예시
-
-```
-feat/12-add-login
-fix/8-fix-signup-error
-refactor/23-cleanup-profile
-```
-
-### 커밋 메시지 규칙
-
-🧱 형식
-
-```
-<타입>: <간단한 설명> #번호
-```
-
-💡 예시
-
-```
-feat: 게시글 작성 기능 추가 #1
-fix: 로그인 오류 수정 #1
-refactor: 유저 서비스 리팩토링 #1
-style: 코드 포맷 정리 #1
-docs: README에 실행 방법 추가 #1
-chore: .gitignore에 .env 추가 #1
-test: 회원가입 유닛 테스트 추가 #1
-```
-
-### 이슈 규칙
-
-🧱 형식
-
-```
-<타입>: <간단한 설명>
-```
-
-💡 예시
-
-```
-feat: 로그인 기능 구현
-feat: 회원가입 유효성 검사
-feat: 비밀번호 재설정 로직
-```
-
-### 작업 유형 (자주 쓰는 것만)
-
-| 타입       | 설명                                 |
-| ---------- | ------------------------------------ |
-| `feat`     | 새로운 기능 추가                     |
-| `fix`      | 버그 수정                            |
-| `refactor` | 코드 리팩터링 (기능 변화 없음)       |
-| `style`    | 코드 스타일 수정 (세미콜론, 공백 등) |
-| `docs`     | 문서 변경 (README, 주석 등)          |
-| `chore`    | 기타 설정, 빌드, 패키지 등           |
-| `test`     | 테스트 코드 추가/수정                |
-
----
-
-
-
+│           ├── application.yml
+│           ├── application-dev.yml
+│           ├── application-prod.yml
+│           ├── application-test.yml
+│           ├── application-secret.yml
+│           └── application-secret.yml.default

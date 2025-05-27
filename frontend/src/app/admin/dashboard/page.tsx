@@ -43,7 +43,14 @@ const metricDisplayConfig: {
   //   displayName: "신고 건수",
   // },
 };
-
+interface DataPoint {
+  date: string;
+  value: number;
+}
+interface ChartDataDto {
+  chartName?: string;
+  dataPoints: DataPoint[];
+}
 interface Notice {
   id: number;
   title: string;
