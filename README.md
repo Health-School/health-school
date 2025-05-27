@@ -99,39 +99,36 @@ health-school/
 ├── .gitignore
 ├── build.gradle.kts
 ├── settings.gradle.kts
-├── gradlew*
-├── uploads/                           # 업로드된 파일 저장 디렉토리
-├── test/                              # 테스트 코드
-│
+├── gradlew*                          # Gradle 실행 스크립트
+├── uploads/                          # 업로드된 파일 저장 디렉토리
+├── test/                             # 테스트 코드 디렉토리
+
 ├── src/
 │   └── main/
 │       ├── java/com/malnutrition/backend/
-│       │   ├── domain/                      # 비즈니스 도메인 계층
-│       │   │   ├── admin/                   # 관리자 대시보드, 사용자 관리
+│       │   ├── domain/                    # 비즈니스 도메인 계층
+│       │   │   ├── admin/                 # 관리자 대시보드, 사용자 관리
 │       │   │   │   └── dashboard/controller, dto, service
-│       │   │   ├── alarm/                   # 알림 기능
-│       │   │   │   └── alarm, alarmsetting.entity
-│       │   │   ├── certification/           # 자격 인증 (유저, 카테고리 포함)
-│       │   │   ├── chatbotmessage/          # 챗봇 메시지 관리
-│       │   │   ├── chatroom/                # 채팅방 및 메시지
-│       │   │   ├── counseling/              # 상담 및 스케줄링
-│       │   │   ├── image/                   # 이미지 업로드/조회
-│       │   │   ├── lecture/                 # 강의 기능 (강의, 커리큘럼 등)
-│       │   │   ├── machine/                 # 운동기구 및 부위
-│       │   │   ├── order/                   # 주문, 결제, 수강 등록
-│       │   │   └── user/                    # 사용자 도메인
-│       │   │
-│       │   ├── global/                      # 전역 설정 및 공통 기능
+│       │   │   ├── alarm/                 # 알림 기능
+│       │   │   ├── certification/         # 자격 인증 (유저, 카테고리 포함)
+│       │   │   ├── chatbotmessage/        # 챗봇 메시지 관리
+│       │   │   ├── chatroom/              # 채팅방 및 메시지
+│       │   │   ├── counseling/            # 상담 및 스케줄링
+│       │   │   ├── image/                 # 이미지 업로드/조회
+│       │   │   ├── lecture/               # 강의 기능 (강의, 커리큘럼 등)
+│       │   │   ├── machine/               # 운동기구 및 부위
+│       │   │   ├── order/                 # 주문, 결제, 수강 등록
+│       │   │   └── user/                  # 사용자 도메인
+│       │   ├── global/                    # 전역 설정 및 공통 기능
 │       │   │   ├── app/
-│       │   │   ├── config/                  # Spring, Security 설정
+│       │   │   ├── config/                # Spring, Security 설정
 │       │   │   ├── converter/
 │       │   │   ├── exception/
 │       │   │   ├── jpa/
-│       │   │   ├── rp/                      # Request Parameter 처리
-│       │   │   ├── rq/                      # 로그인 유저 처리
+│       │   │   ├── rp/                    # Request Parameter 처리
+│       │   │   ├── rq/                    # 로그인 유저 처리
 │       │   │   ├── security/
 │       │   │   └── ut/
-│       │   │
 │       │   └── maincontroller/
 │       │       └── HealthSchoolApplication.java  # Spring Boot 메인 클래스
 │
