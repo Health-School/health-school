@@ -54,6 +54,7 @@
 
 ---
 
+
 ## 주요 기능
 
 ### 🎓 강의 및 커리큘럼 관리
@@ -136,4 +137,3 @@ health-school/
 │           ├── application-test.yml
 │           ├── application-secret.yml
 │           └── application-secret.yml.default
-
