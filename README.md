@@ -96,7 +96,7 @@
 ---
 
  <details>
- <summary>📁 프로젝트 구조 보기 (클릭)</summary>
+ ## <summary>📁 프로젝트 구조 보기 (클릭)</summary>
 
 ```plaintext
 health-school/
