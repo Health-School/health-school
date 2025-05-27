@@ -42,11 +42,8 @@ public class TossPaymentsController {
                 TossPaymentsResponse tossPaymentsResponse = response.getBody();
                 log.info("tossPayments body: {}", tossPaymentsResponse);
                 Long lectureId = orderService.confirmOrder(tossPaymentsResponse);
-
                 // 🔥 강의 인기 점수 반영
                 lectureRankingRedisService.incrementLectureScore(lectureId);
-
-
                 return ResponseEntity.ok().body(ApiResponse.success(null, "결제 성공"));
             } catch (Exception e){
                 //결제 취소... db 에러
