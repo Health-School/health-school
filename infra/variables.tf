@@ -10,5 +10,5 @@ variable "region" {
 
 variable "nickname" {
   description = "nickname"
-  default     = "malnutrition" # 본인 닉네임
+  default     = "malnutritions" # 본인 닉네임
 }
