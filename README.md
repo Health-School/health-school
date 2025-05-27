@@ -53,3 +53,91 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=for-the-badge&logo=Tailwind%20CSS&logoColor=white)
 
 ---
+
+## 주요 기능
+
+### 🎓 강의 및 커리큘럼 관리
+- 트레이너가 강의를 등록하고 사용자에게 노출
+- 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장
+- 수강률 기반 진도율 관리 및 완료 체크 기능
+
+### 🏋️‍♀️ 운동 루틴 및 기구 추천
+- 운동기구/부위별 연관성 기반 루틴 추천
+- 운동기구와 사용자 목표(근성장, 다이어트 등)에 맞춘 콘텐츠 제공
+
+### 📦 주문 및 결제 시스템
+- 강의 결제 및 수강 신청 처리
+- Toss Payments API 연동을 통한 안전한 결제 지원
+
+### 👥 사용자 권한 및 인증
+- 일반 사용자 / 트레이너 / 관리자 권한 구분
+- 소셜 로그인 (카카오) 및 JWT 기반 인증 처리
+
+### 🧑‍💬 실시간 상담 및 챗봇
+- WebSocket 기반 1:1 상담 채팅
+- 챗봇을 통한 기본 질문 응답 기능 제공
+
+### 💬 커뮤니티 및 QnA
+- 강의별 QnA 게시판 운영
+- 댓글 및 좋아요 기능 제공
+
+### 📩 알림 시스템
+- 강의 등록, 댓글 작성 등 이벤트 기반 알림 제공
+- Redis 기반 빠른 푸시/실시간 처리
+
+### 📁 파일 업로드 (이미지 & 영상)
+- Amazon S3를 이용한 이미지/강의영상 업로드 및 스트리밍
+- 이미지 업로드 시 전역 관리 시스템 포함
+
+### 🧾 사용자 인증 관리
+- 사용자 인증서 업로드 및 관리자 검수
+- 인증 상태 및 이력 확인 가능
+
+<details> <summary>📁 프로젝트 구조 보기 (클릭)</summary>
+```
+health-school/
+├── .gitignore
+├── build.gradle.kts
+├── settings.gradle.kts
+├── gradlew*                          # Gradle 실행 스크립트
+├── uploads/                          # 업로드된 파일 저장 디렉토리
+├── test/                             # 테스트 코드 디렉토리
+
+├── src/
+│   └── main/
+│       ├── java/com/malnutrition/backend/
+│       │   ├── domain/                    # 비즈니스 도메인 계층
+│       │   │   ├── admin/                 # 관리자 대시보드, 사용자 관리
+│       │   │   │   └── dashboard/controller, dto, service
+│       │   │   ├── alarm/                 # 알림 기능
+│       │   │   ├── certification/         # 자격 인증 (유저, 카테고리 포함)
+│       │   │   ├── chatbotmessage/        # 챗봇 메시지 관리
+│       │   │   ├── chatroom/              # 채팅방 및 메시지
+│       │   │   ├── counseling/            # 상담 및 스케줄링
+│       │   │   ├── image/                 # 이미지 업로드/조회
+│       │   │   ├── lecture/               # 강의 기능 (강의, 커리큘럼 등)
+│       │   │   ├── machine/               # 운동기구 및 부위
+│       │   │   ├── order/                 # 주문, 결제, 수강 등록
+│       │   │   └── user/                  # 사용자 도메인
+│       │   ├── global/                    # 전역 설정 및 공통 기능
+│       │   │   ├── app/
+│       │   │   ├── config/                # Spring, Security 설정
+│       │   │   ├── converter/
+│       │   │   ├── exception/
+│       │   │   ├── jpa/
+│       │   │   ├── rp/                    # Request Parameter 처리
+│       │   │   ├── rq/                    # 로그인 유저 처리
+│       │   │   ├── security/
+│       │   │   └── ut/
+│       │   └── maincontroller/
+│       │       └── HealthSchoolApplication.java  # Spring Boot 메인 클래스
+│
+│       └── resources/
+│           ├── application.yml
+│           ├── application-dev.yml
+│           ├── application-prod.yml
+│           ├── application-test.yml
+│           ├── application-secret.yml
+│           └── application-secret.yml.default
+</details>
+```
