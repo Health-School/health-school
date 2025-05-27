@@ -48,7 +48,7 @@ public class LectureController {
     }
 
     @GetMapping("/search")
-    public List<LectureSearchResponseDto> searchLectures(@RequestParam String keyword) {
+    public List<LectureSearchResponseDto> searchLectures(@RequestParam(name = "keyword") String keyword) {
         return lectureService.searchLecturesByTitle(keyword);
     }
 
