@@ -128,7 +128,7 @@ export default function LecturePage() {
       {/* 카테고리/필터 바 */}
       <section
         className="w-full bg-white sticky top-0 mt-10 border-b"
-        style={{ zIndex: 100 }}
+        style={{ zIndex: 20 }}
       >
         <div className="mx-auto px-4 py-4 flex flex-wrap gap-2 items-center">
           {/* 카테고리 버튼들 */}

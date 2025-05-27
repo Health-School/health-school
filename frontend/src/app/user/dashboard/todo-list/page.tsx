@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import TodoAddModal from "@/components/todo/TodoAddModal";
 import TodoEditModal from "@/components/todo/TodoEditModal";
+import DashboardTabs from "@/components/dashboard/DashboardTabs";
 
 // Update Todo interface and add TodoEnumType
 type TodoEnumType = "DO" | "DOING" | "DONE";
@@ -170,46 +171,7 @@ export default function TodoListPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          <Link
-            href="/user/dashboard/my-info"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            내 정보
-          </Link>
-          <Link
-            href="/user/dashboard/my-lecture"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            수강 강의
-          </Link>
-          <Link
-            href="/user/dashboard/my-order-list"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            결제 내역
-          </Link>
-          <Link
-            href="/user/dashboard/my-exercises"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            운동 기록 내역
-          </Link>
-          <Link
-            href="/user/dashboard/my-inquiry"
-            className="text-gray-500 hover:text-gray-700 py-4 px-2"
-          >
-            1:1 상담
-          </Link>
-          <Link
-            href="/user/dashboard/todo-list"
-            className="text-green-500 border-b-2 border-green-500 py-4 px-2"
-          >
-            todo list
-          </Link>
-        </nav>
-      </div>
+      <DashboardTabs />
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
@@ -252,8 +214,8 @@ export default function TodoListPage() {
                 index === 0
                   ? "text-red-500"
                   : index === 6
-                  ? "text-blue-500"
-                  : ""
+                    ? "text-blue-500"
+                    : ""
               }`}
             >
               {day}
@@ -289,8 +251,8 @@ export default function TodoListPage() {
                         ? dayOfWeek === 0
                           ? "text-red-500"
                           : dayOfWeek === 6
-                          ? "text-blue-500"
-                          : ""
+                            ? "text-blue-500"
+                            : ""
                         : ""
                     }`}
                   >
