@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import * as echarts from "echarts";
-
+import type { EChartsOption } from "echarts";
 interface MetricWidgetDto {
   metricName: string;
   currentValue: number;
@@ -287,7 +287,7 @@ const DashboardPageContent: React.FC = () => {
         userGrowthData.dataPoints.length > 0
       ) {
         userChart.hideLoading();
-        const userOption = {
+        const userOption: EChartsOption = {
           animation: false,
           tooltip: { trigger: "axis" },
           grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
