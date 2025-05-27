@@ -75,6 +75,7 @@ const DashboardPageContent: React.FC = () => {
   const [salesAmountData, setSalesAmountData] = useState<ChartDataDto | null>(
     null
   );
+
   const [salesAmountLoading, setSalesAmountLoading] = useState<boolean>(true);
   const [salesAmountError, setSalesAmountError] = useState<string | null>(null);
   const [salesChartPeriod, setSalesChartPeriod] = useState<
