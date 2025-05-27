@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function SuccessPage() {
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const searchParams = useSearchParams();
+  const [paymentKey, setPaymentKey] = useState<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [amount, setAmount] = useState<string | null>(null);
 
-  const paymentKey = searchParams.get("paymentKey");
-  const orderId = searchParams.get("orderId");
-  const amount = searchParams.get("amount");
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setPaymentKey(params.get("paymentKey"));
+    setOrderId(params.get("orderId"));
+    setAmount(params.get("amount"));
+  }, []);
 
   async function confirmPayment() {
+    if (!paymentKey || !orderId || !amount) {
+      console.error("결제 정보가 부족합니다.");
+      return;
+    }
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/tosspayments/confirm`,
       {
