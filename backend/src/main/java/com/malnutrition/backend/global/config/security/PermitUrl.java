@@ -46,5 +46,12 @@ public class PermitUrl {
             "/api/v1/reports/*"
     };
 
+    public static final String[] PATCH_URLS = {
+            // 다른 PATCH 엔드포인트가 있으면 여기에 추가
+            "/api/v1/admin/users/*/status",
+            // "/api/v1/lectures/*/something",
+    };
+
+
 
 }

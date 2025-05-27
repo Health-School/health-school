@@ -3,6 +3,7 @@ package com.malnutrition.backend.domain.admin.dashboard.service;
 import com.malnutrition.backend.domain.admin.dashboard.dto.ChartDataDto;
 import com.malnutrition.backend.domain.admin.dashboard.dto.DataPointDto;
 import com.malnutrition.backend.domain.admin.dashboard.dto.MetricWidgetDto;
+import com.malnutrition.backend.domain.admin.dashboard.dto.AdminUserDashboardSummaryDto;
 import com.malnutrition.backend.domain.admin.metric.entity.DailyMetricSnapshot;
 import com.malnutrition.backend.domain.admin.metric.enums.MetricType;
 import com.malnutrition.backend.domain.admin.metric.repository.DailyMetricSnapshotRepository;
@@ -10,15 +11,14 @@ import com.malnutrition.backend.domain.lecture.lecture.repository.LectureReposit
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
+import com.malnutrition.backend.domain.user.user.enums.UserStatus;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -289,6 +289,31 @@ public class AdminDashboardService {
         return new ChartDataDto("결제 금액 추이 " + chartNameSuffix, dataPoints);
     }
 
+    public ChartDataDto getMonthlyNewUsersSignUpsTrend() {
+        LocalDate today = LocalDate.now();
+        List<DataPointDto> dataPoints = new ArrayList<>();
+        String chartName = "월별 신규 가입자 수 추이 (지난달부터 5개월 전)";
+
+        for(int i = 1; i <= 5; i++) {
+            YearMonth targetYearMonth = YearMonth.from(today.minusMonths(i));
+
+            LocalDateTime startDateOfMonth = targetYearMonth.atDay(1).atStartOfDay();
+            LocalDateTime endDateOfMonth = targetYearMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+            // 해당 월에 가입한 사용자 수를 카운트
+            long monthlyNewUsers = userRepository.countByCreatedDateBetween(startDateOfMonth, endDateOfMonth);
+
+            dataPoints.add(new DataPointDto(targetYearMonth.atDay(1), monthlyNewUsers));
+
+
+        }
+
+        dataPoints.sort(Comparator.comparing(DataPointDto::getDate));
+
+        return new ChartDataDto(chartName, dataPoints);
+    }
+
+
     private List<DataPointDto> getDailySalesAmount(LocalDate startDate, LocalDate endDate) {
 
         List<Order> completedOrders = orderRepository.findAllByOrderStatusAndApprovedAtBetween(
@@ -348,6 +373,25 @@ public class AdminDashboardService {
                 .map(entry -> new DataPointDto(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparing(DataPointDto::getDate))
                 .collect(Collectors.toList());
+    }
+
+    public AdminUserDashboardSummaryDto getAdminUserDashboardSummary() {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfCurrentMonth = today.with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
+        LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
+
+        long thisMonthNewUsers = userRepository.countByCreatedDateBetween(startOfCurrentMonth, endOfToday);
+
+        long activeUsers = userRepository.countByUserStatus(UserStatus.NORMAL);
+        long bannedUsers = userRepository.countByUserStatus(UserStatus.BANNED);
+        long deletedUsers = userRepository.countByUserStatus(UserStatus.DELETED);
+
+        return AdminUserDashboardSummaryDto.builder()
+                .thisMonthNewUsersCount(thisMonthNewUsers)
+                .activeUsersCount(activeUsers)
+                .bannedUsersCount(bannedUsers)
+                .deletedUsersCount(deletedUsers)
+                .build();
     }
 
 

@@ -53,7 +53,8 @@ public class User extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus userStatus;
+    @Builder.Default
+    private UserStatus userStatus = UserStatus.NORMAL;
 
     // 사용자의 트레이너 신청 목록 (이력)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

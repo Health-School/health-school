@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PermitUrl.POST_URLS).permitAll()
                         // PUT 요청 허용
                         .requestMatchers(HttpMethod.PUT, PermitUrl.PUT_URLS).permitAll()
+                        // PATCH 요청 허용
+                        .requestMatchers(HttpMethod.PATCH, PermitUrl.PATCH_URLS).permitAll()
                         // DELETE 요청 허용
                         .requestMatchers(HttpMethod.DELETE, PermitUrl.DELETE_URLS).permitAll()
                         // 모든 요청 허용 (ALL_URLS)
@@ -85,7 +87,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000")); // 프론트 도메인
-        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "DELETE"));
+        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
