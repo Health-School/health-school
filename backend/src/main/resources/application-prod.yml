@@ -1,17 +1,10 @@
 custom:
   site:
-    frontUrl: "https://www.fivelogs.site"
-    backUrl: "https://api.fivelogs.site"
-
-db:
-  datasource:
-    url: "${rds.url}"
-    username: "${rds.username}"
-    password: "${rds.password}"
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    frontUrl: "https://www.healthschool.site"
+    backUrl: "https://api.healthschool.site"
 
 cookie:
-  domain: ".fivelogs.site"
+  domain: ".healthschool.site"
 
 profile:
   use_s3: true
