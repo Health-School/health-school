@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+// 👉 Next.js에게 이 페이지는 dynamic하게 처리하라고 명시
+export const dynamic = "force-dynamic";
+
 export default function FailPage() {
   const searchParams = useSearchParams();
   const errorCode = searchParams.get("code");
