@@ -93,7 +93,8 @@
 - 사용자 인증서 업로드 및 관리자 검수
 - 인증 상태 및 이력 확인 가능
 
-<details> <summary>📁 프로젝트 구조 </summary>
+<details> <summary>📁 프로젝트 구조 보기 (클릭)</summary>
+```
 health-school/
 ├── .gitignore
 ├── build.gradle.kts
@@ -138,5 +139,5 @@ health-school/
 │           ├── application-test.yml
 │           ├── application-secret.yml
 │           └── application-secret.yml.default
-
+```
 </details>
