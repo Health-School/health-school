@@ -1,14 +1,34 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:mysql://mysql_1:3306/health_school
+    username: ll_local
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+        highlight_sql: false
+        use_sql_comments: false
+  logging:
+    level:
+      com.back: INFO
+      org.hibernate.SQL: INFO
+      org.hibernate.orm.jdbc.bind: INFO
+      org.hibernate.orm.jdbc.extract: INFO
+      org.springframework.transaction.interceptor: INFO
 custom:
   site:
     frontUrl: "https://www.healthschool.site"
     backUrl: "https://api.healthschool.site"
-
-db:
-  datasource:
-    url: "jdbc:mysql://mysql_1:3306/health_school"
-    username: "root"
-    password: "1234"
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  genFile:
+    dirPath: /gen
 
 
 cookie:
