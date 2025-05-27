@@ -8,10 +8,10 @@ spring:
     active: dev
     include: secret
   datasource:
-    url: jdbc:mysql://localhost:3306/health_school?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=utf8
-    username: dev
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${db.datasource.url}
+    username: ${db.datasource.username}
+    password: ${db.datasource.password}
+    driver-class-name: ${db.datasource.driver-class-name}
   security:
     oauth2:
       client:
