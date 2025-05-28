@@ -31,6 +31,7 @@ custom:
     dirPath: /gen
 
 
+
 cookie:
   domain: ".healthschool.site"
 
@@ -39,4 +40,4 @@ profile:
 
 redis:
   host: redis
-
+  password: root123413

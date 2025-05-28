@@ -49,7 +49,7 @@ spring:
     redis:
       host: ${redis.host}
       port: 6379
-      password: ""  # 비밀번호 없으면 생략 가능
+      password: ${redis.password}  # 비밀번호 없으면 생략 가능
       timeout: 2s   # 초 단위 가능 (권장)
   cache:
     type: redis

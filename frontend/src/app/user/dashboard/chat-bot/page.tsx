@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Bot, User } from "lucide-react";
-import DashboardTabs from "@/components/dashboard/DashboardTabs";
+import DashboardSidebar from "@/components/dashboard/UserDashboardSidebar";
 
 // 타입 정의
 interface ChatBotMessageDto {
@@ -173,12 +173,14 @@ export default function ChatBotPage() {
   };
 
   return (
-    <div className="p-6">
-      <DashboardTabs />
-      <div className="flex flex-col h-screen bg-gray-50">
-        {/* 페이지 타이틀 */}
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <DashboardSidebar />
+
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 flex flex-col h-screen">
         {/* 헤더 */}
-        <div className="bg-yellow-200 border-b border-gray-200 px-6 py-4">
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
@@ -194,173 +196,163 @@ export default function ChatBotPage() {
           </div>
         </div>
 
-        {/* 메시지 영역 */}
-        <div className="flex-1 bg-blue-200 overflow-y-auto px-6 py-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="text-center text-gray-500 mt-20">
-              <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium">
-                안녕하세요! 헬스 상담 봇입니다.
-              </p>
-              <p className="text-sm">
-                운동이나 건강에 대해 궁금한 것이 있으시면 언제든 물어보세요!
-              </p>
-            </div>
-          ) : (
-            messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex items-start space-x-3 ${
-                  message.sender === "USER"
-                    ? "flex-row-reverse space-x-reverse"
-                    : ""
-                }`}
-              >
-                {/* 아바타 */}
+        {/* 메시지 영역 - 고정 높이와 스크롤 */}
+        <div
+          className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50"
+          style={{
+            height: "calc(100vh - 200px)",
+            overflowY: "scroll",
+          }}
+        >
+          <div className="space-y-4">
+            {messages.length === 0 ? (
+              <div className="text-center text-gray-500 mt-20">
+                <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-lg font-medium">
+                  안녕하세요! 헬스 상담 봇입니다.
+                </p>
+                <p className="text-sm">
+                  운동이나 건강에 대해 궁금한 것이 있으시면 언제든 물어보세요!
+                </p>
+              </div>
+            ) : (
+              messages.map((message, index) => (
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.sender === "USER" ? "bg-blue-500" : "bg-green-500"
-                  }`}
-                >
-                  {message.sender === "USER" ? (
-                    <User className="w-5 h-5 text-white" />
-                  ) : (
-                    <Bot className="w-5 h-5 text-white" />
-                  )}
-                </div>
-
-                {/* 메시지 버블 */}
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                  key={index}
+                  className={`flex items-start space-x-3 ${
                     message.sender === "USER"
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-900 border border-gray-200"
+                      ? "flex-row-reverse space-x-reverse"
+                      : ""
                   }`}
                 >
-                  <p className="text-sm">{message.message}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      message.sender === "USER"
-                        ? "text-blue-100"
-                        : "text-gray-500"
+                  {/* 아바타 */}
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      message.sender === "USER" ? "bg-blue-500" : "bg-green-500"
                     }`}
                   >
-                    {formatTime(message.createdAt)}
-                  </p>
+                    {message.sender === "USER" ? (
+                      <User className="w-5 h-5 text-white" />
+                    ) : (
+                      <Bot className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+
+                  {/* 메시지 버블 */}
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                      message.sender === "USER"
+                        ? "bg-blue-500 text-white"
+                        : "bg-white text-gray-900 border border-gray-200 shadow-sm"
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.message}
+                    </p>
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.sender === "USER"
+                          ? "text-blue-100"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {formatTime(message.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {/* 로딩 인디케이터 */}
+            {isLoading && (
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div className="bg-white border border-gray-200 rounded-2xl px-4 py-2 shadow-sm">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                  </div>
                 </div>
               </div>
-            ))
-          )}
+            )}
 
-          {/* 로딩 인디케이터 */}
-          {isLoading && (
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
-              </div>
-              <div className="bg-white border border-gray-200 rounded-2xl px-4 py-2">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
-        {/* 입력 영역 */}
-        <div className="bg-gray-100 border-t border-gray-200 px-6 py-6">
+        {/* 입력 영역 - 고정 */}
+        <div className="bg-white border-t border-gray-200 px-6 py-4 flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-end space-x-4">
               <div className="flex-1 relative">
                 {/* 입력창 래퍼 */}
-                <div className="relative bg-white rounded-2xl border-2 border-gray-200 focus-within:border-green-500 focus-within:ring-4 focus-within:ring-green-100 transition-all duration-300 shadow-lg">
+                <div className="relative bg-gray-50 rounded-2xl border-2 border-gray-200 focus-within:border-green-500 focus-within:ring-4 focus-within:ring-green-100 transition-all duration-300">
                   <textarea
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="헬스 관련 질문을 입력해주세요... 🏋️‍♂️"
-                    className="w-full resize-none bg-transparent px-6 py-4 pr-16 rounded-2xl border-0 focus:outline-none placeholder-gray-400 text-gray-900 text-base"
+                    placeholder="헬스 관련 질문을 입력해주세요... 💪"
+                    className="w-full resize-none bg-transparent px-4 py-3 pr-12 rounded-2xl border-0 focus:outline-none placeholder-gray-400 text-gray-900 text-sm"
                     rows={1}
                     disabled={isLoading}
                     style={{
-                      minHeight: "56px",
+                      minHeight: "48px",
                       maxHeight: "120px",
                     }}
                   />
 
                   {/* 문자 수 표시 */}
                   {inputMessage.length > 0 && (
-                    <div className="absolute bottom-2 right-4 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                    <div className="absolute bottom-2 right-12 text-xs text-gray-400 bg-white px-2 py-1 rounded-full">
                       {inputMessage.length}/500
                     </div>
                   )}
                 </div>
-
-                {/* 입력 힌트 */}
-                {inputMessage.length === 0 && (
-                  <div className="absolute -bottom-6 left-4 flex items-center space-x-6 text-xs text-gray-500">
-                    <span className="flex items-center bg-white px-2 py-1 rounded-full shadow-sm">
-                      <kbd className="bg-gray-100 px-1 rounded text-xs mr-1">
-                        Enter
-                      </kbd>
-                      전송
-                    </span>
-                    <span className="flex items-center bg-white px-2 py-1 rounded-full shadow-sm">
-                      <kbd className="bg-gray-100 px-1 rounded text-xs mr-1">
-                        Shift+Enter
-                      </kbd>
-                      줄바꿈
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* 전송 버튼 */}
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || isLoading}
-                className={`p-4 mb-1 rounded-2xl transition-all duration-300 shadow-lg ${
+                className={`p-3 rounded-2xl transition-all duration-300 ${
                   inputMessage.trim() && !isLoading
-                    ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-green-200 hover:shadow-xl transform hover:scale-105"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
               >
                 {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <Send className="w-6 h-6" />
+                  <Send className="w-5 h-5" />
                 )}
               </button>
             </div>
 
             {/* 추천 질문 버튼들 */}
             {messages.length === 0 && (
-              <div className="mt-6 flex flex-wrap gap-3 justify-center">
-                <p className="w-full text-center text-sm text-gray-600 mb-3">
+              <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                <p className="w-full text-center text-sm text-gray-600 mb-2">
                   💡 이런 질문들을 해보세요!
                 </p>
                 {[
-                  "💪 운동 루틴 추천해줘",
-                  "🥗 다이어트 식단 알려줘",
-                  "🏋️ 근력 운동 방법",
-                  "🏠 홈트레이닝 추천",
+                  "운동 루틴 추천해줘",
+                  "다이어트 식단 알려줘",
+                  "근력 운동 방법",
+                  "홈트레이닝 추천",
                 ].map((suggestion, index) => (
                   <button
                     key={index}
-                    onClick={() =>
-                      setInputMessage(suggestion.split(" ").slice(1).join(" "))
-                    }
-                    className="px-4 py-2 text-sm bg-white hover:bg-green-50 text-gray-700 hover:text-green-700 rounded-full border-2 border-gray-200 hover:border-green-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+                    onClick={() => setInputMessage(suggestion)}
+                    className="px-3 py-2 text-xs bg-white hover:bg-green-50 text-gray-700 hover:text-green-700 rounded-full border-2 border-gray-200 hover:border-green-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
                   >
                     {suggestion}
                   </button>

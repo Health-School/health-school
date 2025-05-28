@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import DashboardTabs from "@/components/dashboard/DashboardTabs";
+import DashboardSidebar from "@/components/dashboard/UserDashboardSidebar";
 
 interface User {
   nickname: string;
@@ -23,6 +22,7 @@ export default function MyInfoPage() {
   const [editPhone, setEditPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [profileImage, setProfileImage] = useState("");
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -51,22 +51,6 @@ export default function MyInfoPage() {
     if (user?.phoneNumber) setPhoneInput(user.phoneNumber);
   }, [user?.phoneNumber]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center max-w-4xl mx-auto my-8">
-        {error}
-      </div>
-    );
-  }
-
   // 프로필 이미지 업로드 핸들러
   const handleProfileImageChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -94,7 +78,6 @@ export default function MyInfoPage() {
         }
       );
       if (!response.ok) throw new Error("프로필 이미지 업로드 실패");
-      // 업로드 성공 후 서버에서 받은 이미지 URL로 갱신 (예시)
       const data = await response.json();
       if (data.data?.profileImageUrl) {
         console.log(data.data);
@@ -154,7 +137,7 @@ export default function MyInfoPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ phoneNumber: phoneInput.replace(/-/g, "") }), // 하이픈 제거해서 전송
+          body: JSON.stringify({ phoneNumber: phoneInput.replace(/-/g, "") }),
         }
       );
       if (!response.ok) throw new Error("연락처 변경 실패");
@@ -166,171 +149,228 @@ export default function MyInfoPage() {
     }
   };
 
-  return (
-    <div className=" p-6">
-      <DashboardTabs />
-      <div className="mt-8">
-        <h1 className="text-2xl font-bold pt-10 pb-6">마이페이지</h1>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <DashboardSidebar />
+        <div className="flex-1 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        </div>
+      </div>
+    );
+  }
 
-        <div className="bg-white rounded-xl px-12 py-12 max-w-5xl mx-auto border border-gray-100 flex flex-col md:flex-row gap-12 min-h-[500px]">
-          {/* 왼쪽: 프로필 */}
-          <div className="flex flex-col items-center w-full md:w-1/3">
-            <div className="relative w-40 h-40 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center mb-4">
-              {profileImage ? (
-                <Image
-                  src={profileImage}
-                  alt="프로필 이미지"
-                  fill
-                  className="object-cover"
-                />
-              ) : user?.profileImageUrl ? (
-                <Image
-                  src={user.profileImageUrl}
-                  alt="프로필 이미지"
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <span className="text-5xl font-bold text-gray-500">
-                  {user?.nickname?.charAt(0) || "U"}
-                </span>
-              )}
-            </div>
-            <button
-              className="cursor-pointer text-rose-400 text-sm mb-4"
-              onClick={() =>
-                document.getElementById("profileImageInput")?.click()
-              }
-              type="button"
-            >
-              프로필 사진 변경
-            </button>
-            <input
-              id="profileImageInput"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleProfileImageChange}
-            />
-            <div className="text-xl font-bold mb-1">{user?.nickname}</div>
-            <div className="text-gray-500 mb-8">{user?.role}</div>
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <DashboardSidebar />
+        <div className="flex-1 flex justify-center items-center p-6">
+          <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center max-w-md">
+            {error}
           </div>
-          {/* 오른쪽: 정보 */}
-          <div className="flex-1 flex flex-col gap-6">
-            <div>
-              <div className="font-bold text-lg mb-2">닉네임</div>
-              <div className="bg-gray-50 rounded px-4 py-3 flex justify-between items-center">
-                {editNickname ? (
-                  <div className="flex w-full gap-2">
-                    <input
-                      type="text"
-                      value={nicknameInput}
-                      onChange={(e) => setNicknameInput(e.target.value)}
-                      className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-200"
-                    />
-                    <button
-                      className="text-green-400 text-sm hover:underline"
-                      onClick={() => {
-                        setEditNickname(false);
-                        setNicknameInput(user?.nickname || "");
-                      }}
-                    >
-                      취소
-                    </button>
-                    <button
-                      className="text-green-400 text-sm hover:underline"
-                      onClick={handleNicknameChange}
-                    >
-                      저장
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-gray-700">{user?.nickname}</span>
-                    <button
-                      className="text-green-400 text-sm cursor-pointer hover:underline"
-                      onClick={() => setEditNickname(true)}
-                    >
-                      수정
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="font-bold text-lg mb-2">이메일 주소</div>
-              <div className="bg-gray-50 rounded px-4 py-3">
-                <span className="text-gray-900">{user?.email}</span>
-              </div>
-            </div>
-            <div>
-              <div className="font-bold text-lg mb-2">연락처</div>
-              <div className="bg-gray-50 rounded px-4 py-3 flex justify-between items-center">
-                {editPhone ? (
-                  <div className="flex w-full gap-2">
-                    <input
-                      type="text"
-                      value={phoneInput}
-                      onChange={(e) =>
-                        setPhoneInput(formatPhoneNumber(e.target.value))
-                      }
-                      maxLength={13}
-                      placeholder="010-1234-5678"
-                      className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-200"
-                    />
-                    <button
-                      className="text-green-400 text-sm hover:underline"
-                      onClick={() => {
-                        setEditPhone(false);
-                        setPhoneInput(user?.phoneNumber || "");
-                      }}
-                    >
-                      취소
-                    </button>
-                    <button
-                      className="text-green-400 text-sm hover:underline"
-                      onClick={() => {
-                        // TODO: 연락처 변경 API 연동
-                        handlePhoneNumberChange();
-                        setUser((u) =>
-                          u ? { ...u, phoneNumber: phoneInput } : u
-                        );
+        </div>
+      </div>
+    );
+  }
 
-                        setEditPhone(false);
-                      }}
-                    >
-                      저장
-                    </button>
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <DashboardSidebar />
+
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 p-6">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">내 정보</h1>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* 왼쪽: 프로필 섹션 */}
+              <div className="flex flex-col items-center lg:w-1/3">
+                <div className="relative w-40 h-40 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center mb-6 shadow-lg">
+                  {profileImage ? (
+                    <Image
+                      src={profileImage}
+                      alt="프로필 이미지"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : user?.profileImageUrl ? (
+                    <Image
+                      src={user.profileImageUrl}
+                      alt="프로필 이미지"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-5xl font-bold text-gray-500">
+                      {user?.nickname?.charAt(0) || "U"}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors mb-4"
+                  onClick={() =>
+                    document.getElementById("profileImageInput")?.click()
+                  }
+                  type="button"
+                >
+                  프로필 사진 변경
+                </button>
+
+                <input
+                  id="profileImageInput"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfileImageChange}
+                />
+
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900 mb-2">
+                    {user?.nickname}
                   </div>
-                ) : (
-                  <>
-                    <span className="text-gray-900">{user?.phoneNumber}</span>
-                    <button
-                      className="text-green-400 text-sm  cursor-pointer hover:underline"
-                      onClick={() => setEditPhone(true)}
+                  <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    {user?.role}
+                  </div>
+                </div>
+              </div>
+
+              {/* 오른쪽: 정보 편집 섹션 */}
+              <div className="flex-1 space-y-6">
+                {/* 닉네임 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    닉네임
+                  </label>
+                  <div className="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                    {editNickname ? (
+                      <div className="flex w-full gap-3">
+                        <input
+                          type="text"
+                          value={nicknameInput}
+                          onChange={(e) => setNicknameInput(e.target.value)}
+                          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                        <button
+                          className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                          onClick={() => {
+                            setEditNickname(false);
+                            setNicknameInput(user?.nickname || "");
+                          }}
+                        >
+                          취소
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
+                          onClick={handleNicknameChange}
+                        >
+                          저장
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-gray-900 font-medium">
+                          {user?.nickname}
+                        </span>
+                        <button
+                          className="text-green-600 hover:text-green-700 font-medium"
+                          onClick={() => setEditNickname(true)}
+                        >
+                          수정
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 이메일 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    이메일 주소
+                  </label>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <span className="text-gray-900 font-medium">
+                      {user?.email}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 연락처 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    연락처
+                  </label>
+                  <div className="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                    {editPhone ? (
+                      <div className="flex w-full gap-3">
+                        <input
+                          type="text"
+                          value={phoneInput}
+                          onChange={(e) =>
+                            setPhoneInput(formatPhoneNumber(e.target.value))
+                          }
+                          maxLength={13}
+                          placeholder="010-1234-5678"
+                          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                        <button
+                          className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+                          onClick={() => {
+                            setEditPhone(false);
+                            setPhoneInput(user?.phoneNumber || "");
+                          }}
+                        >
+                          취소
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium"
+                          onClick={handlePhoneNumberChange}
+                        >
+                          저장
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <span className="text-gray-900 font-medium">
+                          {user?.phoneNumber}
+                        </span>
+                        <button
+                          className="text-green-600 hover:text-green-700 font-medium"
+                          onClick={() => setEditPhone(true)}
+                        >
+                          수정
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 액션 버튼들 */}
+                <div className="pt-6 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href="/user/change/password"
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                     >
-                      수정
-                    </button>
-                  </>
-                )}
+                      비밀번호 변경
+                    </Link>
+                    <Link
+                      href="/user/trainer-application"
+                      className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                    >
+                      트레이너 신청
+                    </Link>
+                    <Link
+                      href="/user/withdrawal"
+                      className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
+                    >
+                      회원탈퇴
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="font-bold text-lg mb-2">회원 역할</div>
-              <div className="bg-gray-50 rounded px-4 py-3">
-                <span className="text-gray-900">{user?.role}</span>
-              </div>
-            </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
-                <Link href="/user/change/password">비밀번호 변경</Link>
-              </button>
-              <button className="px-4 py-2 bg-pink-400 text-white rounded hover:bg-pink-500 transition">
-                <Link href="/user/withdrawal">회원탈퇴</Link>
-              </button>
-              <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
-                <Link href="/user/trainer-application">트레이너 신청</Link>
-              </button>
             </div>
           </div>
         </div>

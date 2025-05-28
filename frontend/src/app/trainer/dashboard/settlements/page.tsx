@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import TrainerDashboardSidebar from "@/components/dashboard/TrainerDashboardSidebar";
 
 interface SettlementOrder {
   orderId: string;
@@ -47,15 +48,6 @@ export default function SettlementsPage() {
     yearly: 0,
     total: 0,
   });
-
-  const tabs = [
-    { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
-    { name: "정산 내역", href: "/trainer/dashboard/settlements" },
-    { name: "수강생 관리", href: "/trainer/dashboard/students" },
-    { name: "상담 일정", href: "/trainer/dashboard/consultations" },
-    { name: "운동 기구 신청", href: "/trainer/dashboard/equipments" },
-    { name: "MY 자격증 관리", href: "/trainer/dashboard/certificates" },
-  ];
 
   const fetchSettlements = async (page: number) => {
     setIsLoading(true);
@@ -160,174 +152,288 @@ export default function SettlementsPage() {
   const currentYearMonth = format(currentDate, "yyyy-MM");
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* Tab Menu */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`${
-                pathname === tab.href
-                  ? "text-green-500 border-b-2 border-green-500 font-semibold"
-                  : "text-gray-500 border-transparent border-b-2 font-medium"
-              } py-4 px-2 hover:text-green-700 transition-colors`}
-            >
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <TrainerDashboardSidebar />
 
-      {/* Summary Boxes */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">
-            이번 달 정산
-          </h3>
-          <p className="text-2xl font-bold text-gray-900">
-            {summaryData.monthly.toLocaleString()}원
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {currentYearMonth.replace("-", "년 ")}월
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">올해 정산</h3>
-          <p className="text-2xl font-bold text-gray-900">
-            {summaryData.yearly.toLocaleString()}원
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {selectedMonth.split("-")[0]}년
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">총 정산</h3>
-          <p className="text-2xl font-bold text-gray-900">
-            {summaryData.total.toLocaleString()}원
-          </p>
-          <p className="text-sm text-gray-500 mt-1">전체 기간</p>
-        </div>
-      </div>
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 페이지 제목 */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                정산 내역
+              </h1>
+              <p className="text-gray-600">
+                강의 수익과 정산 내역을 확인하고 관리하세요.
+              </p>
+            </div>
 
-      {/* Total Amount Summary */}
-      <div className="mb-6 bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">정산 내역</h2>
-            <p className="text-sm text-gray-500">
-              {selectedMonth.replace("-", "년 ")}월 정산 금액:{" "}
-              <span className="font-medium text-gray-900">
-                {totalAmount.toLocaleString()}원
-              </span>
-            </p>
+            {/* Summary Boxes */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-green-600 text-2xl">💰</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">
+                      이번 달 정산
+                    </h3>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {summaryData.monthly.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {currentYearMonth.replace("-", "년 ")}월
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="text-blue-600 text-2xl">📅</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">
+                      올해 정산
+                    </h3>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {summaryData.yearly.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {selectedMonth.split("-")[0]}년
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <span className="text-purple-600 text-2xl">💎</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">
+                      총 정산
+                    </h3>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {summaryData.total.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">전체 기간</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 정산 내역 섹션 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="p-6">
+                {/* Total Amount Summary */}
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      정산 내역
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {selectedMonth.replace("-", "년 ")}월 정산 금액:{" "}
+                      <span className="font-medium text-green-600">
+                        {totalAmount.toLocaleString()}원
+                      </span>
+                      {" • "}총 {settlements.length}건
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        기간:
+                      </label>
+                      <input
+                        type="month"
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Settlements Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          주문 번호
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          강의명
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          수강생
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          금액
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          결제일
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-2"></div>
+                              <span className="text-gray-500">로딩 중...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : settlements.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <div className="flex flex-col items-center">
+                              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-3xl">📊</span>
+                              </div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                정산 내역이 없습니다
+                              </h3>
+                              <p className="text-gray-500">
+                                선택한 기간에 정산된 내역이 없습니다.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        settlements.map((settlement) => (
+                          <tr
+                            key={settlement.orderId}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                #{settlement.orderId}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {settlement.lectureName}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-900">
+                                {settlement.userName}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-bold text-green-600">
+                                {settlement.amount.toLocaleString()}원
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {new Date(
+                                  settlement.approvedAt
+                                ).toLocaleDateString("ko-KR")}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-8">
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(0, prev - 1))
+                      }
+                      disabled={currentPage === 0}
+                      className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === 0
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      이전
+                    </button>
+
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === i
+                              ? "bg-green-500 text-white shadow-lg"
+                              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(totalPages - 1, prev + 1)
+                        )
+                      }
+                      disabled={currentPage === totalPages - 1}
+                      className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === totalPages - 1
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                      }`}
+                    >
+                      다음
+                      <svg
+                        className="w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <input
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm"
-            />
-            <p className="text-sm text-gray-500">총 {settlements.length}건</p>
-          </div>
         </div>
-      </div>
-
-      {/* Settlements Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                주문 번호
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                강의명
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                수강생
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                금액
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                결제일
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-4 text-center">
-                  로딩 중...
-                </td>
-              </tr>
-            ) : settlements.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-4 text-center">
-                  정산 내역이 없습니다.
-                </td>
-              </tr>
-            ) : (
-              settlements.map((settlement) => (
-                <tr key={settlement.orderId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {settlement.orderId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {settlement.lectureName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {settlement.userName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {settlement.amount.toLocaleString()}원
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(settlement.approvedAt).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="mt-4 flex justify-center">
-        <nav className="flex items-center space-x-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-            disabled={currentPage === 0}
-            className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-          >
-            이전
-          </button>
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i)}
-              className={`px-3 py-1 rounded text-sm ${
-                currentPage === i
-                  ? "bg-green-500 text-white"
-                  : "border border-gray-300"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
-            }
-            disabled={currentPage === totalPages - 1}
-            className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-          >
-            다음
-          </button>
-        </nav>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ export default function Header({ hideDropdownMenus = false }) {
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
   console.log("loginUser:::" + JSON.stringify(loginUser));
-  
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -38,7 +38,7 @@ export default function Header({ hideDropdownMenus = false }) {
   const isAdmin = isLogin && loginUser?.roleName === "ADMIN";
 
   return (
-    <nav className="bg-white ">
+    <nav className="bg-white border-b border-gray-200">
       <div className="max-w-[1600px] mx-auto ">
         <div className="flex justify-between items-center ">
           {/* 로고 */}
@@ -55,17 +55,16 @@ export default function Header({ hideDropdownMenus = false }) {
           </div>
           {/* 우측 메뉴 */}
 
-
-
-    <div className="flex items-center">
-
-    {isAdmin && (
-        <Link
-        href="/admin/dashboard"
-        className="ml-3 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
-        > 관리자
-        </Link>
-        )}
+          <div className="flex items-center">
+            {isAdmin && (
+              <Link
+                href="/admin/dashboard"
+                className="ml-3 text-gray-700 hover:text-green-600 font-semibold px-4  transition"
+              >
+                {" "}
+                관리자
+              </Link>
+            )}
 
             <Link
               href="/lecture"

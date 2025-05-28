@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import TrainerDashboardSidebar from "@/components/dashboard/TrainerDashboardSidebar";
 
 interface Machine {
   id: number;
@@ -60,15 +61,6 @@ export default function EquipmentsPage() {
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
-  const tabs = [
-    { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
-    { name: "정산 내역", href: "/trainer/dashboard/settlements" },
-    { name: "수강생 관리", href: "/trainer/dashboard/students" },
-    { name: "상담 일정", href: "/trainer/dashboard/consultations" },
-    { name: "운동 기구 신청", href: "/trainer/dashboard/equipments" },
-    { name: "MY 자격증 관리", href: "/trainer/dashboard/certificates" },
-  ];
 
   // Move fetchMachines outside useEffect
   const fetchMachines = async () => {
@@ -231,217 +223,62 @@ export default function EquipmentsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* 탭 메뉴 */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`${
-                pathname === tab.href
-                  ? "text-green-500 border-b-2 border-green-500 font-semibold"
-                  : "text-gray-500 border-transparent border-b-2 font-medium"
-              } py-4 px-2 hover:text-green-700 transition-colors`}
-            >
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <TrainerDashboardSidebar />
 
-      <div className="mt-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">운동 기구 목록</h1>
-            <span className="text-sm text-gray-500">
-              기구 신청이 가능하고, 기구를 사용하려면 관리자의 승인이 필요합니다
-            </span>
-          </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-          >
-            운동 기구 신청
-          </button>
-        </div>
-
-        {/* Add search filters */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow-md">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                운동 부위
-              </label>
-              <select
-                value={selectedBodyFilter}
-                onChange={(e) => setSelectedBodyFilter(Number(e.target.value))}
-                className="w-full px-3 py-2 border rounded-md"
-              >
-                <option value={0}>전체</option>
-                {bodyParts.map((part) => (
-                  <option key={part.id} value={part.id}>
-                    {part.name}
-                  </option>
-                ))}
-              </select>
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 페이지 제목 */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                운동 기구 신청
+              </h1>
+              <p className="text-gray-600">
+                기구 신청이 가능하고, 기구를 사용하려면 관리자의 승인이
+                필요합니다.
+              </p>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                기구 타입
-              </label>
-              <select
-                value={selectedTypeFilter}
-                onChange={(e) => setSelectedTypeFilter(Number(e.target.value))}
-                className="w-full px-3 py-2 border rounded-md"
-              >
-                <option value={0}>전체</option>
-                {machineTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto shadow-md rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  기구 번호
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  기구 이름
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  운동 부위
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  기구 타입
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {machines.map((machine) => (
-                <tr key={machine.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {machine.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {machine.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-wrap gap-1">
-                      {machine.body.map((part, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                        >
-                          {part}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {machine.type}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {machines.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            운동 기구가 없습니다.
-          </div>
-        )}
-
-        {/* Add pagination */}
-        <div className="mt-4 flex justify-center">
-          <nav className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
-              disabled={currentPage === 0}
-              className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-            >
-              이전
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i)}
-                className={`px-3 py-1 rounded text-sm ${
-                  currentPage === i
-                    ? "bg-green-500 text-white"
-                    : "border border-gray-300"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
-              }
-              disabled={currentPage === totalPages - 1}
-              className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-            >
-              다음
-            </button>
-          </nav>
-        </div>
-
-        {/* Add Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h2 className="text-xl font-semibold mb-4">운동 기구 신청</h2>
-
-              <div className="space-y-4">
+            {/* 필터 섹션 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                운동 기구 검색
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    기구 이름
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    운동 부위
                   </label>
-                  <input
-                    type="text"
-                    value={machineName}
-                    onChange={(e) => setMachineName(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md"
-                    placeholder="기구 이름을 입력하세요"
-                  />
+                  <select
+                    value={selectedBodyFilter}
+                    onChange={(e) =>
+                      setSelectedBodyFilter(Number(e.target.value))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value={0}>전체</option>
+                    {bodyParts.map((part) => (
+                      <option key={part.id} value={part.id}>
+                        {part.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     기구 타입
                   </label>
                   <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(Number(e.target.value))}
-                    className="w-full px-3 py-2 border rounded-md"
+                    value={selectedTypeFilter}
+                    onChange={(e) =>
+                      setSelectedTypeFilter(Number(e.target.value))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   >
-                    <option value={0}>타입을 선택하세요</option>
+                    <option value={0}>전체</option>
                     {machineTypes.map((type) => (
                       <option key={type.id} value={type.id}>
                         {type.name}
@@ -449,54 +286,290 @@ export default function EquipmentsPage() {
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    운동 부위
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {/* Changed to grid layout for better spacing */}
-                    {bodyParts.map((part) => (
-                      <label key={part.id} className="inline-flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedBodies.includes(part.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedBodies([...selectedBodies, part.id]);
-                            } else {
-                              setSelectedBodies(
-                                selectedBodies.filter((id) => id !== part.id)
-                              );
-                            }
-                          }}
-                          className="mr-2"
-                        />
-                        <span className="text-sm">{part.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
               </div>
+            </div>
 
-              <div className="mt-6 flex justify-end gap-2">
-                <button
-                  onClick={handleRegister}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  신청하기
-                </button>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                >
-                  취소
-                </button>
+            {/* 운동 기구 목록 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    운동 기구 목록
+                  </h2>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                  >
+                    <span>+</span>
+                    <span>운동 기구 신청</span>
+                  </button>
+                </div>
+
+                {machines.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            기구 번호
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            기구 이름
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            운동 부위
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            기구 타입
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {machines.map((machine) => (
+                          <tr
+                            key={machine.id}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              #{machine.id}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {machine.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex flex-wrap gap-1">
+                                {machine.body.map((part, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                  >
+                                    {part}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {machine.type}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-4xl">🏋️</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      등록된 운동 기구가 없습니다
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      새로운 운동 기구를 신청해보세요.
+                    </p>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      운동 기구 신청하기
+                    </button>
+                  </div>
+                )}
+
+                {/* 페이지네이션 */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-8">
+                    <button
+                      onClick={() =>
+                        setCurrentPage(Math.max(0, currentPage - 1))
+                      }
+                      disabled={currentPage === 0}
+                      className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === 0
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      이전
+                    </button>
+
+                    <div className="flex space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === i
+                              ? "bg-green-500 text-white shadow-lg"
+                              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setCurrentPage(
+                          Math.min(totalPages - 1, currentPage + 1)
+                        )
+                      }
+                      disabled={currentPage === totalPages - 1}
+                      className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage === totalPages - 1
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                      }`}
+                    >
+                      다음
+                      <svg
+                        className="w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* 운동 기구 신청 모달 */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                운동 기구 신청
+              </h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  기구 이름
+                </label>
+                <input
+                  type="text"
+                  value={machineName}
+                  onChange={(e) => setMachineName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="기구 이름을 입력하세요"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  기구 타입
+                </label>
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                >
+                  <option value={0}>타입을 선택하세요</option>
+                  {machineTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  운동 부위
+                </label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                  {bodyParts.map((part) => (
+                    <label
+                      key={part.id}
+                      className="inline-flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedBodies.includes(part.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedBodies([...selectedBodies, part.id]);
+                          } else {
+                            setSelectedBodies(
+                              selectedBodies.filter((id) => id !== part.id)
+                            );
+                          }
+                        }}
+                        className="mr-2 text-green-600 focus:ring-green-500"
+                      />
+                      <span className="text-sm text-gray-700">{part.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleRegister}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+              >
+                신청하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ db:
 
 redis:
   host: localhost
+  password: ""
 
 custom:
   site:
