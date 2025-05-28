@@ -2,6 +2,8 @@
 server:
   port: 8090
 spring:
+  jackson:
+    time-zone: Asia/Seoul
   application:
     name: health_school
   profiles:
