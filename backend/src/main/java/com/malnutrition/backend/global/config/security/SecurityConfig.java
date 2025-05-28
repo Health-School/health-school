@@ -43,6 +43,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests( auth -> auth
+
                         // GET 요청 허용
                         .requestMatchers(HttpMethod.GET, PermitUrl.GET_URLS).permitAll()
                         // POST 요청 허용

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import * as echarts from "echarts";
+import type { EChartsOption } from 'echarts'
+
 
 interface MetricWidgetDto {
   metricName: string;
@@ -49,14 +51,7 @@ const metricDisplayConfig: {
   //   displayName: "신고 건수",
   // },
 };
-interface DataPoint {
-  date: string;
-  value: number;
-}
-interface ChartDataDto {
-  chartName?: string;
-  dataPoints: DataPoint[];
-}
+
 interface Notice {
   id: number;
   title: string;
@@ -293,25 +288,25 @@ const DashboardPageContent: React.FC = () => {
         userGrowthData.dataPoints.length > 0
       ) {
         userChart.hideLoading();
-        const userOption = {
+        const userOption: EChartsOption = {
           animation: false,
           tooltip: { trigger: "axis" },
           grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
           xAxis: {
-            type: "category",
+            type: "category" as const,
             data: userGrowthData.dataPoints.map((dp) => dp.date),
           },
-          yAxis: { type: "value" },
+          yAxis: { type: "value" as const },
           series: [
             {
               name: userGrowthData.chartName || "사용자 수",
-              type: "line",
+              type: "line" as const,
               smooth: true,
               data: userGrowthData.dataPoints.map((dp) => dp.value),
               itemStyle: { color: "#2ECC71" },
               areaStyle: {
                 color: {
-                  type: "linear",
+                  type: "linear" as const,
                   x: 0,
                   y: 0,
                   x2: 0,
@@ -352,17 +347,17 @@ const DashboardPageContent: React.FC = () => {
           tooltip: { trigger: "axis" },
           grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
           xAxis: {
-            type: "category",
+            type: "category" as const,
             data: salesAmountData.dataPoints.map((dp) => dp.date),
           },
           yAxis: {
-            type: "value",
+            type: "value" as const,
             axisLabel: { formatter: "{value}원" },
           },
           series: [
             {
               name: salesAmountData.chartName || "결제 금액",
-              type: "bar",
+              type: "bar" as const,
 
               data: salesAmountData.dataPoints.map((dp) => dp.value),
               itemStyle: { color: "#3498DB" },
@@ -387,14 +382,14 @@ const DashboardPageContent: React.FC = () => {
         animation: false,
         tooltip: { trigger: "item" },
         legend: {
-          orient: "vertical",
-          left: "left",
+          orient: "vertical" as const,
+          left: "left" as const,
           textStyle: { color: "#2C3E50" },
         },
         series: [
           {
             name: "강의 카테고리",
-            type: "pie",
+            type: "pie" as const,
             radius: "70%",
             data: [
               { value: 35, name: "요가" },
@@ -437,14 +432,14 @@ const DashboardPageContent: React.FC = () => {
         animation: false,
         tooltip: { trigger: "item" },
         legend: {
-          orient: "vertical",
-          left: "left",
+          orient: "vertical" as const,
+          left: "left" as const,
           textStyle: { color: "#2C3E50" },
         },
         series: [
           {
             name: "신고 유형",
-            type: "pie",
+            type: "pie" as const,
             radius: "70%",
             data: [
               { value: 40, name: "부적절한 콘텐츠" },

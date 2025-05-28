@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import * as echarts from 'echarts';
 import { LoginUserContext } from '@/stores/auth/loginUser';
+import * as echarts from 'echarts';
 import { useRouter } from 'next/navigation';
 
 function useDebounce<T>(value: T, delay = 300): T {
@@ -14,7 +14,9 @@ function useDebounce<T>(value: T, delay = 300): T {
   return debounced;
 }
 
-const API_BASE_URL = 'http://localhost:8090/api/v1';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8090';
+
 
 // 백엔드에서 받아올 회원 데이터의 타입
 interface UserFromBackend {
@@ -135,7 +137,7 @@ const App: React.FC = () => {
       console.log("useEffect (API 호출용): 요청 파라미터:", params.toString());
 
       try {
-        const url = `${API_BASE_URL}/admin/users?${params.toString()}`;
+        const url = `${API_BASE_URL}/api/v1/admin/users?${params.toString()}`;
 
                 const response = await fetch(url, {
                   method: 'GET',
@@ -229,7 +231,7 @@ const App: React.FC = () => {
       const fetchUserDashboardSummary = async () => {
         console.log("useEffect: fetchUserDashboardSummary 시작 (API 호출용)");
         try {
-          const url = `${API_BASE_URL}/admin/dashboard/user-summary`; // 새로운 백엔드 API 경로
+          const url = `${API_BASE_URL}/api/v1/admin/dashboard/user-summary`; // 새로운 백엔드 API 경로
           const response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -284,7 +286,7 @@ useEffect(() => {
     const fetchMonthlyUserTrend = async () => {
       console.log("useEffect: fetchMonthlyUserTrend 시작 (API 호출용)");
       try {
-        const url = `${API_BASE_URL}/admin/dashboard/monthly-new-user-signups`; // 백엔드 API 경로
+        const url = `${API_BASE_URL}/api/v1/admin/dashboard/monthly-new-user-signups`; // 백엔드 API 경로
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -387,7 +389,7 @@ useEffect(() => {
       setError(null);
 
       try {
-        const url = `${API_BASE_URL}/admin/users/${userToChangeStatus}/status`;
+        const url = `${API_BASE_URL}/api/v1/admin/users/${userToChangeStatus}/status`;
         const response = await fetch(url, {
           method: 'PATCH',
           headers: {
@@ -418,7 +420,7 @@ useEffect(() => {
           // 대시보드 카드 숫자들도 갱신해야 할 수 있으므로, fetchUserDashboardSummary를 다시 호출
           const fetchUserDashboardSummary = async () => {
               try {
-                  const summaryUrl = `${API_BASE_URL}/admin/dashboard/user-summary`;
+                  const summaryUrl = `${API_BASE_URL}/api/v1/admin/dashboard/user-summary`;
                   const summaryResponse = await fetch(summaryUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
                   if (!summaryResponse.ok) throw new Error('대시보드 요약 정보 갱신 실패');
                   const summaryResponseData = await summaryResponse.json();
@@ -466,7 +468,7 @@ useEffect(() => {
       setError(null);
 
       try {
-        const url = `${API_BASE_URL}/admin/users/${userId}/status`;
+        const url = `${API_BASE_URL}/api/v1/admin/users/${userId}/status`;
         const response = await fetch(url, {
           method: 'PATCH', // 또는 'PUT', 백엔드 API 정의에 따라
           headers: {
@@ -582,17 +584,17 @@ useEffect(() => {
                     trigger: 'axis'
                   },
                   xAxis: {
-                    type: 'category',
+                    type: 'category' as const,
                     boundaryGap: false, // X축 양 끝에 여백 없애기
                     data: monthlyUserTrend.monthLabels // ★ API에서 받아온 월 이름 배열 사용
                   },
                   yAxis: {
-                    type: 'value',
+                    type: 'value' as const,
                     name: '가입자 수' // Y축 이름
                   },
                   series: [{
                     name: '신규 회원',
-                    type: 'line',
+                    type: 'line' as const,
                     smooth: true, // 부드러운 곡선
                     data: monthlyUserTrend.seriesData, // ★ API에서 받아온 가입자 수 배열 사용
                     itemStyle: { color: '#3498DB' },
@@ -635,14 +637,14 @@ useEffect(() => {
                       formatter: '{a} <br/>{b}: {c}명 ({d}%)'
                     },
                     legend: {
-                      orient: 'horizontal',
-                      left: 'center',
+                      orient: 'horizontal' as const,
+                      left: 'center' as const,
                       bottom: 10,
                       data: ['활성 회원', '정지 회원', '삭제 회원']
                     },
                     series: [{
                       name: '회원 상태',
-                      type: 'pie',
+                      type: 'pie' as const,
                       radius: ['50%', '70%'],
                       avoidLabelOverlap: false,
                       label: { show: false, position: 'center' },
