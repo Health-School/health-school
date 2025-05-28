@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import removeMarkdown from "remove-markdown";
-import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import TrainerDashboardSidebar from "@/components/dashboard/TrainerDashboardSidebar";
 
+// 기존 인터페이스들은 그대로 유지...
 interface LectureStats {
   totalStudents: number;
   completionRate: number;
@@ -31,7 +32,6 @@ interface LecturePage {
   number: number;
 }
 
-// Update ApiResponse interface
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -47,7 +47,6 @@ interface ApiResponse<T> {
   };
 }
 
-// Update the interface to match actual data
 interface Stats {
   totalStudents: number;
   completionRate: number;
@@ -55,7 +54,6 @@ interface Stats {
   totalRevenue: number;
 }
 
-// Add near other interfaces
 interface Notification {
   id: number;
   title: string;
@@ -64,7 +62,6 @@ interface Notification {
   createdAt: string;
 }
 
-// Add detailed notification interface
 interface NotificationDetail {
   id: number;
   title: string;
@@ -73,7 +70,6 @@ interface NotificationDetail {
   createdAt: string;
 }
 
-// Add these interfaces at the top with other interfaces
 interface UserCertification {
   certificationId: number;
   certificationName: string;
@@ -95,10 +91,9 @@ interface CertificationPage {
 export default function MyLecturesPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState("내 정보");
   const [stats, setStats] = useState<Stats>({
     totalStudents: 0,
-    completionRate: 0, // 기본값 0
+    completionRate: 0,
     averageRating: 4.8,
     totalRevenue: 1850000,
   });
@@ -106,36 +101,24 @@ export default function MyLecturesPage() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
-  // Add state for consultation notification
   const [hasNewConsultation, setHasNewConsultation] = useState(false);
-
-  // 상태 정의 부분에 notifications 추가
   const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  // Add these state variables
   const [notificationPage, setNotificationPage] = useState(0);
   const [notificationTotalPages, setNotificationTotalPages] = useState(0);
-
-  // Add state for notification modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationDetail | null>(null);
-
-  // Add these state variables in the component
   const [certifications, setCertifications] = useState<UserCertification[]>([]);
   const [certificationPage, setCertificationPage] = useState(0);
   const [totalCertificationPages, setTotalCertificationPages] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  // 상태 변수 추가
-  const [myLecturesAverageScore, setMyLecturesAverageScore] = useState<number>(0);
+  const [myLecturesAverageScore, setMyLecturesAverageScore] =
+    useState<number>(0);
 
   const handleNewLecture = () => {
     router.push("/trainer/dashboard/my-lectures/new");
   };
 
-  // Update fetchLectures function
   const fetchLectures = async (page: number = 0) => {
     try {
       const response = await fetch(
@@ -163,7 +146,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add function to fetch total students count
   const fetchTotalStudents = async () => {
     try {
       const response = await fetch(
@@ -187,7 +169,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add fetchTotalRevenue function
   const fetchTotalRevenue = async () => {
     try {
       const response = await fetch(
@@ -205,7 +186,7 @@ export default function MyLecturesPage() {
       if (result.success) {
         setStats((prev) => ({
           ...prev,
-          totalRevenue: result.data.total, // Use the total from settlement summary
+          totalRevenue: result.data.total,
         }));
       }
     } catch (error) {
@@ -213,7 +194,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add function to check for new consultations
   const checkNewConsultations = async () => {
     try {
       const response = await fetch(
@@ -227,9 +207,8 @@ export default function MyLecturesPage() {
 
       const result = await response.json();
 
-      // Filter consultations for today or future dates
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+      today.setHours(0, 0, 0, 0);
 
       const futureConsultations = result.data.filter((schedule: any) => {
         const scheduleDate = new Date(schedule.desiredDate);
@@ -243,7 +222,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // fetchNotifications 함수 수정
   const fetchNotifications = async (page: number = 0) => {
     try {
       const response = await fetch(
@@ -258,7 +236,7 @@ export default function MyLecturesPage() {
       }
 
       const result = await response.json();
-      console.log("Notifications response:", result); // 디버깅용
+      console.log("Notifications response:", result);
       if (result.success) {
         setNotifications(result.data);
         setNotificationPage(page);
@@ -269,19 +247,16 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add function to open notification modal
   const openNotificationModal = (notification: NotificationDetail) => {
     setSelectedNotification(notification);
     setIsModalOpen(true);
   };
 
-  // Add function to close notification modal
   const closeNotificationModal = () => {
     setSelectedNotification(null);
     setIsModalOpen(false);
   };
 
-  // 수료율 가져오기
   const fetchCompletionRate = async () => {
     try {
       const response = await fetch(
@@ -291,7 +266,6 @@ export default function MyLecturesPage() {
       if (!response.ok) throw new Error("수료율 조회 실패");
       const result = await response.json();
       if (result.success && result.data) {
-        // result.data가 "85%" 형태라면 숫자만 추출
         const rate = parseFloat(result.data.replace("%", ""));
         setStats((prev) => ({
           ...prev,
@@ -303,7 +277,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add this function to fetch certifications
   const fetchCertifications = async (page: number = 0) => {
     try {
       const response = await fetch(
@@ -326,7 +299,6 @@ export default function MyLecturesPage() {
     }
   };
 
-  // 내 모든 강의의 평균 평점 가져오기 함수
   const fetchMyLecturesAverageScore = async () => {
     try {
       const response = await fetch(
@@ -349,12 +321,10 @@ export default function MyLecturesPage() {
     }
   };
 
-  // Add useEffect to fetch certifications
-  useEffect(() => {
-    if (activeTab === "MY 자격증 관리") {
-      fetchCertifications();
-    }
-  }, [activeTab]);
+  const handleViewAllQnA = () => {
+    localStorage.setItem("activeTab", "qna");
+    router.push("/trainer/dashboard/students");
+  };
 
   useEffect(() => {
     fetchLectures();
@@ -362,318 +332,340 @@ export default function MyLecturesPage() {
     fetchTotalRevenue();
     checkNewConsultations();
     fetchNotifications();
-    fetchCompletionRate(); // 수료율도 패칭
-    fetchMyLecturesAverageScore(); // 평균 평점도 가져오기
+    fetchCompletionRate();
+    fetchMyLecturesAverageScore();
   }, []);
 
-  const tabs = [
-    { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
-    { name: "정산 내역", href: "/trainer/dashboard/settlements" },
-    { name: "수강생 관리", href: "/trainer/dashboard/students" },
-    { name: "상담 일정", href: "/trainer/dashboard/consultations" },
-    { name: "운동 기구 신청", href: "/trainer/dashboard/equipments" },
-    { name: "MY 자격증 관리", href: "/trainer/dashboard/certificates" },
-  ];
-
-  // Add function to handle "모두 보기" click
-  const handleViewAllQnA = () => {
-    // Store the active tab in localStorage before navigation
-    localStorage.setItem("activeTab", "qna");
-    // Navigate to students page
-    router.push("/trainer/dashboard/students");
-  };
-
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* 탭 메뉴 */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`${
-                pathname === tab.href
-                  ? "text-green-500 border-b-2 border-green-500 font-semibold"
-                  : "text-gray-500 border-transparent border-b-2 font-medium"
-              } py-4 px-2 hover:text-green-700 transition-colors`}
-            >
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <TrainerDashboardSidebar />
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
-                <span className="text-blue-600 text-lg">👥</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">전체 수강생</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {stats.totalStudents}명
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
-                <span className="text-green-600 text-lg">💰</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">총 수익</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {stats.totalRevenue.toLocaleString()}원
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
-                <span className="text-purple-600 text-lg">📊</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">완료율</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {stats.completionRate}%
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* 새로 추가: 평균 평점 카드 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
-                <span className="text-yellow-600 text-lg">⭐</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">평균 평점</p>
-              <div className="flex items-center">
-                <p className="text-2xl font-semibold text-gray-900">
-                  {myLecturesAverageScore.toFixed(1)}
-                </p>
-                <span className="text-sm text-gray-500 ml-1">/5.0</span>
-              </div>
-              {/* 별점 표시 */}
-              <div className="flex items-center mt-1">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <span
-                    key={i}
-                    className={`text-sm ${
-                      i < Math.floor(myLecturesAverageScore)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 공지사항 섹션 */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-500">✓</span>
-              </span>
-              <span className="text-gray-700">
-                답변을 기다리는 질문이 있습니다
-              </span>
-            </div>
-            <button
-              onClick={handleViewAllQnA}
-              className="text-green-500 hover:text-green-600"
-            >
-              모두 보기
-            </button>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <span className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-500">!</span>
-              </span>
-              <span className="text-gray-700">
-                {hasNewConsultation
-                  ? "새로운 상담 일정이 잡혔습니다"
-                  : "새로운 상담 일정이 없습니다"}
-              </span>
-            </div>
-            {hasNewConsultation && (
-              <button
-                onClick={() => router.push("/trainer/dashboard/consultations")}
-                className="text-blue-500 hover:text-blue-600"
-              >
-                모두 보기
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 공지사항 목록 섹션 - MOVED HERE */}
-      <div className="bg-white rounded-lg shadow mb-8">
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">최근 공지사항</h2>
-          <div className="space-y-4">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="flex justify-between items-center p-4 bg-gray-50 rounded"
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm text-gray-600">
-                        {new Date(notification.createdAt).toLocaleDateString(
-                          "ko-KR"
-                        )}
-                      </span>
-                      <span className="text-sm text-blue-600">
-                        {notification.lectureName}
-                      </span>
+          <div className="max-w-7xl mx-auto">
+            {/* 페이지 제목 */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                MY 강의 관리
+              </h1>
+              <p className="text-gray-600">강의 현황을 확인하고 관리하세요.</p>
+            </div>
+
+            {/* Stats Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="text-blue-600 text-2xl">👥</span>
                     </div>
-                    <div className="text-gray-800">{notification.title}</div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">
+                      전체 수강생
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats.totalStudents}명
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-green-600 text-2xl">💰</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">총 수익</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats.totalRevenue.toLocaleString()}원
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <span className="text-purple-600 text-2xl">📊</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">완료율</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats.completionRate}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <span className="text-yellow-600 text-2xl">⭐</span>
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-gray-500">
+                      평균 평점
+                    </p>
+                    <div className="flex items-center">
+                      <p className="text-2xl font-bold text-gray-900">
+                        {myLecturesAverageScore.toFixed(1)}
+                      </p>
+                      <span className="text-sm text-gray-500 ml-1">/5.0</span>
+                    </div>
+                    <div className="flex items-center mt-1">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${
+                            i < Math.floor(myLecturesAverageScore)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 알림 섹션 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <span className="text-green-500 text-lg">✓</span>
+                    </div>
+                    <span className="text-gray-700 font-medium">
+                      답변을 기다리는 질문이 있습니다
+                    </span>
                   </div>
                   <button
-                    onClick={() => {
-                      setSelectedNotification(notification);
-                      setIsModalOpen(true);
-                    }}
-                    className="text-green-500 hover:text-green-600"
+                    onClick={handleViewAllQnA}
+                    className="text-green-500 hover:text-green-600 font-medium"
                   >
-                    상세보기
+                    모두 보기
                   </button>
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-500 py-4">
-                등록된 공지사항이 없습니다.
               </div>
-            )}
-          </div>
-          {notificationTotalPages > 1 && (
-            <div className="flex justify-center mt-4 gap-2">
-              <button
-                onClick={() =>
-                  fetchNotifications(Math.max(0, notificationPage - 1))
-                }
-                disabled={notificationPage === 0}
-                className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
-              >
-                이전
-              </button>
-              <span className="px-3 py-1">
-                {notificationPage + 1} / {notificationTotalPages}
-              </span>
-              <button
-                onClick={() =>
-                  fetchNotifications(
-                    Math.min(notificationTotalPages - 1, notificationPage + 1)
-                  )
-                }
-                disabled={notificationPage === notificationTotalPages - 1}
-                className="px-3 py-1 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
-              >
-                다음
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* 강의 목록 */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">클래스 목록</h2>
-          <button
-            onClick={handleNewLecture}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            + 새 클래스 등록
-          </button>
-        </div>
-        <div className="grid grid-cols-3 gap-6">
-          {lectures.map((lecture) => (
-            <div
-              key={lecture.id}
-              className="bg-white rounded-lg shadow overflow-hidden"
-            >
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-2">{lecture.title}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                  {removeMarkdown(lecture.content)}
-                </p>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {lecture.lectureLevel}
-                    {/* {lecture.lectureLevel === "BEGINNER"
-                      ? "초급"
-                      : lecture.lectureLevel === "INTERMEDIATE"
-                      ? "중급"
-                      : "고급"} */}
-                  </span>
-                  <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
-                    {lecture.lectureStatus === "OPEN" ? "운영중" : "준비중"}
-                  </span>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <span className="text-blue-500 text-lg">!</span>
+                    </div>
+                    <span className="text-gray-700 font-medium">
+                      {hasNewConsultation
+                        ? "새로운 상담 일정이 잡혔습니다"
+                        : "새로운 상담 일정이 없습니다"}
+                    </span>
+                  </div>
+                  {hasNewConsultation && (
+                    <button
+                      onClick={() =>
+                        router.push("/trainer/dashboard/consultations")
+                      }
+                      className="text-blue-500 hover:text-blue-600 font-medium"
+                    >
+                      모두 보기
+                    </button>
+                  )}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">
-                    {lecture.price.toLocaleString()}원
-                  </span>
+              </div>
+            </div>
+
+            {/* 공지사항 목록 섹션 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  최근 공지사항
+                </h2>
+                <div className="space-y-4">
+                  {notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="flex justify-between items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm text-gray-600">
+                              {new Date(
+                                notification.createdAt
+                              ).toLocaleDateString("ko-KR")}
+                            </span>
+                            <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                              {notification.lectureName}
+                            </span>
+                          </div>
+                          <div className="text-gray-800 font-medium">
+                            {notification.title}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedNotification(notification);
+                            setIsModalOpen(true);
+                          }}
+                          className="text-green-500 hover:text-green-600 font-medium"
+                        >
+                          상세보기
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      등록된 공지사항이 없습니다.
+                    </div>
+                  )}
+                </div>
+
+                {notificationTotalPages > 1 && (
+                  <div className="flex justify-center mt-6 gap-2">
+                    <button
+                      onClick={() =>
+                        fetchNotifications(Math.max(0, notificationPage - 1))
+                      }
+                      disabled={notificationPage === 0}
+                      className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      이전
+                    </button>
+                    <span className="px-4 py-2 text-sm text-gray-700">
+                      {notificationPage + 1} / {notificationTotalPages}
+                    </span>
+                    <button
+                      onClick={() =>
+                        fetchNotifications(
+                          Math.min(
+                            notificationTotalPages - 1,
+                            notificationPage + 1
+                          )
+                        )
+                      }
+                      disabled={notificationPage === notificationTotalPages - 1}
+                      className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      다음
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 강의 목록 */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    클래스 목록
+                  </h2>
                   <button
-                    onClick={() => router.push(`/lecture/manage/${lecture.id}`)}
-                    className="text-blue-600 hover:text-blue-700"
+                    onClick={handleNewLecture}
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
                   >
-                    관리하기
+                    <span>+</span>
+                    <span>새 클래스 등록</span>
                   </button>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {lectures.map((lecture) => (
+                    <div
+                      key={lecture.id}
+                      className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="p-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                          {lecture.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                          {removeMarkdown(lecture.content)}
+                        </p>
+
+                        <div className="flex justify-between items-center mb-4">
+                          <span
+                            className={`text-xs px-3 py-1 rounded-full font-medium ${
+                              lecture.lectureLevel === "BEGINNER"
+                                ? "bg-green-100 text-green-800"
+                                : lecture.lectureLevel === "INTERMEDIATE"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {lecture.lectureLevel === "BEGINNER"
+                              ? "초급"
+                              : lecture.lectureLevel === "INTERMEDIATE"
+                                ? "중급"
+                                : "고급"}
+                          </span>
+                          <span
+                            className={`text-xs px-3 py-1 rounded-full font-medium ${
+                              lecture.lectureStatus === "OPEN"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {lecture.lectureStatus === "OPEN"
+                              ? "운영중"
+                              : "준비중"}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className="text-xl font-bold text-gray-900">
+                            {lecture.price.toLocaleString()}원
+                          </span>
+                          <button
+                            onClick={() =>
+                              router.push(`/lecture/manage/${lecture.id}`)
+                            }
+                            className="text-green-600 hover:text-green-700 font-medium"
+                          >
+                            관리하기
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 페이지네이션 */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-8 gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => fetchLectures(i)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          currentPage === i
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Add pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-6 gap-2">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => fetchLectures(i)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === i
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Notification Modal */}
@@ -682,13 +674,11 @@ export default function MyLecturesPage() {
         isOpen={isModalOpen}
         onClose={closeNotificationModal}
       />
-
-      {/* Add ImageModal component here if needed */}
     </div>
   );
 }
 
-// Add this component in the same file, before MyLecturesPage
+// 모달 컴포넌트들
 const NotificationModal = ({
   notification,
   isOpen,
@@ -701,9 +691,8 @@ const NotificationModal = ({
   if (!isOpen || !notification) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0" onClick={onClose}></div>
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 shadow-xl z-10">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 shadow-xl">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">{notification.title}</h3>
           <button
@@ -737,7 +726,6 @@ const NotificationModal = ({
   );
 };
 
-// Add this component for the image modal
 const ImageModal = ({ url, onClose }: { url: string; onClose: () => void }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

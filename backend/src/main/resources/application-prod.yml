@@ -36,6 +36,7 @@ custom:
     dirPath: /gen
 
 
+
 cookie:
   domain: ".healthschool.site"
 
@@ -43,4 +44,6 @@ profile:
   use_s3: true
 
 
-
+redis:
+  host: redis
+  password: root123413
