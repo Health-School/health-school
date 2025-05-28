@@ -43,12 +43,14 @@ cookie:
 profile:
   use_s3: true
 
+management:
+  health:
+    mail:
+      enabled: false  # 메일 헬스체크 비활성화
+
 
 redis:
   host: redis
   password: root123413
 
-management:
-  health:
-    mail:
-      enabled: false  # 메일 헬스체크 비활성화
+
