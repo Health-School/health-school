@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
+import TrainerDashboardSidebar from "@/components/dashboard/TrainerDashboardSidebar";
 
 // Update Student interface
 interface Student {
@@ -170,15 +171,6 @@ export default function StudentsPage() {
     null
   );
   const [editingComment, setEditingComment] = useState("");
-
-  const tabs = [
-    { name: "MY 강의 관리", href: "/trainer/dashboard/my-lectures" },
-    { name: "정산 내역", href: "/trainer/dashboard/settlements" },
-    { name: "수강생 관리", href: "/trainer/dashboard/students" },
-    { name: "상담 일정", href: "/trainer/dashboard/consultations" },
-    { name: "운동 기구 신청", href: "/trainer/dashboard/equipments" },
-    { name: "MY 자격증 관리", href: "/trainer/dashboard/certificates" },
-  ];
 
   const contentTabs = [
     { key: "students", name: "수강생 목록" },
@@ -533,628 +525,865 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      {/* Main navigation */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.name}
-              href={tab.href}
-              className={`${
-                pathname === tab.href
-                  ? "text-green-500 border-b-2 border-green-500 font-semibold"
-                  : "text-gray-500 border-transparent border-b-2 font-medium"
-              } py-4 px-2 hover:text-green-700 transition-colors`}
-            >
-              {tab.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <TrainerDashboardSidebar />
 
-      {/* Content tabs */}
-      <div className="mb-6">
-        <nav className="flex space-x-4">
-          {contentTabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as typeof activeTab)}
-              className={`px-4 py-2 rounded-md ${
-                activeTab === tab.key
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 페이지 제목 */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                수강생 관리
+              </h1>
+              <p className="text-gray-600">
+                수강생 정보, QnA, 운동 기록을 확인하고 피드백을 제공하세요.
+              </p>
+            </div>
 
-      {/* Content area */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        {activeTab === "students" && (
-          <>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    수강생
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    이메일
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    전화번호
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-4 text-center">
-                      로딩 중...
-                    </td>
-                  </tr>
-                ) : students.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-4 text-center">
-                      수강생이 없습니다.
-                    </td>
-                  </tr>
-                ) : (
-                  students.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {student.username}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {student.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {student.phoneNumber}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-
-            {/* Pagination */}
-            <div className="mt-4 flex justify-center">
-              <nav className="flex items-center space-x-2">
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(0, prev - 1))
-                  }
-                  disabled={currentPage === 0 || isLoading}
-                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                >
-                  이전
-                </button>
-                {[...Array(totalPages)].map((_, i) => (
+            {/* Content tabs */}
+            <div className="mb-6">
+              <nav className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                {contentTabs.map((tab) => (
                   <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    disabled={isLoading}
-                    className={`px-3 py-1 rounded text-sm ${
-                      currentPage === i
-                        ? "bg-green-500 text-white"
-                        : "border border-gray-300"
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      activeTab === tab.key
+                        ? "bg-white text-green-600 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     }`}
                   >
-                    {i + 1}
+                    {tab.name}
                   </button>
                 ))}
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
-                  }
-                  disabled={currentPage === totalPages - 1 || isLoading}
-                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                >
-                  다음
-                </button>
               </nav>
             </div>
-          </>
-        )}
 
-        {activeTab === "qna" && (
-          <>
-            {/* Replace existing search bar with lecture selector */}
-            <div className="mb-6">
-              <div className="flex gap-4">
-                <select
-                  value={selectedLectureId || ""}
-                  onChange={(e) => {
-                    const id = Number(e.target.value);
-                    if (id) {
-                      handleLectureClick(id);
-                    } else {
-                      handleBack();
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">전체 강의 보기</option>
-                  {lectures.map((lecture) => (
-                    <option key={lecture.id} value={lecture.id}>
-                      {lecture.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            {/* Content area */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              {activeTab === "students" && (
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      수강생 목록
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      총 {students.length}명의 수강생
+                    </p>
+                  </div>
 
-            {selectedLectureId ? (
-              // Show lecture specific QnAs
-              <div className="space-y-4">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">강의 QnA 목록</h2>
-                  <button
-                    onClick={handleBack}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    ← 전체 QnA 목록으로 돌아가기
-                  </button>
-                </div>
-                {lectureQnas.map((qna) => (
-                  <div
-                    key={qna.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="mb-2">
-                      <div
-                        onClick={() => handleLectureClick(qna.lectureId)}
-                        className="text-sm text-red-500 mb-1 cursor-pointer hover:underline"
-                      >
-                        "{qna.lectureTitle}" 강의에 질문이 추가되었습니다!
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">{qna.title}</h3>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            qna.openStatus === "OPEN"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {qna.openStatus === "OPEN" ? "공개" : "비공개"}
-                        </span>
-                      </div>
-                    </div>
-                    {expandedQnaId === qna.id && (
-                      <div className="text-sm mb-2 mt-2">
-                        <p className="text-gray-600 p-3 bg-gray-50 rounded mb-2">
-                          {qna.content}
-                        </p>
-                        <button
-                          onClick={() => handleLectureClick(qna.lectureId)}
-                          className="text-green-600 hover:text-green-700 text-xs underline"
-                        >
-                          해당 강의 QnA 게시판으로 이동
-                        </button>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center text-xs text-gray-500">
-                      <div className="flex items-center space-x-2">
-                        <span>{qna.username}</span>
-                        <span>·</span>
-                        <span>
-                          {format(
-                            new Date(qna.createdDate),
-                            "yyyy.MM.dd HH:mm"
-                          )}
-                        </span>
-                      </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            수강생
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            이메일
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            전화번호
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {isLoading ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-12 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-2"></div>
+                                <span className="text-gray-500">
+                                  로딩 중...
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : students.length === 0 ? (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-12 text-center">
+                              <div className="flex flex-col items-center">
+                                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                  <span className="text-3xl">👥</span>
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                  수강생이 없습니다
+                                </h3>
+                                <p className="text-gray-500">
+                                  아직 등록된 수강생이 없습니다.
+                                </p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          students.map((student) => (
+                            <tr
+                              key={student.id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {student.username}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {student.email}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-900">
+                                  {student.phoneNumber}
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center items-center space-x-2 mt-8">
                       <button
                         onClick={() =>
-                          setExpandedQnaId(
-                            expandedQnaId === qna.id ? null : qna.id
-                          )
+                          setCurrentPage((prev) => Math.max(0, prev - 1))
                         }
-                        className="text-green-600 hover:text-green-700 text-sm"
+                        disabled={currentPage === 0 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === 0 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
                       >
-                        {expandedQnaId === qna.id ? "접기" : "자세히 보기"}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              // Filter QnAs by lecture title
-              <div className="space-y-4">
-                {qnas
-                  .filter((qna) =>
-                    qna.lectureTitle
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                  )
-                  .map((qna) => (
-                    <div
-                      key={qna.id}
-                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="mb-2">
-                        <div
-                          onClick={() => handleLectureClick(qna.lectureId)}
-                          className="text-sm text-red-500 mb-1 cursor-pointer hover:underline"
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          "{qna.lectureTitle}" 강의에 질문이 추가되었습니다!
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <h3 className="font-medium">{qna.title}</h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs ${
-                              qna.openStatus === "OPEN"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        이전
+                      </button>
+
+                      <div className="flex space-x-1">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i)}
+                            disabled={isLoading}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentPage === i
+                                ? "bg-green-500 text-white shadow-lg"
+                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
                             }`}
                           >
-                            {qna.openStatus === "OPEN" ? "공개" : "비공개"}
-                          </span>
-                        </div>
+                            {i + 1}
+                          </button>
+                        ))}
                       </div>
-                      {expandedQnaId === qna.id && (
-                        <div className="text-sm mb-2 mt-2">
-                          <p className="text-gray-600 p-3 bg-gray-50 rounded mb-2">
-                            {qna.content}
-                          </p>
-                          {/* <button
-                            onClick={() => handleLectureClick(qna.lectureId)}
-                            className="text-green-600 hover:text-green-700 text-xs underline"
-                          >
-                            해당 강의 QnA 게시판으로 이동
-                          </button> */}
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center text-xs text-gray-500">
-                        <div className="flex items-center space-x-2">
-                          <span>{qna.username}</span>
-                          <span>·</span>
-                          <span>
-                            {format(
-                              new Date(qna.createdDate),
-                              "yyyy.MM.dd HH:mm"
-                            )}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() =>
-                            setExpandedQnaId(
-                              expandedQnaId === qna.id ? null : qna.id
-                            )
-                          }
-                          className="text-green-600 hover:text-green-700 text-sm"
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages - 1, prev + 1)
+                          )
+                        }
+                        disabled={currentPage === totalPages - 1 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === totalPages - 1 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
+                      >
+                        다음
+                        <svg
+                          className="w-4 h-4 ml-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          {expandedQnaId === qna.id ? "접기" : "자세히 보기"}
-                        </button>
-                      </div>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
                     </div>
-                  ))}
-              </div>
-            )}
+                  )}
+                </>
+              )}
 
-            {/* Pagination */}
-            <div className="mt-6 flex justify-center">
-              <nav className="flex items-center space-x-2">
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(0, prev - 1))
-                  }
-                  disabled={currentPage === 0 || isLoading}
-                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                >
-                  이전
-                </button>
-                {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i)}
-                    disabled={isLoading}
-                    className={`px-3 py-1 rounded text-sm ${
-                      currentPage === i
-                        ? "bg-green-500 text-white"
-                        : "border border-gray-300"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
-                  }
-                  disabled={currentPage === totalPages - 1 || isLoading}
-                  className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                >
-                  다음
-                </button>
-              </nav>
-            </div>
-          </>
-        )}
-
-        {activeTab === "logs" && (
-          <>
-            {selectedExercise ? (
-              // Detail view
-              <div className="space-y-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">
-                    {selectedExercise.machineExercises[0]?.writerName}님의 상세
-                    운동 기록
-                  </h3>
-                  <button
-                    onClick={() => setSelectedExercise(null)}
-                    className="text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    ← 목록으로 돌아가기
-                  </button>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <div className="mb-4 pb-4 border-b">
-                    <p className="text-sm text-gray-500">
-                      운동 일자:{" "}
-                      {format(
-                        new Date(selectedExercise.exerciseDate),
-                        "yyyy.MM.dd"
-                      )}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      운동 시간: {selectedExercise.exerciseStartTime} -{" "}
-                      {selectedExercise.exerciseEndTime}
+              {activeTab === "qna" && (
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      QnA 관리
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      수강생들의 질문을 확인하고 답변하세요.
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    {selectedExercise.machineExercises.map((exercise) => (
-                      <div
-                        key={exercise.id}
-                        className="p-4 bg-gray-50 rounded-lg"
+                  {/* Replace existing search bar with lecture selector */}
+                  <div className="mb-6">
+                    <div className="flex gap-4">
+                      <select
+                        value={selectedLectureId || ""}
+                        onChange={(e) => {
+                          const id = Number(e.target.value);
+                          if (id) {
+                            handleLectureClick(id);
+                          } else {
+                            handleBack();
+                          }
+                        }}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       >
-                        <h4 className="font-medium mb-2">
-                          {exercise.machineName}
-                        </h4>
-                        <div className="bg-white p-3 rounded border border-gray-200">
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-500">세트:</span>{" "}
-                              <span className="font-medium">
-                                {exercise.sets}
-                              </span>
+                        <option value="">전체 강의 보기</option>
+                        {lectures.map((lecture) => (
+                          <option key={lecture.id} value={lecture.id}>
+                            {lecture.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {selectedLectureId ? (
+                    // Show lecture specific QnAs
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-medium">강의별 QnA 목록</h3>
+                        <button
+                          onClick={handleBack}
+                          className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                          전체 QnA 목록으로 돌아가기
+                        </button>
+                      </div>
+                      {lectureQnas.map((qna) => (
+                        <div
+                          key={qna.id}
+                          className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="mb-2">
+                            <div className="text-sm text-green-600 mb-1 font-medium">
+                              "{qna.lectureTitle}" 강의 질문
                             </div>
-                            <div>
-                              <span className="text-gray-500">횟수:</span>{" "}
-                              <span className="font-medium">
-                                {exercise.reps}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">무게:</span>{" "}
-                              <span className="font-medium">
-                                {exercise.weight}kg
+                            <div className="flex justify-between items-center">
+                              <h4 className="font-medium text-gray-900">
+                                {qna.title}
+                              </h4>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  qna.openStatus === "OPEN"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}
+                              >
+                                {qna.openStatus === "OPEN" ? "공개" : "비공개"}
                               </span>
                             </div>
                           </div>
+                          {expandedQnaId === qna.id && (
+                            <div className="text-sm mb-2 mt-2">
+                              <p className="text-gray-600 p-3 bg-gray-50 rounded border border-gray-200">
+                                {qna.content}
+                              </p>
+                            </div>
+                          )}
+                          <div className="flex justify-between items-center text-xs text-gray-500">
+                            <div className="flex items-center space-x-2">
+                              <span>{qna.username}</span>
+                              <span>·</span>
+                              <span>
+                                {format(
+                                  new Date(qna.createdDate),
+                                  "yyyy.MM.dd HH:mm"
+                                )}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() =>
+                                setExpandedQnaId(
+                                  expandedQnaId === qna.id ? null : qna.id
+                                )
+                              }
+                              className="text-green-600 hover:text-green-700 text-sm font-medium"
+                            >
+                              {expandedQnaId === qna.id
+                                ? "접기"
+                                : "자세히 보기"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Add feedback section */}
-                <div className="mt-6">
-                  {showFeedbackForm ? (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                      <h4 className="text-lg font-medium mb-4">피드백 작성</h4>
-                      <textarea
-                        value={feedback}
-                        onChange={(e) => setFeedback(e.target.value)}
-                        placeholder="피드백을 입력하세요..."
-                        className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                      <div className="flex justify-end space-x-2 mt-4">
-                        <button
-                          onClick={() => setShowFeedbackForm(false)}
-                          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border rounded-md"
-                        >
-                          취소
-                        </button>
-                        <button
-                          onClick={() => submitFeedback(selectedExercise.id)}
-                          disabled={!feedback.trim()}
-                          className="px-4 py-2 text-sm text-white bg-green-500 hover:bg-green-600 rounded-md disabled:opacity-50"
-                        >
-                          피드백 등록
-                        </button>
-                      </div>
+                      ))}
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setShowFeedbackForm(true)}
-                      className="w-full py-3 text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-                    >
-                      피드백 달기
-                    </button>
-                  )}
-                </div>
-
-                {/* Show existing feedbacks if any */}
-                {selectedExercise?.feedbacks &&
-                  selectedExercise.feedbacks.length > 0 && (
-                    <div className="bg-white p-6 rounded-lg shadow">
-                      <h4 className="text-lg font-medium mb-4">
-                        등록된 피드백
-                      </h4>
-                      <div className="space-y-4">
-                        {selectedExercise.feedbacks.map(
-                          (feedback: FeedbackDto) => (
-                            <div key={feedback.id} className="border-b pb-4">
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex-1">
-                                  {editingFeedbackId === feedback.id ? (
-                                    // Edit mode
-                                    <div className="space-y-2">
-                                      <textarea
-                                        value={editingComment}
-                                        onChange={(e) =>
-                                          setEditingComment(e.target.value)
-                                        }
-                                        className="w-full h-24 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                                      />
-                                      <div className="flex justify-end space-x-2">
-                                        <button
-                                          onClick={() => {
-                                            setEditingFeedbackId(null);
-                                            setEditingComment("");
-                                          }}
-                                          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border rounded-md"
-                                        >
-                                          취소
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            updateFeedback(
-                                              feedback.id,
-                                              editingComment
-                                            )
-                                          }
-                                          disabled={!editingComment.trim()}
-                                          className="px-3 py-1 text-sm text-white bg-green-500 hover:bg-green-600 rounded-md disabled:opacity-50"
-                                        >
-                                          수정완료
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    // View mode
-                                    <>
-                                      <p className="text-gray-700">
-                                        {feedback.comment}
-                                      </p>
-                                      <div className="flex items-center mt-2 text-sm text-gray-500">
-                                        <span>
-                                          {feedback.trainerName} 트레이너
-                                        </span>
-                                        <span className="mx-2">·</span>
-                                        <span>
-                                          {format(
-                                            new Date(feedback.createdAt),
-                                            "yyyy.MM.dd HH:mm"
-                                          )}
-                                        </span>
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
-                                {editingFeedbackId !== feedback.id && (
-                                  <div className="flex space-x-2">
-                                    <button
-                                      onClick={() => {
-                                        setEditingFeedbackId(feedback.id);
-                                        setEditingComment(feedback.comment);
-                                      }}
-                                      className="text-sm text-blue-500 hover:text-blue-700"
-                                    >
-                                      수정
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        if (
-                                          window.confirm(
-                                            "이 피드백을 삭제하시겠습니까?"
-                                          )
-                                        ) {
-                                          deleteFeedback(feedback.id);
-                                        }
-                                      }}
-                                      className="text-sm text-red-500 hover:text-red-700"
-                                    >
-                                      삭제
-                                    </button>
-                                  </div>
-                                )}
+                    // Filter QnAs by lecture title
+                    <div className="space-y-4">
+                      {qnas
+                        .filter((qna) =>
+                          qna.lectureTitle
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase())
+                        )
+                        .map((qna) => (
+                          <div
+                            key={qna.id}
+                            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="mb-2">
+                              <div
+                                onClick={() =>
+                                  handleLectureClick(qna.lectureId)
+                                }
+                                className="text-sm text-green-600 mb-1 cursor-pointer hover:underline font-medium"
+                              >
+                                "{qna.lectureTitle}" 강의에 질문이
+                                추가되었습니다!
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <h4 className="font-medium text-gray-900">
+                                  {qna.title}
+                                </h4>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    qna.openStatus === "OPEN"
+                                      ? "bg-green-100 text-green-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
+                                >
+                                  {qna.openStatus === "OPEN"
+                                    ? "공개"
+                                    : "비공개"}
+                                </span>
                               </div>
                             </div>
-                          )
-                        )}
-                      </div>
+                            {expandedQnaId === qna.id && (
+                              <div className="text-sm mb-2 mt-2">
+                                <p className="text-gray-600 p-3 bg-gray-50 rounded border border-gray-200">
+                                  {qna.content}
+                                </p>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center text-xs text-gray-500">
+                              <div className="flex items-center space-x-2">
+                                <span>{qna.username}</span>
+                                <span>·</span>
+                                <span>
+                                  {format(
+                                    new Date(qna.createdDate),
+                                    "yyyy.MM.dd HH:mm"
+                                  )}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  setExpandedQnaId(
+                                    expandedQnaId === qna.id ? null : qna.id
+                                  )
+                                }
+                                className="text-green-600 hover:text-green-700 text-sm font-medium"
+                              >
+                                {expandedQnaId === qna.id
+                                  ? "접기"
+                                  : "자세히 보기"}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   )}
-              </div>
-            ) : (
-              // List view
-              <div className="space-y-6">
-                {workoutLogs.map((log) => (
-                  <div key={log.id} className="border rounded-lg p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium">
-                          {log.username}님의 운동 기록
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {format(new Date(log.exerciseDate), "yyyy.MM.dd")}
-                        </p>
-                      </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center items-center space-x-2 mt-8">
                       <button
-                        onClick={() => fetchExerciseDetail(log.id)}
-                        className="px-4 py-2 text-sm text-green-600 hover:text-green-700 font-medium"
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(0, prev - 1))
+                        }
+                        disabled={currentPage === 0 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === 0 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
                       >
-                        자세히 보기 →
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        이전
+                      </button>
+
+                      <div className="flex space-x-1">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i)}
+                            disabled={isLoading}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentPage === i
+                                ? "bg-green-500 text-white shadow-lg"
+                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                            }`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages - 1, prev + 1)
+                          )
+                        }
+                        disabled={currentPage === totalPages - 1 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === totalPages - 1 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
+                      >
+                        다음
+                        <svg
+                          className="w-4 h-4 ml-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  )}
+                </>
+              )}
 
-            {/* Pagination (only show when not in detail view) */}
-            {!selectedExercise && (
-              <div className="mt-6 flex justify-center">
-                <nav className="flex items-center space-x-2">
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(0, prev - 1))
-                    }
-                    disabled={currentPage === 0 || isLoading}
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                  >
-                    이전
-                  </button>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentPage(i)}
-                      disabled={isLoading}
-                      className={`px-3 py-1 rounded text-sm ${
-                        currentPage === i
-                          ? "bg-green-500 text-white"
-                          : "border border-gray-300"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) =>
-                        Math.min(totalPages - 1, prev + 1)
-                      )
-                    }
-                    disabled={currentPage === totalPages - 1 || isLoading}
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50"
-                  >
-                    다음
-                  </button>
-                </nav>
-              </div>
-            )}
-          </>
-        )}
+              {activeTab === "logs" && (
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      운동 기록 관리
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      수강생들의 운동 기록을 확인하고 피드백을 제공하세요.
+                    </p>
+                  </div>
+
+                  {selectedExercise ? (
+                    // Detail view
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">
+                          {selectedExercise.machineExercises[0]?.writerName}님의
+                          상세 운동 기록
+                        </h3>
+                        <button
+                          onClick={() => setSelectedExercise(null)}
+                          className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                          목록으로 돌아가기
+                        </button>
+                      </div>
+
+                      <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <div className="mb-4 pb-4 border-b border-gray-300">
+                          <p className="text-sm text-gray-600 mb-1">
+                            <span className="font-medium">운동 일자:</span>{" "}
+                            {format(
+                              new Date(selectedExercise.exerciseDate),
+                              "yyyy.MM.dd"
+                            )}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <span className="font-medium">운동 시간:</span>{" "}
+                            {selectedExercise.exerciseStartTime} -{" "}
+                            {selectedExercise.exerciseEndTime}
+                          </p>
+                        </div>
+
+                        <div className="space-y-4">
+                          {selectedExercise.machineExercises.map((exercise) => (
+                            <div
+                              key={exercise.id}
+                              className="bg-white p-4 rounded-lg border border-gray-200"
+                            >
+                              <h4 className="font-medium text-gray-900 mb-3">
+                                {exercise.machineName}
+                              </h4>
+                              <div className="grid grid-cols-3 gap-4 text-sm">
+                                <div className="text-center p-2 bg-gray-50 rounded">
+                                  <span className="block text-gray-500 text-xs">
+                                    세트
+                                  </span>
+                                  <span className="block font-semibold text-lg text-gray-900">
+                                    {exercise.sets}
+                                  </span>
+                                </div>
+                                <div className="text-center p-2 bg-gray-50 rounded">
+                                  <span className="block text-gray-500 text-xs">
+                                    횟수
+                                  </span>
+                                  <span className="block font-semibold text-lg text-gray-900">
+                                    {exercise.reps}
+                                  </span>
+                                </div>
+                                <div className="text-center p-2 bg-gray-50 rounded">
+                                  <span className="block text-gray-500 text-xs">
+                                    무게
+                                  </span>
+                                  <span className="block font-semibold text-lg text-gray-900">
+                                    {exercise.weight}kg
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Add feedback section */}
+                      <div className="mt-6">
+                        {showFeedbackForm ? (
+                          <div className="bg-white p-6 rounded-lg border border-gray-200">
+                            <h4 className="text-lg font-medium mb-4">
+                              피드백 작성
+                            </h4>
+                            <textarea
+                              value={feedback}
+                              onChange={(e) => setFeedback(e.target.value)}
+                              placeholder="피드백을 입력하세요..."
+                              className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                            <div className="flex justify-end space-x-2 mt-4">
+                              <button
+                                onClick={() => setShowFeedbackForm(false)}
+                                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                              >
+                                취소
+                              </button>
+                              <button
+                                onClick={() =>
+                                  submitFeedback(selectedExercise.id)
+                                }
+                                disabled={!feedback.trim()}
+                                className="px-4 py-2 text-sm text-white bg-green-500 hover:bg-green-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                피드백 등록
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setShowFeedbackForm(true)}
+                            className="w-full py-3 text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors border-2 border-dashed border-green-200 hover:border-green-300"
+                          >
+                            + 피드백 작성하기
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Show existing feedbacks if any */}
+                      {selectedExercise?.feedbacks &&
+                        selectedExercise.feedbacks.length > 0 && (
+                          <div className="bg-white p-6 rounded-lg border border-gray-200">
+                            <h4 className="text-lg font-medium mb-4">
+                              등록된 피드백 ({selectedExercise.feedbacks.length}
+                              개)
+                            </h4>
+                            <div className="space-y-4">
+                              {selectedExercise.feedbacks.map(
+                                (feedback: FeedbackDto) => (
+                                  <div
+                                    key={feedback.id}
+                                    className="border-b border-gray-200 pb-4 last:border-b-0"
+                                  >
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div className="flex-1">
+                                        {editingFeedbackId === feedback.id ? (
+                                          // Edit mode
+                                          <div className="space-y-2">
+                                            <textarea
+                                              value={editingComment}
+                                              onChange={(e) =>
+                                                setEditingComment(
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="w-full h-24 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            />
+                                            <div className="flex justify-end space-x-2">
+                                              <button
+                                                onClick={() => {
+                                                  setEditingFeedbackId(null);
+                                                  setEditingComment("");
+                                                }}
+                                                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                              >
+                                                취소
+                                              </button>
+                                              <button
+                                                onClick={() =>
+                                                  updateFeedback(
+                                                    feedback.id,
+                                                    editingComment
+                                                  )
+                                                }
+                                                disabled={
+                                                  !editingComment.trim()
+                                                }
+                                                className="px-3 py-1 text-sm text-white bg-green-500 hover:bg-green-600 rounded-lg disabled:opacity-50"
+                                              >
+                                                수정완료
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          // View mode
+                                          <>
+                                            <p className="text-gray-700 mb-2">
+                                              {feedback.comment}
+                                            </p>
+                                            <div className="flex items-center text-sm text-gray-500">
+                                              <span className="font-medium">
+                                                {feedback.trainerName} 트레이너
+                                              </span>
+                                              <span className="mx-2">·</span>
+                                              <span>
+                                                {format(
+                                                  new Date(feedback.createdAt),
+                                                  "yyyy.MM.dd HH:mm"
+                                                )}
+                                              </span>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                      {editingFeedbackId !== feedback.id && (
+                                        <div className="flex space-x-2 ml-4">
+                                          <button
+                                            onClick={() => {
+                                              setEditingFeedbackId(feedback.id);
+                                              setEditingComment(
+                                                feedback.comment
+                                              );
+                                            }}
+                                            className="text-sm text-blue-500 hover:text-blue-700 font-medium"
+                                          >
+                                            수정
+                                          </button>
+                                          <button
+                                            onClick={() => {
+                                              if (
+                                                window.confirm(
+                                                  "이 피드백을 삭제하시겠습니까?"
+                                                )
+                                              ) {
+                                                deleteFeedback(feedback.id);
+                                              }
+                                            }}
+                                            className="text-sm text-red-500 hover:text-red-700 font-medium"
+                                          >
+                                            삭제
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    // List view
+                    <div className="space-y-4">
+                      {workoutLogs.length === 0 ? (
+                        <div className="text-center py-16">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                            <span className="text-3xl">📊</span>
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            운동 기록이 없습니다
+                          </h3>
+                          <p className="text-gray-500">
+                            아직 등록된 운동 기록이 없습니다.
+                          </p>
+                        </div>
+                      ) : (
+                        workoutLogs.map((log) => (
+                          <div
+                            key={log.id}
+                            className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-all"
+                          >
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                                  {log.username}님의 운동 기록
+                                </h3>
+                                <p className="text-sm text-gray-500 mb-2">
+                                  {format(
+                                    new Date(log.exerciseDate),
+                                    "yyyy.MM.dd"
+                                  )}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  운동 시간: {log.exerciseStartTime} -{" "}
+                                  {log.exerciseEndTime}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => fetchExerciseDetail(log.id)}
+                                className="px-4 py-2 text-sm text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                              >
+                                자세히 보기 →
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pagination (only show when not in detail view) */}
+                  {!selectedExercise && totalPages > 1 && (
+                    <div className="flex justify-center items-center space-x-2 mt-8">
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(0, prev - 1))
+                        }
+                        disabled={currentPage === 0 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === 0 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
+                      >
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        이전
+                      </button>
+
+                      <div className="flex space-x-1">
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i)}
+                            disabled={isLoading}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              currentPage === i
+                                ? "bg-green-500 text-white shadow-lg"
+                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                            }`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(totalPages - 1, prev + 1)
+                          )
+                        }
+                        disabled={currentPage === totalPages - 1 || isLoading}
+                        className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === totalPages - 1 || isLoading
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                        }`}
+                      >
+                        다음
+                        <svg
+                          className="w-4 h-4 ml-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

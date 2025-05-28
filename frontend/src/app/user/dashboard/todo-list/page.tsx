@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import TodoAddModal from "@/components/todo/TodoAddModal";
 import TodoEditModal from "@/components/todo/TodoEditModal";
-import DashboardTabs from "@/components/dashboard/DashboardTabs";
+import DashboardSidebar from "@/components/dashboard/UserDashboardSidebar";
 
 // Update Todo interface and add TodoEnumType
 type TodoEnumType = "DO" | "DOING" | "DONE";
@@ -168,163 +168,316 @@ export default function TodoListPage() {
     }
   };
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Navigation Tabs */}
-      <DashboardTabs />
-
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">할 일 목록</h1>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          + 할 일 추가
-        </button>
-      </div>
-
-      {/* Calendar */}
-      <div className="bg-white rounded-lg shadow mb-6">
-        <div className="flex justify-between items-center p-4 border-b">
-          <button
-            onClick={prevMonth}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            ←
-          </button>
-          <h2 className="text-lg font-semibold">
-            {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
-          </h2>
-          <button
-            onClick={nextMonth}
-            className="p-2 hover:bg-gray-100 rounded-full"
-          >
-            →
-          </button>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <DashboardSidebar />
+        <div className="flex-1 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
         </div>
+      </div>
+    );
+  }
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
-          {/* 요일 헤더 수정 */}
-          {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => (
-            <div
-              key={day}
-              className={`bg-gray-50 p-2 text-center font-medium ${
-                index === 0
-                  ? "text-red-500"
-                  : index === 6
-                    ? "text-blue-500"
-                    : ""
-              }`}
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <DashboardSidebar />
+        <div className="flex-1 flex justify-center items-center">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
-              {day}
-            </div>
-          ))}
-
-          {/* 날짜 그리드 수정 */}
-          {Array.from({ length: 42 }).map((_, index) => {
-            const dayNumber = index - startingDay + 1;
-            const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth;
-            const date = formatDateString(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              dayNumber
-            );
-            const hasTodoOnDate = isCurrentMonth && hasTodo(date);
-            const dayOfWeek = index % 7; // 0은 일요일, 6은 토요일
-
-            return (
-              <div
-                key={index}
-                className={`bg-white p-2 min-h-[80px] ${
-                  isCurrentMonth
-                    ? "cursor-pointer hover:bg-blue-50"
-                    : "bg-gray-50 text-gray-400"
-                } ${selectedDate === date ? "bg-blue-100" : ""}`}
-                onClick={() => isCurrentMonth && setSelectedDate(date)}
-              >
-                <div className="flex justify-between items-start">
-                  <span
-                    className={`${
-                      isCurrentMonth
-                        ? dayOfWeek === 0
-                          ? "text-red-500"
-                          : dayOfWeek === 6
-                            ? "text-blue-500"
-                            : ""
-                        : ""
-                    }`}
-                  >
-                    {isCurrentMonth ? dayNumber : ""}
-                  </span>
-                  {hasTodoOnDate && (
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              다시 시도
+            </button>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Todo List for Selected Date */}
-      {selectedDate && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-800">
-            {new Date(selectedDate).toLocaleDateString()} 할 일
-          </h3>
-          {selectedDateTodos.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
-              이 날짜에 등록된 할 일이 없습니다.
-            </p>
-          ) : (
-            selectedDateTodos.map((todo) => (
-              <div
-                key={todo.id}
-                className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-lg text-gray-800">
-                        {todo.title}
-                      </h4>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          getTodoStatus(todo.isDone).className
-                        }`}
-                      >
-                        {getTodoStatus(todo.isDone).text}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      마감일: {new Date(todo.dueDate).toLocaleDateString()}
-                    </div>
-                    <div className="mt-2 p-3 bg-gray-50 rounded-md text-gray-700">
-                      {todo.content}
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(todo)}
-                      className="text-blue-500 hover:text-blue-700 transition-colors"
-                    >
-                      수정
-                    </button>
-                    <button
-                      onClick={() => handleDelete(todo.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      삭제
-                    </button>
-                  </div>
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 사이드바 */}
+      <DashboardSidebar />
+
+      {/* 메인 컨텐츠 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 페이지 제목 */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    할 일 목록
+                  </h1>
+                  <p className="text-gray-600">
+                    일정을 관리하고 할 일을 체계적으로 정리하세요.
+                  </p>
                 </div>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                >
+                  <span>+</span>
+                  <span>할 일 추가</span>
+                </button>
               </div>
-            ))
-          )}
+            </div>
+
+            {/* Calendar */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                <button
+                  onClick={prevMonth}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월
+                </h2>
+                <button
+                  onClick={nextMonth}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-px bg-gray-200">
+                {/* 요일 헤더 */}
+                {["일", "월", "화", "수", "목", "금", "토"].map(
+                  (day, index) => (
+                    <div
+                      key={day}
+                      className={`bg-gray-50 p-4 text-center font-medium text-sm ${
+                        index === 0
+                          ? "text-red-500"
+                          : index === 6
+                            ? "text-blue-500"
+                            : "text-gray-700"
+                      }`}
+                    >
+                      {day}
+                    </div>
+                  )
+                )}
+
+                {/* 날짜 그리드 */}
+                {Array.from({ length: 42 }).map((_, index) => {
+                  const dayNumber = index - startingDay + 1;
+                  const isCurrentMonth =
+                    dayNumber > 0 && dayNumber <= daysInMonth;
+                  const date = formatDateString(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth(),
+                    dayNumber
+                  );
+                  const hasTodoOnDate = isCurrentMonth && hasTodo(date);
+                  const dayOfWeek = index % 7;
+                  const isToday =
+                    isCurrentMonth &&
+                    new Date().toDateString() ===
+                      new Date(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth(),
+                        dayNumber
+                      ).toDateString();
+
+                  return (
+                    <div
+                      key={index}
+                      className={`bg-white p-3 min-h-[100px] border-r border-b border-gray-100 transition-all duration-200 ${
+                        isCurrentMonth
+                          ? "cursor-pointer hover:bg-green-50"
+                          : "bg-gray-50 text-gray-400"
+                      } ${selectedDate === date ? "bg-green-100 ring-2 ring-green-300" : ""}`}
+                      onClick={() => isCurrentMonth && setSelectedDate(date)}
+                    >
+                      <div className="flex justify-between items-start h-full">
+                        <span
+                          className={`text-sm font-medium ${
+                            isCurrentMonth
+                              ? isToday
+                                ? "bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center"
+                                : dayOfWeek === 0
+                                  ? "text-red-500"
+                                  : dayOfWeek === 6
+                                    ? "text-blue-500"
+                                    : "text-gray-700"
+                              : ""
+                          }`}
+                        >
+                          {isCurrentMonth ? dayNumber : ""}
+                        </span>
+                        {hasTodoOnDate && (
+                          <div className="flex flex-col items-end">
+                            <div className="w-2 h-2 rounded-full bg-green-500 mb-1"></div>
+                            <span className="text-xs text-green-600 font-medium">
+                              {
+                                todos.filter((todo) => todo.dueDate === date)
+                                  .length
+                              }
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Todo List for Selected Date */}
+            {selectedDate && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {new Date(selectedDate).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      weekday: "long",
+                    })}{" "}
+                    할 일
+                  </h3>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {selectedDateTodos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">📝</span>
+                    </div>
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                      이 날짜에 등록된 할 일이 없습니다
+                    </h4>
+                    <p className="text-gray-500 mb-4">
+                      새로운 할 일을 추가해보세요!
+                    </p>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      할 일 추가
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {selectedDateTodos.map((todo) => (
+                      <div
+                        key={todo.id}
+                        className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-all duration-200 hover:shadow-sm"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-3 flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-lg text-gray-900">
+                                {todo.title}
+                              </h4>
+                              <span
+                                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                  getTodoStatus(todo.isDone).className
+                                }`}
+                              >
+                                {getTodoStatus(todo.isDone).text}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-500 flex items-center">
+                              <svg
+                                className="w-4 h-4 mr-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                              마감일:{" "}
+                              {new Date(todo.dueDate).toLocaleDateString(
+                                "ko-KR"
+                              )}
+                            </div>
+                            {todo.content && (
+                              <div className="mt-3 p-4 bg-gray-50 rounded-lg text-gray-700 text-sm leading-relaxed">
+                                {todo.content}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex space-x-2 ml-4">
+                            <button
+                              onClick={() => handleEdit(todo)}
+                              className="text-green-600 hover:text-green-700 px-3 py-2 rounded-lg border border-green-600 hover:bg-green-50 transition-colors text-sm font-medium"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleDelete(todo.id)}
+                              className="text-red-600 hover:text-red-700 px-3 py-2 rounded-lg border border-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Add Todo Modal */}
       {showAddModal && (
