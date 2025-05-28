@@ -1,13 +1,19 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import LectureSearchResult from "@/components/lecture/LectureSearchResult";
 
 export default function SearchPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    // 클라이언트에서 쿼리 파라미터 'q'를 읽어 초기값 설정
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q") || "";
+    setSearchQuery(q);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
