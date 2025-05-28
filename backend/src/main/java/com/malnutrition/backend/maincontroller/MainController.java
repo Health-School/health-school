@@ -19,6 +19,6 @@ public class MainController {
         System.out.println("backUrl = " + backUrl);
         System.out.println("frontUrl = " + frontUrl);
 
-        return "Welcome to Main Page!!";
+        return "Welcome to Main Page!";
     }
 }
