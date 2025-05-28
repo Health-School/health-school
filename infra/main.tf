@@ -14,19 +14,19 @@ provider "aws" {
 # AWS 설정 끝
 
 # VPC 설정 시작
-resource "aws_vpc" "vpc_1" {
+resource "aws_vpc" "vpc_4" {
   cidr_block = "10.0.0.0/16"
 
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.prefix}-vpc-1"
+    Name = "${var.prefix}-vpc-4"
   }
 }
 
 resource "aws_subnet" "subnet_1" {
-  vpc_id                  = aws_vpc.vpc_1.id
+  vpc_id                  = aws_vpc.vpc_4.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
@@ -37,7 +37,7 @@ resource "aws_subnet" "subnet_1" {
 }
 
 resource "aws_subnet" "subnet_2" {
-  vpc_id                  = aws_vpc.vpc_1.id
+  vpc_id                  = aws_vpc.vpc_4.id
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "${var.region}b"
   map_public_ip_on_launch = true
@@ -48,7 +48,7 @@ resource "aws_subnet" "subnet_2" {
 }
 
 resource "aws_subnet" "subnet_3" {
-  vpc_id                  = aws_vpc.vpc_1.id
+  vpc_id                  = aws_vpc.vpc_4.id
   cidr_block              = "10.0.3.0/24"
   availability_zone       = "${var.region}c"
   map_public_ip_on_launch = true
@@ -59,7 +59,7 @@ resource "aws_subnet" "subnet_3" {
 }
 
 resource "aws_subnet" "subnet_4" {
-  vpc_id                  = aws_vpc.vpc_1.id
+  vpc_id                  = aws_vpc.vpc_4.id
   cidr_block              = "10.0.4.0/24"
   availability_zone       = "${var.region}d"
   map_public_ip_on_launch = true
@@ -70,7 +70,7 @@ resource "aws_subnet" "subnet_4" {
 }
 
 resource "aws_internet_gateway" "igw_1" {
-  vpc_id = aws_vpc.vpc_1.id
+  vpc_id = aws_vpc.vpc_4.id
 
   tags = {
     Name = "${var.prefix}-igw-1"
@@ -78,7 +78,7 @@ resource "aws_internet_gateway" "igw_1" {
 }
 
 resource "aws_route_table" "rt_1" {
-  vpc_id = aws_vpc.vpc_1.id
+  vpc_id = aws_vpc.vpc_4.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -127,7 +127,7 @@ resource "aws_security_group" "sg_1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  vpc_id = aws_vpc.vpc_1.id
+  vpc_id = aws_vpc.vpc_4.id
 
   tags = {
     Name = "${var.prefix}-sg-1"
@@ -137,8 +137,8 @@ resource "aws_security_group" "sg_1" {
 # EC2 설정 시작
 
 # EC2 역할 생성
-resource "aws_iam_role" "ec2_role_1" {
-  name = "${var.prefix}-ec2-role-1"
+resource "aws_iam_role" "ec2_role_4" {
+  name = "${var.prefix}-ec2-role-4"
 
   # 이 역할에 대한 신뢰 정책 설정. EC2 서비스가 이 역할을 가정할 수 있도록 설정
   assume_role_policy = <<EOF
@@ -160,20 +160,20 @@ resource "aws_iam_role" "ec2_role_1" {
 
 # EC2 역할에 AmazonS3FullAccess 정책을 부착
 resource "aws_iam_role_policy_attachment" "s3_full_access" {
-  role       = aws_iam_role.ec2_role_1.name
+  role       = aws_iam_role.ec2_role_4.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 # EC2 역할에 AmazonEC2RoleforSSM 정책을 부착
 resource "aws_iam_role_policy_attachment" "ec2_ssm" {
-  role       = aws_iam_role.ec2_role_1.name
+  role       = aws_iam_role.ec2_role_4.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
 }
 
 # IAM 인스턴스 프로파일 생성
-resource "aws_iam_instance_profile" "instance_profile_1" {
-  name = "${var.prefix}-instance-profile-1"
-  role = aws_iam_role.ec2_role_1.name
+resource "aws_iam_instance_profile" "instance_profile_4" {
+  name = "${var.prefix}-instance-profile-4"
+  role = aws_iam_role.ec2_role_4.name
 }
 
 locals {
@@ -206,6 +206,63 @@ docker run -d \
   -v /dockerProjects/npm_1/volumes/data:/data \
   -v /dockerProjects/npm_1/volumes/etc/letsencrypt:/etc/letsencrypt \
   jc21/nginx-proxy-manager:latest
+
+# ha proxy 설치
+## 설정파일을 위한 디렉토리 생성
+mkdir -p /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/lua
+
+cat << 'EOF' > /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/lua/retry_on_502_504.lua
+core.register_action("retry_on_502_504", { "http-res" }, function(txn)
+  local status = txn.sf:status()
+  if status == 502 or status == 504 then
+    txn:Done()
+  end
+end)
+EOF
+
+## 설정파일 생성
+echo -e "
+global
+    lua-load /usr/local/etc/haproxy/lua/retry_on_502_504.lua
+
+resolvers docker
+    nameserver dns1 127.0.0.11:53
+    resolve_retries       3
+    timeout retry         1s
+    hold valid            10s
+
+defaults
+    mode http
+    timeout connect 5s
+    timeout client 60s
+    timeout server 60s
+
+## api.blog.sik2.site => 프로젝트 API 서버 도메인
+frontend http_front
+    bind *:80
+    acl host_app1 hdr_beg(host) -i api.blog.sik2.site
+
+    use_backend http_back_1 if host_app1
+
+backend http_back_1
+    balance roundrobin
+    option httpchk GET /actuator/health
+    default-server inter 2s rise 1 fall 1 init-addr last,libc,none resolvers docker
+    option redispatch
+    http-response lua.retry_on_502_504
+
+    server app_server_1_1 app1_1:8080 check
+    server app_server_1_2 app1_2:8080 check
+" > /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/haproxy.cfg
+
+docker run \
+  -d \
+  --network common \
+  -p 8090:80 \
+  -v /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy:/usr/local/etc/haproxy \
+  -e TZ=Asia/Seoul \
+  --name ha_proxy_1 \
+  haproxy
 
 # redis 설치
 docker run -d \
@@ -250,7 +307,7 @@ CREATE DATABASE health_school;
 FLUSH PRIVILEGES;
 "
 
-echo "${var.github_access_token_1}" | docker login ghcr.io -u ${var.github_access_token_1_owner} --password-stdin
+echo "${var.github_access_token_2}" | docker login ghcr.io -u ${var.github_access_token_2_owner} --password-stdin
 
 END_OF_FILE
 }
@@ -282,7 +339,7 @@ data "aws_ami" "latest_amazon_linux" {
 }
 
 # EC2 인스턴스 생성
-resource "aws_instance" "ec2_1" {
+resource "aws_instance" "ec2_4" {
   # 사용할 AMI ID
   ami = data.aws_ami.latest_amazon_linux.id
   # EC2 인스턴스 유형
@@ -295,11 +352,11 @@ resource "aws_instance" "ec2_1" {
   associate_public_ip_address = true
 
   # 인스턴스에 IAM 역할 연결
-  iam_instance_profile = aws_iam_instance_profile.instance_profile_1.name
+  iam_instance_profile = aws_iam_instance_profile.instance_profile_4.name
 
   # 인스턴스에 태그 설정
   tags = {
-    Name = "${var.prefix}-ec2-1"
+    Name = "${var.prefix}-ec2-4"
   }
 
   # 루트 볼륨 설정

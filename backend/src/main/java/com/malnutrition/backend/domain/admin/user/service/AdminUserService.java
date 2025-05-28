@@ -264,9 +264,19 @@ public class AdminUserService {
             return;
 
         user.setUserStatus(newStatus);
+
+        if (newStatus == UserStatus.DELETED) {
+            user.setEmail("deleted_user_" + user.getId() + "@example.com");
+            user.setNickname("탈퇴한사용자");
+            user.setPhoneNumber(null);
+            user.setRefreshToken(null);
+            System.out.println("사용자 ID " + userId + "가 DELETED 상태로 변경되었으며, deletedAt이 기록되었습니다.");
+        }
+
+
+
+
         userRepository.save(user);
-
-
     }
 
 
