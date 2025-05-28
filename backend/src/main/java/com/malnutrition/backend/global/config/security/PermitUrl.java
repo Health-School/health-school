@@ -23,7 +23,8 @@ public class PermitUrl {
             "/api/v1/lecture_categories",
             "/api/v1/reports","/api/v1/reports/*",
             "/api/v1/like", "/api/v1/lectures/popular", "/api/v1/trainers/popular",
-            "/api/v1/lectures/hot"
+            "/api/v1/lectures/hot",
+
     };
 
     public static final String[] POST_URLS = {
@@ -45,6 +46,13 @@ public class PermitUrl {
             // DELETE 메서드에 해당하는 경로를 여기에 추가
             "/api/v1/reports/*"
     };
+
+    public static final String[] PATCH_URLS = {
+            // 다른 PATCH 엔드포인트가 있으면 여기에 추가
+            "/api/v1/admin/users/*/status",
+            // "/api/v1/lectures/*/something",
+    };
+
 
 
 }

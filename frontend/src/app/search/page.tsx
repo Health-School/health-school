@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ export default function SearchPage() {
     <main className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
         {/* 검색 섹션 */}
+
         <div className="max-w-3xl mx-auto mb-12">
           <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
             강의 검색
@@ -55,7 +57,6 @@ export default function SearchPage() {
             </button>
           </form>
         </div>
-
         {/* 검색 결과 섹션 */}
         <div className="max-w-4xl mx-auto">
           <LectureSearchResult />
@@ -64,3 +65,6 @@ export default function SearchPage() {
     </main>
   );
 }
+
+
+

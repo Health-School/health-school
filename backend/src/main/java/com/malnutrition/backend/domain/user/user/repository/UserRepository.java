@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.user.user.dto.TrainerInfoProcessDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.enums.Role;
+import com.malnutrition.backend.domain.user.user.enums.UserStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -34,7 +35,10 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
 
     boolean existsByProvider(String provider);
 
+    long countByUserStatus(UserStatus userStatus);
+
     long countByCreatedDateBefore(LocalDateTime localDateTime);
+    long countByCreatedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     boolean existsByPhoneNumber(String phoneNumber);
     Optional<User> findByPhoneNumber(String phoneNumber);

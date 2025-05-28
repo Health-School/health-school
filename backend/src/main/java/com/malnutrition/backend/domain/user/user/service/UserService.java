@@ -65,6 +65,7 @@ public class UserService {
                 .phoneNumber(phoneNumber)
                 .refreshToken(UUID.randomUUID().toString())
                 .role(Role.USER)
+                .userStatus(UserStatus.NORMAL)
                 .build();
 
         return userRepository.save(user);

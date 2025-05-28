@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.admin.dashboard.controller;
 
 import com.malnutrition.backend.domain.admin.dashboard.dto.ChartDataDto;
 import com.malnutrition.backend.domain.admin.dashboard.dto.MetricWidgetDto;
+import com.malnutrition.backend.domain.admin.dashboard.dto.AdminUserDashboardSummaryDto;
 import com.malnutrition.backend.domain.admin.dashboard.service.AdminDashboardService;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,6 +72,25 @@ public class AdminDashboardController {
         } catch(IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
+
+    }
+
+    @Operation(summary = "월별 신규 사용자 가입 추이 조회",
+            description = "최근 6개월간 월별 신규 가입자 수 추이를 조회합니다.",
+            tags = {"Admin Dashboard API"})
+    @GetMapping("/monthly-new-user-signups")
+    public ResponseEntity<ApiResponse<ChartDataDto>> getMonthlyNewUserSignUpsTrend() {
+        ChartDataDto chartData = adminDashboardService.getMonthlyNewUsersSignUpsTrend();
+        return ResponseEntity.ok(ApiResponse.success(chartData, "월별 신규 사용자 가입 추이 조회 성공"));
+    }
+
+    @Operation(summary = "사용자 대시보드 요약 정보 조회",
+            description = "이번 달 신규 가입자 수 및 상태별 사용자 수를 조회합니다.",
+            tags = "Admin Dashboard API")
+    @GetMapping("/user-summary")
+    public ResponseEntity<ApiResponse<AdminUserDashboardSummaryDto>> getAdminUserDashboardSummary() {
+        AdminUserDashboardSummaryDto countDto = adminDashboardService.getAdminUserDashboardSummary();
+        return ResponseEntity.ok(ApiResponse.success(countDto, "이번 달 신규 가입자 수 조회 성공"));
 
     }
 
