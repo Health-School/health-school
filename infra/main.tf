@@ -250,7 +250,7 @@ CREATE DATABASE health_school;
 FLUSH PRIVILEGES;
 "
 
-echo "${var.github_access_token_1}" | docker login ghcr.io -u ${var.github_access_token_1_owner} --password-stdin
+echo "${var.github_access_token_2}" | docker login ghcr.io -u ${var.github_access_token_2_owner} --password-stdin
 
 END_OF_FILE
 }
