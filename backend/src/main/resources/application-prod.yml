@@ -2,7 +2,7 @@ server:
   port: 8080
 spring:
   datasource:
-    url: jdbc:mysql://mysql_1:3306/health_school
+    url: jdbc:mysql://mysql_1:3306/health_school?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
     username: ll_local
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,6 +23,11 @@ spring:
       org.hibernate.orm.jdbc.bind: INFO
       org.hibernate.orm.jdbc.extract: INFO
       org.springframework.transaction.interceptor: INFO
+  data:
+    redis:
+      host: redis_1
+      port: 6379
+      password: root123413 # 시크릿에서
 custom:
   site:
     frontUrl: "https://www.healthschool.site"
@@ -37,6 +42,7 @@ cookie:
 
 profile:
   use_s3: true
+
 
 redis:
   host: redis
