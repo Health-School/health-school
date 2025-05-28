@@ -23,6 +23,11 @@ spring:
       org.hibernate.orm.jdbc.bind: INFO
       org.hibernate.orm.jdbc.extract: INFO
       org.springframework.transaction.interceptor: INFO
+  data:
+    redis:
+      host: redis_1
+      port: 6379
+      password: root123413 # 시크릿에서
 custom:
   site:
     frontUrl: "https://www.healthschool.site"
@@ -37,6 +42,5 @@ cookie:
 profile:
   use_s3: true
 
-redis:
-  host: redis
+
 
