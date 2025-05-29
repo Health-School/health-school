@@ -198,9 +198,6 @@ export default function CertificatesPage() {
                     <p className="text-gray-500 mb-6">
                       자격증을 등록하여 트레이너로서의 전문성을 인증받으세요.
                     </p>
-                    <button className="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                      자격증 등록하기
-                    </button>
                   </div>
                 )}
 
