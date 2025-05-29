@@ -41,7 +41,7 @@ cookie:
   domain: ".healthschool.site"
 
 profile:
-  use_s3: false
+  use_s3: true
 
 
 redis:
