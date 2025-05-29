@@ -54,30 +54,50 @@ export default function AlarmBell() {
     useGlobalLoginUser();
   // SSE 연결 함수
   const connectToSSE = () => {
+    console.log("🚀 SSE 연결 시도 시작");
+
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
 
-    const eventSource = new EventSourcePolyfill(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`,
-      {
-        withCredentials: true,
+    const sseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`;
+    console.log("🔗 연결 URL:", sseUrl);
 
-        headers: {
-          Accept: "text/event-stream",
-          "Cache-Control": "no-cache",
-          ...(lastEventIdRef.current
-            ? { "Last-Event-ID": lastEventIdRef.current }
-            : {}),
-        },
-      }
-    );
+    // 먼저 일반 HTTP 요청으로 테스트
+    fetch(sseUrl, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "text/event-stream",
+      },
+    })
+      .then((response) => {
+        console.log("📡 HTTP 테스트 응답:", {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries()),
+        });
+      })
+      .catch((error) => {
+        console.error("❌ HTTP 테스트 실패:", error);
+      });
+
+    const eventSource = new EventSourcePolyfill(sseUrl, {
+      withCredentials: true,
+      headers: {
+        Accept: "text/event-stream",
+        "Cache-Control": "no-cache",
+        ...(lastEventIdRef.current
+          ? { "Last-Event-ID": lastEventIdRef.current }
+          : {}),
+      },
+    });
 
     eventSourceRef.current = eventSource;
 
-    eventSource.onopen = () => {
-      console.log("✅ SSE 연결 성공");
-
+    eventSource.onopen = (event) => {
+      console.log("✅ SSE 연결 성공", event);
       reconnectAttemptsRef.current = 0;
     };
 
