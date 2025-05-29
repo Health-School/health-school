@@ -88,4 +88,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
     List<Lecture> findWithDetailsByIdIn(@Param("ids") List<Long> ids);
 
 
+    Page<Lecture> findByTrainerId(Long trainerId, Pageable pageable);
+
+
 }

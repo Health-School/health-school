@@ -10,6 +10,7 @@ import com.malnutrition.backend.global.rq.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -46,8 +47,8 @@ public class UserController {
     @PostMapping("/join")//리플래시토큰과 쿠키 생성이 필요함
     public ResponseEntity<ApiResponse<User>> joinUser(@RequestBody @Valid UserJoinRequestDto userJoinRequestDto){
         User join = userService.join (userJoinRequestDto, "");
-        ApiResponse<User> joinSuccess = ApiResponse.success( join,"join success");
-        return ResponseEntity.ok(joinSuccess);
+        // ApiResponse<User> joinSuccess = ApiResponse.success( join,"join success");
+        return ResponseEntity.ok(null);
     }
 
     @Operation(

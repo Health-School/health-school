@@ -122,7 +122,7 @@ export default function MyLecturesPage() {
   const fetchLectures = async (page: number = 0) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures?page=${page}&size=10`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/my?page=${page}&size=10`,
         {
           credentials: "include",
         }
