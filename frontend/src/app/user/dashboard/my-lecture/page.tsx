@@ -135,7 +135,6 @@ export default function MyLecturePage() {
               >
                 <option value="latest">최신순</option>
                 <option value="name">이름순</option>
-                <option value="progress">진행률순</option>
               </select>
             </div>
 
@@ -211,11 +210,7 @@ export default function MyLecturePage() {
                                     : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {lecture.lectureLevel === "BEGINNER"
-                                ? "초급"
-                                : lecture.lectureLevel === "INTERMEDIATE"
-                                  ? "중급"
-                                  : "고급"}
+                              {lecture.lectureLevel}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
@@ -225,22 +220,6 @@ export default function MyLecturePage() {
                                 "ko-KR"
                               )}
                             </span>
-                          </div>
-                        </div>
-
-                        {/* 진행률 바 (더미 데이터) */}
-                        <div className="mb-6">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-gray-500">진행률</span>
-                            <span className="text-green-600 font-medium">
-                              65%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-green-500 h-2 rounded-full"
-                              style={{ width: "65%" }}
-                            ></div>
                           </div>
                         </div>
 

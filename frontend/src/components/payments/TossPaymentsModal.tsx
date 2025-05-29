@@ -57,7 +57,7 @@ export default function TossPaymentsModal({
         <div id="agreement" className="w-full" />
         <div className="w-full p-6 pt-8">
           <button
-            className="w-full py-3 px-6  bg-[#3282f6] text-white font-semibold text-lg rounded-md hover:bg-[#1f6af7]"
+            className="w-full py-3 px-6  bg-[#3282f6] text-white font-semibold text-lg rounded-md hover:bg-[#1f6af7] cursor-pointer"
             onClick={async () => {
               try {
                 const response = await fetch(
@@ -109,7 +109,7 @@ export default function TossPaymentsModal({
             결제하기
           </button>
           <button
-            className="w-full mt-2 py-2 px-4 border rounded text-gray-600"
+            className="w-full mt-2 py-2 px-4 border rounded text-gray-600 cursor-pointer"
             onClick={onClose}
           >
             닫기

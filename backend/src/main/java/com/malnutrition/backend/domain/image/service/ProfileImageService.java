@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.image.dto.ImageFileInfo;
 import com.malnutrition.backend.domain.image.dto.ImageResponseDto;
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.repository.ImageRepository;
+import com.malnutrition.backend.domain.lecture.curriculum.service.CurriculumS3Service;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -86,33 +87,28 @@ public class ProfileImageService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어 있습니다.");
         }
-        try {
-            String uploadPath = imageProperties.getProfileUploadPath();
-            ImageFileInfo imageFileInfo = imageService.getImageFileInfo(file, uploadPath);
+        String uploadPath = imageProperties.getProfileUploadPath();
+        ImageFileInfo imageFileInfo = imageService.getImageFileInfo(file, uploadPath);
 
-            String originalName = imageFileInfo.getOriginalName();
-            String serverFileName = imageFileInfo.getServerFileName();
-            String savedPath = imageFileInfo.getSavedPath();
+        String originalName = imageFileInfo.getOriginalName();
+        String serverFileName = imageFileInfo.getServerFileName();
+        String savedPath = imageFileInfo.getSavedPath();
 
-            imageS3Service.uploadFile(savedPath,file.getInputStream(),file.getSize(), file.getContentType());
+            imageS3Service.uploadFile(savedPath, file);
+        User user = userService.findByIdWithProfileImage(userId);
+        Image preProfileImage = user.getProfileImage();
 
-            User user = userService.findByIdWithProfileImage(userId);
-            Image preProfileImage = user.getProfileImage();
-
-            if(!Objects.isNull(preProfileImage)){
-                imageS3Service.deleteFile(preProfileImage.getPath());
-            }
-            Image savedImage = saveProfileImage(originalName, serverFileName, savedPath, user);
-
-
-            return ImageResponseDto.builder()
-                    .id(savedImage.getId())
-                    .originalName(savedImage.getOriginalName())
-                    .imageUrl(imageService.getImageUrl(savedImage))
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류 발생", e);
+        if(!Objects.isNull(preProfileImage)){
+            imageS3Service.deleteFile(preProfileImage.getPath());
         }
+        Image savedImage = saveProfileImage(originalName, serverFileName, savedPath, user);
+
+
+        return ImageResponseDto.builder()
+                .id(savedImage.getId())
+                .originalName(savedImage.getOriginalName())
+                .imageUrl(imageService.getImageUrl(savedImage))
+                .build();
 
     }
 

@@ -310,13 +310,13 @@ export default function LectureDetailPage() {
               평점: {data.averageScore?.toFixed(1) ?? "-"}
             </div>
             <button
-              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold"
+              className="w-full bg-green-600 text-white py-2 rounded mb-2 font-semibold cursor-pointer"
               onClick={() => setShowTossModal(true)}
             >
               수강하기
             </button>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          {/* <div className="bg-white rounded-lg shadow p-6">
             <h3 className="font-bold mb-2">강의 정보</h3>
             <ul className="text-gray-700 text-sm space-y-1">
               <li>총 24시간 분량</li>
@@ -325,7 +325,7 @@ export default function LectureDetailPage() {
               <li>모바일/PC 수강 가능</li>
               <li>수료증 발급</li>
             </ul>
-          </div>
+          </div> */}
         </aside>
       </div>
 

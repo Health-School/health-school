@@ -717,7 +717,7 @@ export default function ConsultationsPage() {
                         )}
                         <button
                           onClick={() => handleScheduleClick(schedule.id)}
-                          className="mt-3 w-full text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-2 rounded-lg transition-colors"
+                          className="mt-3 w-full text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 py-2 rounded-lg transition-colors cursor-pointer"
                         >
                           상세보기
                         </button>

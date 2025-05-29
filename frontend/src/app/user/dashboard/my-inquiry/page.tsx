@@ -8,6 +8,7 @@ import DashboardSidebar from "@/components/dashboard/UserDashboardSidebar";
 
 // 기존 인터페이스들은 그대로 유지...
 interface Trainer {
+  id: number; // ID 필드 추가
   name: string;
 }
 
@@ -86,6 +87,7 @@ export default function ConsultationPage() {
       }
 
       const result = await response.json();
+      console.log("Trainers response:", result); // 응답 구조 확인
       setTrainers(result);
     } catch (error) {
       console.error("트레이너 목록 조회 실패:", error);
@@ -278,8 +280,10 @@ export default function ConsultationPage() {
                       required
                     >
                       <option value="">트레이너를 선택하세요</option>
-                      {trainers.map((trainer, index) => (
-                        <option key={index} value={index + 1}>
+                      {trainers.map((trainer) => (
+                        <option key={trainer.id} value={trainer.id}>
+                          {" "}
+                          {/* 실제 ID 사용 */}
                           {trainer.name}
                         </option>
                       ))}
@@ -341,7 +345,7 @@ export default function ConsultationPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full lg:w-auto bg-green-500 text-white py-3 px-8 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                  className="w-full lg:w-auto bg-green-500 text-white py-3 px-8 rounded-lg hover:bg-green-600 transition-colors font-medium cursor-pointer"
                 >
                   상담 신청하기
                 </button>
@@ -395,18 +399,27 @@ export default function ConsultationPage() {
                                 트레이너
                               </label>
                               <select
-                                value={editingSchedule.trainerName}
-                                onChange={(e) =>
+                                value={
+                                  trainers.find(
+                                    (t) =>
+                                      t.name === editingSchedule.trainerName
+                                  )?.id || ""
+                                }
+                                onChange={(e) => {
+                                  const selectedTrainer = trainers.find(
+                                    (t) => t.id === Number(e.target.value)
+                                  );
                                   setEditingSchedule({
                                     ...editingSchedule,
-                                    trainerName: e.target.value,
-                                  })
-                                }
+                                    trainerName: selectedTrainer?.name || "",
+                                  });
+                                }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                 required
                               >
-                                {trainers.map((trainer, index) => (
-                                  <option key={index} value={trainer.name}>
+                                <option value="">트레이너를 선택하세요</option>
+                                {trainers.map((trainer) => (
+                                  <option key={trainer.id} value={trainer.id}>
                                     {trainer.name}
                                   </option>
                                 ))}

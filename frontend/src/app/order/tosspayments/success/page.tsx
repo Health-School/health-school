@@ -114,7 +114,7 @@ export default function SuccessPage() {
             </h4>
             <div className="w-full mt-10">
               <button
-                className="w-full py-4 px-8 bg-blue-600 text-white rounded-md hover:bg-blue-500 font-semibold text-xl"
+                className="w-full py-4 px-8 bg-blue-600 text-white rounded-md hover:bg-blue-500 font-semibold text-xl cursor-pointer"
                 onClick={confirmPayment}
               >
                 결제 승인하기

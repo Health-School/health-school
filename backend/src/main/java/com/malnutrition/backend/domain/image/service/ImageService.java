@@ -147,22 +147,16 @@ public class ImageService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어 있습니다.");
         }
-        try {
-            ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
 
-            String originalName = imageFileInfo.getOriginalName();
-            String serverFileName = imageFileInfo.getServerFileName();
-            String savedPath = imageFileInfo.getSavedPath();
+        ImageFileInfo imageFileInfo = getImageFileInfo(file, uploadPath);
 
-            imageS3Service.uploadFile(savedPath,file.getInputStream(),file.getSize(), file.getContentType());
+        String originalName = imageFileInfo.getOriginalName();
+        String serverFileName = imageFileInfo.getServerFileName();
+        String savedPath = imageFileInfo.getSavedPath();
 
+        imageS3Service.uploadFile(savedPath, file);
 
-            return saveImage(originalName, serverFileName, savedPath);
-
-
-        } catch (IOException e) {
-            throw new RuntimeException("파일 저장 중 오류 발생", e);
-        }
+        return saveImage(originalName, serverFileName, savedPath);
 
     }
 
