@@ -52,7 +52,6 @@ public class LectureController {
         return lectureService.searchLecturesByTitle(keyword);
     }
 
-
     @Operation(summary = "강의 추가", description = "새로운 강의를 추가합니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식
     @PreAuthorize("hasRole('ROLE_TRAINER')")
@@ -121,5 +120,17 @@ public class LectureController {
     public ResponseEntity<?> getHotLectures() {
         List<LectureDto> todayHotLectures = lectureService.getTodayHotLectures();
         return ResponseEntity.ok(ApiResponse.success(todayHotLectures, "hot lecture 조회 성공"));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyLectures(
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "10", name = "size") int size
+    ) {
+        Long trainerId = rq.getActor().getId();  // 로그인한 사용자
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<LectureDto> myLectures = lectureService.getMyLectures(trainerId, pageRequest);
+        return ResponseEntity.ok(ApiResponse.success(myLectures, "내 강의 조회 성공"));
     }
 }
