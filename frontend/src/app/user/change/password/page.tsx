@@ -35,7 +35,7 @@ export default function ChangePasswordPage() {
         return;
       }
       alert(data.message || "비밀번호가 성공적으로 변경되었습니다.");
-      router.push("/users/dashboard/my-info");
+      router.push("/user/dashboard/my-info");
     } catch (err) {
       alert("비밀번호 변경 중 오류가 발생했습니다.");
     }
