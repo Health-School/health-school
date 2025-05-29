@@ -62,9 +62,14 @@ export default function AlarmBell() {
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`,
       {
         withCredentials: true,
-        headers: lastEventIdRef.current
-          ? { "Last-Event-ID": lastEventIdRef.current }
-          : {},
+
+        headers: {
+          Accept: "text/event-stream",
+          "Cache-Control": "no-cache",
+          ...(lastEventIdRef.current
+            ? { "Last-Event-ID": lastEventIdRef.current }
+            : {}),
+        },
       }
     );
 
@@ -125,6 +130,17 @@ export default function AlarmBell() {
     };
     // eslint-disable-next-line
   }, [isLogin]);
+
+  // 환경 정보 로깅
+  useEffect(() => {
+    console.log("🌍 Environment Info:", {
+      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+      isLogin,
+      loginUser: loginUser?.nickname,
+    });
+  }, [isLogin, loginUser]);
 
   // 읽지 않은 알림 개수
   const unreadCount = alarms.filter((a) => !a.read).length;
