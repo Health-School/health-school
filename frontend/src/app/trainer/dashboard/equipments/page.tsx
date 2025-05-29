@@ -142,7 +142,7 @@ export default function EquipmentsPage() {
         url = `${url}/by-type?typeId=${selectedTypeFilter}`;
       }
 
-      url += `&page=${currentPage}&size=10`;
+      // url += `&page=${currentPage}&size=10`;
 
       const response = await fetch(url, {
         credentials: "include",
