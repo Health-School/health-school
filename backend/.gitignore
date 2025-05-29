@@ -1,5 +1,5 @@
-.DS_Store
 HELP.md
+
 
 .gradle
 build/
@@ -41,6 +41,8 @@ out/
 ### Custom ###
 application-secret.yml
 /uploads/
+
+.DS_Store
 
 .idea/
 
