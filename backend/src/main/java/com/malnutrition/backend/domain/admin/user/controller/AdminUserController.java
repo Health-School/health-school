@@ -70,6 +70,7 @@ public class AdminUserController {
     @Operation(summary = "특정 회원 결제 내역 조회",
             description = "관리자가 특정 회원의 결제 내역을 페이징하여 조회합니다.",
             tags = {"Admin User Management API"})
+    @GetMapping("/{userId}/payment-history")
     public ResponseEntity<ApiResponse<Page<OrderResponse>>> getUserPaymentHistory(
             @Parameter(description = "조회할 회원의 ID") @PathVariable Long userId,
             @PageableDefault(size = 5, sort = "approvedAt", direction = Sort.Direction.DESC) Pageable pageable) {

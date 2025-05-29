@@ -242,6 +242,7 @@ export default function StudentsPage() {
       const result: ApiResponse<QnA> = await response.json();
       if (result.success) {
         setLectureQnas(result.data.content);
+        console.log("Lecture QnAs:", result.data.content); // 디버깅용
         setTotalPages(result.data.totalPages);
       }
     } catch (error) {
@@ -550,7 +551,7 @@ export default function StudentsPage() {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as typeof activeTab)}
-                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                       activeTab === tab.key
                         ? "bg-white text-green-600 shadow-sm"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -835,7 +836,7 @@ export default function StudentsPage() {
                                   expandedQnaId === qna.id ? null : qna.id
                                 )
                               }
-                              className="text-green-600 hover:text-green-700 text-sm font-medium"
+                              className="text-green-600 hover:text-green-700 text-sm font-medium "
                             >
                               {expandedQnaId === qna.id
                                 ? "접기"
@@ -1023,7 +1024,7 @@ export default function StudentsPage() {
                         </h3>
                         <button
                           onClick={() => setSelectedExercise(null)}
-                          className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
                         >
                           <svg
                             className="w-4 h-4 mr-1"
@@ -1132,7 +1133,7 @@ export default function StudentsPage() {
                         ) : (
                           <button
                             onClick={() => setShowFeedbackForm(true)}
-                            className="w-full py-3 text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors border-2 border-dashed border-green-200 hover:border-green-300"
+                            className="w-full py-3 text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors border-2 border-dashed border-green-200 hover:border-green-300 cursor-pointer"
                           >
                             + 피드백 작성하기
                           </button>
@@ -1291,7 +1292,7 @@ export default function StudentsPage() {
                               </div>
                               <button
                                 onClick={() => fetchExerciseDetail(log.id)}
-                                className="px-4 py-2 text-sm text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-sm text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 rounded-lg transition-colors cursor-pointer"
                               >
                                 자세히 보기 →
                               </button>

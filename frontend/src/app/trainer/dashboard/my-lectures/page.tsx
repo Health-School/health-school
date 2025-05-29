@@ -576,7 +576,7 @@ export default function MyLecturesPage() {
                   </h2>
                   <button
                     onClick={handleNewLecture}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2 cursor-pointer"
                   >
                     <span>+</span>
                     <span>새 클래스 등록</span>
@@ -597,32 +597,29 @@ export default function MyLecturesPage() {
                           {removeMarkdown(lecture.content)}
                         </p>
 
+                        {/* 강의 상태 및 레벨 표시 부분 수정 */}
                         <div className="flex justify-between items-center mb-4">
                           <span
                             className={`text-xs px-3 py-1 rounded-full font-medium ${
-                              lecture.lectureLevel === "BEGINNER"
+                              lecture.lectureLevel === "초급"
                                 ? "bg-green-100 text-green-800"
-                                : lecture.lectureLevel === "INTERMEDIATE"
+                                : lecture.lectureLevel === "중급"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {lecture.lectureLevel === "BEGINNER"
-                              ? "초급"
-                              : lecture.lectureLevel === "INTERMEDIATE"
-                                ? "중급"
-                                : "고급"}
+                            {lecture.lectureLevel}
                           </span>
                           <span
                             className={`text-xs px-3 py-1 rounded-full font-medium ${
-                              lecture.lectureStatus === "OPEN"
+                              lecture.lectureStatus === "진행중"
                                 ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-800"
+                                : lecture.lectureStatus === "예정"
+                                  ? "bg-gray-100 text-gray-800"
+                                  : "bg-green-100 text-green-800"
                             }`}
                           >
-                            {lecture.lectureStatus === "OPEN"
-                              ? "운영중"
-                              : "준비중"}
+                            {lecture.lectureStatus}
                           </span>
                         </div>
 
@@ -634,7 +631,7 @@ export default function MyLecturesPage() {
                             onClick={() =>
                               router.push(`/lecture/manage/${lecture.id}`)
                             }
-                            className="text-green-600 hover:text-green-700 font-medium"
+                            className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
                           >
                             관리하기
                           </button>

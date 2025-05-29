@@ -261,7 +261,7 @@ export default function MyExercisesPage() {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={prevMonth}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className=" p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
                   type="button"
                 >
                   <svg
@@ -283,7 +283,7 @@ export default function MyExercisesPage() {
                 </h2>
                 <button
                   onClick={nextMonth}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
                   type="button"
                 >
                   <svg
@@ -303,7 +303,7 @@ export default function MyExercisesPage() {
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-green-600 transition-colors font-medium shadow-sm text-sm sm:text-base whitespace-nowrap"
+                className="bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg hover:bg-green-600 transition-colors font-medium shadow-sm text-sm sm:text-base whitespace-nowrap cursor-pointer"
                 type="button"
               >
                 + 운동 기록 추가
@@ -412,14 +412,14 @@ export default function MyExercisesPage() {
                       <div className="flex space-x-3">
                         <button
                           onClick={() => handleEdit(sheet)}
-                          className="px-3 sm:px-4 py-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors font-medium text-sm sm:text-base"
+                          className="px-3 sm:px-4 py-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors font-medium text-sm sm:text-base cursor-pointer"
                           type="button"
                         >
                           수정
                         </button>
                         <button
                           onClick={() => handleDelete(sheet.id)}
-                          className="px-3 sm:px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm sm:text-base"
+                          className="px-3 sm:px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm sm:text-base cursor-pointer"
                           type="button"
                         >
                           삭제

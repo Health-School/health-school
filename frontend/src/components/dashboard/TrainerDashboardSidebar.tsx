@@ -55,7 +55,7 @@ export default function TrainerDashboardSidebar() {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <svg
               className={`w-5 h-5 transition-transform ${

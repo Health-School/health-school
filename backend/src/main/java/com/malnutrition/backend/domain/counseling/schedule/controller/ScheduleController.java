@@ -9,6 +9,7 @@ import com.malnutrition.backend.domain.counseling.schedule.service.ScheduleServi
 import com.malnutrition.backend.global.rp.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/schedules")
+@Slf4j
 public class ScheduleController {
     private final ScheduleService scheduleService;
     @PostMapping
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleCreateDto dto) {
+        log.info("dto {}", dto);
         try {
             ScheduleDto response = scheduleService.createSchedule(dto);
             return ResponseEntity.ok(ApiResponse.success(response, "스케줄 신청 성공!!"));
