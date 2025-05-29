@@ -44,6 +44,8 @@ const QnaForm: React.FC<QnaFormProps> = ({ lectureId, userId, onSuccess }) => {
         setTitle("");
         setContent("");
         setSuccess(true);
+        alert("QnA가 성공적으로 등록되었습니다."); // 등록 완료 시 알림창
+        setTimeout(() => setSuccess(false), 1000); // 1초 후 등록 완료 문구 사라짐
         if (onSuccess) onSuccess();
       } else {
         const errorText = await res.text();
