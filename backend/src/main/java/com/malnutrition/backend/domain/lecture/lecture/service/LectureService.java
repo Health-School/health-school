@@ -61,11 +61,25 @@ public class LectureService {
     private final Rq rq;
     @Transactional
     public List<LectureSearchResponseDto> searchLecturesByTitle(String keyword) {
+        // 1. 강의 제목 키워드로 전체 강의 조회
         List<Lecture> lectures = lectureRepository.findByTitleContaining(keyword);
 
+        // 2. 강의 ID 리스트 추출
+        List<Long> lectureIds = lectures.stream()
+                .map(Lecture::getId)
+                .collect(Collectors.toList());
+
+        // 3. 강의별 평균 점수 한 번에 조회 (강의 ID -> 평균 점수 Map)
+        Map<Long, Double> averageScoreMap = likeRepository.findAverageScoresByLectureIds(lectureIds).stream()
+                .collect(Collectors.toMap(
+                        obj -> (Long) obj[0],
+                        obj -> obj[1] != null ? (Double) obj[1] : 0.0
+                ));
+
+        // 4. DTO 매핑
         return lectures.stream()
                 .map(lecture -> {
-                    Double averageScore = likeRepository.findAverageScoreByLectureId(lecture.getId());
+                    Double averageScore = averageScoreMap.getOrDefault(lecture.getId(), 0.0);
                     return LectureSearchResponseDto.transDto(lecture, imageService, averageScore);
                 })
                 .collect(Collectors.toList());

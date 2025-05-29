@@ -89,7 +89,10 @@ const App: React.FC = () => {
 
   const [newStatusForModal, setNewStatusForModal] = useState<string>('active'); // 모달에서 선택된 새 상태 (기본값 'active')
 
-
+  const handleNavigateToDetail = (userId: number) => {
+      console.log(`회원 ID ${userId}의 상세 페이지로 이동합니다.`);
+      router.push(`/admin/users/${userId}`);
+    };
 
   useEffect(() => {
       if (debouncedSearch !== undefined) {
@@ -940,6 +943,7 @@ useEffect(() => {
                 <tr
                   key={user.id}
                   className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleNavigateToDetail(user.id)}
                 >
                   <td className="px-3 py-4 whitespace-nowrap">
                     <div className="flex items-center">
