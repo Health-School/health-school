@@ -167,6 +167,7 @@ export default function ChatBotPage() {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString("ko-KR", {
+      timeZone: "Asia/Seoul", // ← 이 한 줄만 추가하면 됩니다
       hour: "2-digit",
       minute: "2-digit",
     });
