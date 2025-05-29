@@ -142,7 +142,7 @@ export default function EquipmentsPage() {
         url = `${url}/by-type?typeId=${selectedTypeFilter}`;
       }
 
-      url += `&page=${currentPage}&size=10`;
+      // url += `&page=${currentPage}&size=10`;
 
       const response = await fetch(url, {
         credentials: "include",
@@ -298,7 +298,7 @@ export default function EquipmentsPage() {
                   </h2>
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2 cursor-pointer"
                   >
                     <span>+</span>
                     <span>운동 기구 신청</span>

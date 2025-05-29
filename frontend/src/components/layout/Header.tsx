@@ -3,15 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGlobalLoginUser } from "@/stores/auth/loginUser";
 import AlarmBell from "@/components/alarm/AlarmBell";
+
 export default function Header({ hideDropdownMenus = false }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
+
+  // 드롭다운 ref 추가
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   console.log("loginUser:::" + JSON.stringify(loginUser));
 
   const handleSearch = (e: React.FormEvent) => {
@@ -30,6 +35,28 @@ export default function Header({ hideDropdownMenus = false }) {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+  // 외부 클릭 감지를 위한 useEffect 추가
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    // 드롭다운이 열려있을 때만 이벤트 리스너 추가
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // 클린업 함수
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   if (isLoginUserPending) {
     return <div>로딩중...</div>;
@@ -103,7 +130,7 @@ export default function Header({ hideDropdownMenus = false }) {
               )}
 
               {isLogin ? (
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                   <div
                     className="flex items-center gap-2 cursor-pointer"
                     onClick={toggleDropdown}
@@ -138,11 +165,7 @@ export default function Header({ hideDropdownMenus = false }) {
                     </svg>
                   </div>
                   {isDropdownOpen && (
-                    <div
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-25 border border-gray-200"
-                      tabIndex={0}
-                      onBlur={() => setIsDropdownOpen(false)}
-                    >
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-25 border border-gray-200">
                       {!hideDropdownMenus && (
                         <>
                           <Link

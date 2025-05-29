@@ -3,12 +3,14 @@ package com.malnutrition.backend.domain.image.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 @Service
@@ -20,15 +22,22 @@ public class ImageS3Service {
 
 
 
-    public void uploadFile(String key, InputStream inputStream, long contentLength, String contentType) {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key) // 폴더/파일명 형태 가능
-                .contentType(contentType)
-//                .acl("public-read") // ✅ 문자열로 퍼블릭 읽기 권한 지정
-                .build();
+    public void uploadFile(String key, MultipartFile file) {
+        try {
+            // InputStream → byte[] 로 읽기
+            InputStream inputStream = file.getInputStream();
+            byte[] bytes = inputStream.readAllBytes(); // Java 9+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
 
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, contentLength));
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(bytes));
+
+        } catch (IOException e) {
+            throw new RuntimeException("파일 업로드 실패: " + e.getMessage(), e);
+        }
     }
 
     public void deleteFile(String key) {

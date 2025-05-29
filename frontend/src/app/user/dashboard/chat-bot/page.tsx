@@ -323,7 +323,7 @@ export default function ChatBotPage() {
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || isLoading}
-                className={`p-3 rounded-2xl transition-all duration-300 ${
+                className={`p-3 cursor-pointer rounded-2xl transition-all duration-300 ${
                   inputMessage.trim() && !isLoading
                     ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105"
                     : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -352,7 +352,7 @@ export default function ChatBotPage() {
                   <button
                     key={index}
                     onClick={() => setInputMessage(suggestion)}
-                    className="px-3 py-2 text-xs bg-white hover:bg-green-50 text-gray-700 hover:text-green-700 rounded-full border-2 border-gray-200 hover:border-green-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+                    className="cursor-pointer px-3 py-2 text-xs bg-white hover:bg-green-50 text-gray-700 hover:text-green-700 rounded-full border-2 border-gray-200 hover:border-green-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
                   >
                     {suggestion}
                   </button>
