@@ -218,7 +218,7 @@ export default function JoinPage() {
               </div>
               <button
                 type="button"
-                className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
+                className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition cursor-pointer"
                 onClick={handleSendEmailCode}
                 disabled={emailSent || emailVerified || !email}
               >
@@ -238,7 +238,7 @@ export default function JoinPage() {
                 />
                 <button
                   type="button"
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
+                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition cursor-pointer"
                   onClick={handleVerifyEmail}
                   disabled={emailVerified || !emailVerifyInput}
                 >
@@ -369,7 +369,7 @@ export default function JoinPage() {
               </div>
               <button
                 type="button"
-                className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
+                className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition cursor-pointer"
                 onClick={handleSendPhoneCode}
                 disabled={phoneSent || phoneVerified || !phoneNumber}
               >
@@ -388,7 +388,7 @@ export default function JoinPage() {
                 />
                 <button
                   type="button"
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition"
+                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-md text-sm font-semibold transition cursor-pointer"
                   onClick={handleVerifyPhone}
                   disabled={phoneVerified || !phoneVerifyInput}
                 >
@@ -405,13 +405,13 @@ export default function JoinPage() {
           {/* 회원가입 버튼 */}
           <button
             type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-md mb-3 text-lg transition"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-md mb-3 text-lg transition cursor-pointer"
           >
             회원가입
           </button>
         </form>
         {/* 카카오 회원가입 버튼 */}
-        <button className="w-full flex items-center justify-center bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-md mb-6 text-lg transition">
+        <button className="w-full flex items-center justify-center bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-md mb-6 text-lg transition cursor-pointer">
           <span className="mr-2">
             <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="20" fill="#3C1E1E" />

@@ -43,8 +43,16 @@ public class LectureDto {
                 .createdAt(lecture.getCreatedDate())
                 .build();
     }
-
-
-
+    public static LectureDto from(Lecture lecture) {
+        return LectureDto.builder()
+                .id(lecture.getId())
+                .title(lecture.getTitle())
+                .content(lecture.getContent())
+                .price(lecture.getPrice())
+                .lectureStatus(lecture.getLectureStatus().getDescription())
+                .lectureLevel(lecture.getLectureLevel().getDescription())
+                .createdAt(lecture.getCreatedDate())
+                .build();
+    }
 }
 

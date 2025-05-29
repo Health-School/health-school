@@ -128,14 +128,14 @@ export default function LoginPage() {
           {/* 로그인 버튼 */}
           <button
             type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-md mb-3 text-lg transition"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-md mb-3 text-lg transition cursor-pointer"
             disabled={loading}
           >
             {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
         {/* 카카오 로그인 버튼 */}
-        <button className="w-full flex items-center justify-center bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-md mb-6 text-lg transition">
+        <button className="w-full flex items-center justify-center bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-md mb-6 text-lg transition cursor-pointer">
           <span className="mr-2">
             <svg width="24" height="24" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="20" fill="#3C1E1E" />
