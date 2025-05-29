@@ -11,6 +11,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ScheduleCreateDto {
     private Long trainerId;
     private LocalDate desiredDate;

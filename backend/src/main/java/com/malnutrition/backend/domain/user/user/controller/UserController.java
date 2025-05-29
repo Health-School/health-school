@@ -36,8 +36,6 @@ public class UserController {
     @GetMapping("/test")
     public void test() throws BadRequestException, CredentialException {
         throw new CredentialException("신용 불량자");
-
-
     }
 
     @Operation(
@@ -115,6 +113,7 @@ public class UserController {
     @GetMapping("/trainers")
     public ResponseEntity<List<TrainerUserDto>> getTrainerUsers() {
         List<TrainerUserDto> trainers = userService.getTrainerUsers();
+
         return ResponseEntity.ok(trainers);
     }
 

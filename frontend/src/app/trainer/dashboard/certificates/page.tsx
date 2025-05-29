@@ -177,7 +177,7 @@ export default function CertificatesPage() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <button
                                 onClick={() => setSelectedImage(cert.imageUrl)}
-                                className="text-green-600 hover:text-green-700 font-medium transition-colors"
+                                className="text-green-600 hover:text-green-700 font-medium transition-colors cursor-pointer"
                               >
                                 사진 보기
                               </button>

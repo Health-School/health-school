@@ -576,7 +576,7 @@ export default function MyLecturesPage() {
                   </h2>
                   <button
                     onClick={handleNewLecture}
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2 cursor-pointer"
                   >
                     <span>+</span>
                     <span>새 클래스 등록</span>
@@ -631,7 +631,7 @@ export default function MyLecturesPage() {
                             onClick={() =>
                               router.push(`/lecture/manage/${lecture.id}`)
                             }
-                            className="text-green-600 hover:text-green-700 font-medium"
+                            className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
                           >
                             관리하기
                           </button>

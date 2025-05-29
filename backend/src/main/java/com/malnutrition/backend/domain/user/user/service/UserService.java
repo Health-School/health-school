@@ -192,9 +192,10 @@ public class UserService {
         return userRepository.existsByProvider(provider);
     }
 
+    @Transactional(readOnly = true)
     public List<TrainerUserDto> getTrainerUsers() {
         return userRepository.findByRole(Role.TRAINER).stream()
-                .map(user -> new TrainerUserDto(user.getNickname()))
+                .map(user -> new TrainerUserDto(user.getId(),user.getNickname()))
                 .collect(Collectors.toList());
     }
 

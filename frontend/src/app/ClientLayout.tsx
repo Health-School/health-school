@@ -64,7 +64,7 @@ export default function ClientLayout({ children }: LayoutProps) {
     // ✅ QueryClientProvider로 전체 감싸기
     <LoginUserContext value={loginUserContextValue}>
       <div className="flex flex-col min-h-screen">
-        <main className="py-2 flex-1">
+        <main className="pt-2 flex-1">
           {/* 헤더도 루트 페이지가 아니면 container mx-auto px-2 적용 */}
           {isRootPage ? (
             <Header />

@@ -220,7 +220,7 @@ export default function TodoListPage() {
                 </div>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x-2"
+                  className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center space-x- cursor-pointer"
                 >
                   <span>+</span>
                   <span>할 일 추가</span>

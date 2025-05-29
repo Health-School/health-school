@@ -210,7 +210,7 @@ export default function MyInfoPage() {
                 </div>
 
                 <button
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors mb-4"
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors mb-4 cursor-pointer"
                   onClick={() =>
                     document.getElementById("profileImageInput")?.click()
                   }
@@ -275,7 +275,7 @@ export default function MyInfoPage() {
                           {user?.nickname}
                         </span>
                         <button
-                          className="text-green-600 hover:text-green-700 font-medium"
+                          className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
                           onClick={() => setEditNickname(true)}
                         >
                           수정
@@ -337,7 +337,7 @@ export default function MyInfoPage() {
                           {user?.phoneNumber}
                         </span>
                         <button
-                          className="text-green-600 hover:text-green-700 font-medium"
+                          className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
                           onClick={() => setEditPhone(true)}
                         >
                           수정
