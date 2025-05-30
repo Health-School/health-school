@@ -54,6 +54,7 @@ public class ChatController {
         String msg = sender.getNickname() + "님이 채팅방에 참여하였습니다.";
 
         ChatMessage chatMessage = chatService.buildChatMessage(chatRoom, sender, msg, UserType.ENTER);
+        log.info("입장 메시지 저장: {}", chatMessage);
         chatMessageRepository.save(chatMessage);
 
         ChatEnterResponseMessageDto response = chatService.buildEnterOrLeaveResponseMessageDto(
