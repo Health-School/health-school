@@ -89,19 +89,34 @@ public class AlarmService {
         }
         return emitter;
     }
+
+
     private String makeTimeIncludeId(Long userId) {
 
         return userId + "_" + System.currentTimeMillis();
     }
 
     private void sendAlarmMessage(SseEmitter emitter, AlarmEventType alarmEventType, String emitterId, Object data) {
+//        try {
+//            emitter.send(
+//                    SseEmitter.event()
+//                    .id(emitterId)
+//                    .name(alarmEventType.name())
+//                    .data(data, MediaType.APPLICATION_JSON));
+//        } catch (IOException exception) {
+//            emitterRepository.deleteById(emitterId);
+//        }
+
         try {
+            log.debug("SSE 메시지 전송 시도: emitterId={}, type={}", emitterId, alarmEventType);
             emitter.send(
                     SseEmitter.event()
-                    .id(emitterId)
-                    .name(alarmEventType.name())
-                    .data(data, MediaType.APPLICATION_JSON));
+                            .id(emitterId)
+                            .name(alarmEventType.name())
+                            .data(data, MediaType.APPLICATION_JSON));
+            log.debug("SSE 메시지 전송 성공: emitterId={}", emitterId);
         } catch (IOException exception) {
+            log.error("SSE 메시지 전송 실패: emitterId={}", emitterId, exception);
             emitterRepository.deleteById(emitterId);
         }
     }
