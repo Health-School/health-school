@@ -31,8 +31,9 @@ public class TrainerService {
         return trainerInfoProcessDtos.stream().map((trainerInfoProcessDto ->{
             Long imageId = trainerInfoProcessDto.getImageId();
             String imageUrl = null;
-            if(imageId != null && imageId >= 1 ){
-                imageUrl = imageService.getImageUrl(trainerInfoProcessDto.getImageId(), trainerInfoProcessDto.getImagePath());
+            String imagePath = trainerInfoProcessDto.getImagePath();
+            if(imageId != null && imageId >= 1 && imagePath != null ){
+                imageUrl = imageService.getImageUrl(trainerInfoProcessDto.getImageId(), imagePath);
             }
             return TrainerInfoDto.from(trainerInfoProcessDto, imageUrl);
         })).collect(Collectors.toList());
