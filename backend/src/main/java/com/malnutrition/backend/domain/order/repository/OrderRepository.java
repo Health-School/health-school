@@ -22,6 +22,8 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findByUser(User user);
 
 
+
+
     // 특정 사용자의 주문 목록을 페이징하여 조회
     @Query(value = "SELECT o FROM Order o " +
                    "JOIN FETCH o.lecture l " +

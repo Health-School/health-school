@@ -40,7 +40,7 @@ public class OrderService {
     // 사용자의 결제 내역을 조회
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersByUser(User user) {
-        List<Order> orders = orderRepository.findByUser(user);
+        List<Order> orders = orderRepository.findByUserAndOrderStatus(user, OrderStatus.COMPLETED);
         if (orders.isEmpty()) {
             return Collections.emptyList(); // 비어 있는 리스트 반환
         }
