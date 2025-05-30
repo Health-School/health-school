@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.user.user.service;
 
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.domain.lecture.like.repository.LikeRepository;
 import com.malnutrition.backend.domain.user.user.dto.TrainerInfoDto;
 import com.malnutrition.backend.domain.user.user.dto.TrainerInfoProcessDto;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
@@ -19,16 +20,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TrainerService {
 
-    private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
     private final ImageService imageService;
     @Transactional(readOnly = true)
     public List<TrainerInfoDto> findPopularTrainersWithHighScore(){
         Pageable pageable = PageRequest.of(0, 5);
 
-        List<TrainerInfoProcessDto> trainerInfoProcessDtos = userRepository.findPopularTrainersWithHighScore(pageable);
+        List<TrainerInfoProcessDto> trainerInfoProcessDtos = likeRepository.findPopularTrainersWithHighScore(pageable);
         log.info("TrainerInfoProceessDto {}", trainerInfoProcessDtos);
         return trainerInfoProcessDtos.stream().map((trainerInfoProcessDto ->{
-            String imageUrl = imageService.getImageUrl(trainerInfoProcessDto.getImageId(), trainerInfoProcessDto.getImagePath());
+            Long imageId = trainerInfoProcessDto.getImageId();
+            String imageUrl = null;
+            if(imageId != null && imageId >= 1 ){
+                imageUrl = imageService.getImageUrl(trainerInfoProcessDto.getImageId(), trainerInfoProcessDto.getImagePath());
+            }
             return TrainerInfoDto.from(trainerInfoProcessDto, imageUrl);
         })).collect(Collectors.toList());
     }
