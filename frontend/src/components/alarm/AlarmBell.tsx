@@ -72,6 +72,7 @@ export default function AlarmBell() {
           ? { "Last-Event-ID": lastEventIdRef.current }
           : {}),
       },
+      heartbeatTimeout: 10000, // 1 단축
     });
 
     eventSourceRef.current = eventSource;
@@ -80,7 +81,9 @@ export default function AlarmBell() {
       console.log("✅ SSE 연결 성공", event);
       reconnectAttemptsRef.current = 0;
     };
-
+    eventSource.addEventListener("CONNECT", (event: any) => {
+      console.log("✅ SSE 연결 확인:", event.data);
+    });
     eventSource.addEventListener(EventType.ALARM, {
       handleEvent(event) {
         try {
@@ -105,17 +108,16 @@ export default function AlarmBell() {
       },
     });
 
-    eventSource.onerror = (err) => {
+    eventSource.onerror = (error) => {
+      console.error("❌ SSE 오류:", error);
       eventSource.close();
-      const reconnectDelay = Math.min(
-        1000 * Math.pow(2, reconnectAttemptsRef.current),
-        30000
-      );
-      if (reconnectAttemptsRef.current < 5) {
-        reconnectTimeoutRef.current = setTimeout(() => {
+
+      // 3초 후 재연결
+      if (reconnectAttemptsRef.current < 3) {
+        setTimeout(() => {
           reconnectAttemptsRef.current++;
           connectToSSE();
-        }, reconnectDelay);
+        }, 3000);
       }
     };
   };
