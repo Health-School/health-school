@@ -5,23 +5,30 @@ interface ReportModalProps {
   onClose: () => void;
 }
 
+const REPORT_TYPES = [
+  "부적절한 컨텐츠",
+  "저작권 침해",
+  "허위/잘못된 정보",
+  "강의 운영문제",
+  "기타",
+];
+
 export default function ReportModal({ lectureId, onClose }: ReportModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [reportType, setReportType] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      alert("제목과 내용을 입력해주세요.");
+    if (!title.trim() || !content.trim() || !reportType) {
+      alert("모든 필드를 입력해주세요.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("accessToken");
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/reports/${lectureId}`,
         {
@@ -29,11 +36,11 @@ export default function ReportModal({ lectureId, onClose }: ReportModalProps) {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-
           },
           body: JSON.stringify({
             title,
             content,
+            reportType,
           }),
         }
       );
@@ -55,11 +62,7 @@ export default function ReportModal({ lectureId, onClose }: ReportModalProps) {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-transparent"
-        onClick={onClose}
-      />
-      {/* 신고 폼 */}
+      <div className="absolute inset-0 bg-transparent" onClick={onClose} />
       <form
         onSubmit={handleSubmit}
         className="relative z-10 bg-white rounded-xl shadow-xl w-full max-w-md p-8"
@@ -73,6 +76,25 @@ export default function ReportModal({ lectureId, onClose }: ReportModalProps) {
           ×
         </button>
         <h2 className="text-xl font-bold mb-6">신고하기</h2>
+
+        {/* 신고 유형 드롭다운 */}
+        <div className="mb-4">
+          <label className="block font-semibold mb-1">신고 유형</label>
+          <select
+            className="w-full border rounded px-3 py-2 bg-white"
+            value={reportType}
+            onChange={(e) => setReportType(e.target.value)}
+            required
+            disabled={loading}
+          >
+            <option value="">신고 유형을 선택하세요</option>
+            {REPORT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="mb-4">
           <label className="block font-semibold mb-1">신고 제목</label>
