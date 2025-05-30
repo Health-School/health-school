@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.webjars.NotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -124,7 +125,6 @@ public class LectureService {
                 .createdAt(lecture.getCreatedDate())
                 .build();
     }
-
 
     @Transactional
     public void addLecture(LectureRequestDto lectureRequestDto, User user, MultipartFile lectureImage) {
@@ -312,4 +312,10 @@ public class LectureService {
                 .filter(Objects::nonNull) // null 방지
                 .collect(Collectors.toList());
     }
+
+    public Page<LectureDto> getMyLectures(Long trainerId, Pageable pageable) {
+        return lectureRepository.findByTrainerId(trainerId, pageable)
+                .map(LectureDto::from); // coverImageUrl, averageScore 필요 없으면 간단하게
+    }
+
 }

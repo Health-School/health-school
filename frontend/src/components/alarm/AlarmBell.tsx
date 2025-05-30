@@ -54,28 +54,36 @@ export default function AlarmBell() {
     useGlobalLoginUser();
   // SSE 연결 함수
   const connectToSSE = () => {
+    console.log("🚀 SSE 연결 시도 시작");
+
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
 
-    const eventSource = new EventSourcePolyfill(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`,
-      {
-        withCredentials: true,
-        headers: lastEventIdRef.current
+    const sseUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/alarm/subscribe`;
+    console.log("🔗 연결 URL:", sseUrl);
+
+    const eventSource = new EventSourcePolyfill(sseUrl, {
+      withCredentials: true,
+      headers: {
+        Accept: "text/event-stream",
+        "Cache-Control": "no-cache",
+        ...(lastEventIdRef.current
           ? { "Last-Event-ID": lastEventIdRef.current }
-          : {},
-      }
-    );
+          : {}),
+      },
+      heartbeatTimeout: 10000, // 1 단축
+    });
 
     eventSourceRef.current = eventSource;
 
-    eventSource.onopen = () => {
-      console.log("✅ SSE 연결 성공");
-
+    eventSource.onopen = (event) => {
+      console.log("✅ SSE 연결 성공", event);
       reconnectAttemptsRef.current = 0;
     };
-
+    eventSource.addEventListener("CONNECT", (event: any) => {
+      console.log("✅ SSE 연결 확인:", event.data);
+    });
     eventSource.addEventListener(EventType.ALARM, {
       handleEvent(event) {
         try {
@@ -100,17 +108,16 @@ export default function AlarmBell() {
       },
     });
 
-    eventSource.onerror = (err) => {
+    eventSource.onerror = (error) => {
+      console.error("❌ SSE 오류:", error);
       eventSource.close();
-      const reconnectDelay = Math.min(
-        1000 * Math.pow(2, reconnectAttemptsRef.current),
-        30000
-      );
-      if (reconnectAttemptsRef.current < 5) {
-        reconnectTimeoutRef.current = setTimeout(() => {
+
+      // 3초 후 재연결
+      if (reconnectAttemptsRef.current < 3) {
+        setTimeout(() => {
           reconnectAttemptsRef.current++;
           connectToSSE();
-        }, reconnectDelay);
+        }, 3000);
       }
     };
   };
@@ -125,6 +132,17 @@ export default function AlarmBell() {
     };
     // eslint-disable-next-line
   }, [isLogin]);
+
+  // 환경 정보 로깅
+  useEffect(() => {
+    console.log("🌍 Environment Info:", {
+      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+      isLogin,
+      loginUser: loginUser?.nickname,
+    });
+  }, [isLogin, loginUser]);
 
   // 읽지 않은 알림 개수
   const unreadCount = alarms.filter((a) => !a.read).length;
