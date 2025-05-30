@@ -82,12 +82,7 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
   const getHeaderTitle = () => {
     if (activeMenuItem === 'dashboard') return '대시보드';
     if (activeMenuItem === 'users') return '회원 관리';
-    if (activeMenuItem.startsWith('instructor-')) {
-        if (activeMenuItem === 'instructor-list') return '강사 목록';
-        if (activeMenuItem === 'instructor-approval') return '강사 자격 신청 관리';
-        if (activeMenuItem === 'instructor-certification') return '강사 자격증 관리';
-        return '강사 관리';
-    }
+    if (activeMenuItem === 'trainer-applications') return '강사 신청 관리';
     if (activeMenuItem === 'courses') return '강의 관리';
     if (activeMenuItem === 'reports') return '신고 관리';
     if (activeMenuItem === 'equipment') return '운동 기구 관리';
@@ -157,13 +152,14 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
             </li>
             <li>
               <button
-                onClick={handleInstructorMenuToggle}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${
-                  (activeMenuItem === 'instructor' || activeMenuItem.startsWith('instructor-')) ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'
-                } transition-colors duration-200 cursor-pointer`}
+                onClick={() => {
+                setActiveMenuItem('trainer-applications');
+                router.push('/admin/trainer-applications');
+                }}
+                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'trainer-applications' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer no-underline`}
               >
                 <i className="fa-solid fa-chalkboard-teacher w-5 text-center"></i>
-                <span>강사 관리</span>
+                <span>강사 신청 관리</span>
               </button>
 
               {isInstructorMenuOpen && (

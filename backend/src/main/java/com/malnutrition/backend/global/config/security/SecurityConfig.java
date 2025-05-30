@@ -87,8 +87,9 @@ public class SecurityConfig {
     }
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.healthschool.site"));
-        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "DELETE"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.healthschool.site")); // 프론트 도메인
+        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"));
+
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
