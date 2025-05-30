@@ -12,8 +12,6 @@ public class PermitUrl {
             "/api/v1/users/**","/api/v1/chats/**","/api/v1/machine-exercises/**",
 //            "/api/v1/alarm/**",
             "/api/v1/reports/**","/actuator/health"
-
-
     };
     public static final String[] GET_URLS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",

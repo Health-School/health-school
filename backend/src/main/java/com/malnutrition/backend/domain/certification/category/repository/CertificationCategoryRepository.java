@@ -9,4 +9,6 @@ public interface CertificationCategoryRepository extends JpaRepository<Certifica
 
     Optional<CertificationCategory> findByName(String name);
 
+
+
 }
