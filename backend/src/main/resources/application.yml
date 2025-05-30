@@ -1,6 +1,7 @@
 ## 루트 설정
 server:
   port: 8090
+  timezone: Asia/Seoul
 spring:
   jackson:
     time-zone: Asia/Seoul
