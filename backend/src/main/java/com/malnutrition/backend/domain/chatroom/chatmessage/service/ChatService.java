@@ -24,7 +24,6 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
-//    private final ChatService chatService;
 
     @Transactional
     public ChatMessage updateChatMessage(Long messageId, ChatMessageUpdateRequestDto dto, Long userId) {
