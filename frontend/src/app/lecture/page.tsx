@@ -217,7 +217,7 @@ export default function LecturePage() {
                 router.push(`/lecture/${lecture.id}`);
               }}
             >
-              <div className="relative w-full h-36 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+              <div className="relative w-full h-48 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                 {lecture.coverImageUrl ? (
                   <Image
                     src={lecture.coverImageUrl}
