@@ -78,20 +78,15 @@ public class AlarmService {
         //등록 후 SseEmitter 유효시간동안 어느 데이터도 전송되지 않는 다면 503 에러를 발생시키므로 이것에 대한 방지로 더이 이벤트 발생
         sendAlarmMessage(emitter, AlarmEventType.DUMMY,  emitterId, dummyData);
 
-        PageRequest pageable = PageRequest.of(0, 15, Sort.by("createdDate").descending());
-        List<Alarm> content = alarmRepository.findByListener_Id(userId, pageable).getContent();
-        content.forEach( (alarmMessage -> {
-            /*if(!alarmMessage.getIsRead())*/ sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
-        }) );
-        /*if (hasLostData(lastEventId)) {
+        if (hasLostData(lastEventId)) {
             sendLostData(lastEventId, userId, emitter);
         }else {
             PageRequest pageable = PageRequest.of(0, 15, Sort.by("createdDate").descending());
             List<Alarm> content = alarmRepository.findByListener_Id(userId, pageable).getContent();
             content.forEach( (alarmMessage -> {
-                *//*if(!alarmMessage.getIsRead())*//* sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
+                /*if(!alarmMessage.getIsRead())*/ sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
             }) );
-        }*/
+        }
         return emitter;
     }
     private String makeTimeIncludeId(Long userId) {
