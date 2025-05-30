@@ -10,7 +10,7 @@ public class PermitUrl {
             "/api/v1/admin/machines/**","/api/v1/chatrooms/**",
             "/api/chat/**", "/ws-stomp/**", "/ws/**", "/chat/**",
             "/api/v1/users/**","/api/v1/chats/**","/api/v1/machine-exercises/**",
-            "/api/v1/alarm/**",
+//            "/api/v1/alarm/**",
             "/api/v1/reports/**","/actuator/health"
 
 
