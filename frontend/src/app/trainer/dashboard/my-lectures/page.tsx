@@ -237,11 +237,11 @@ export default function MyLecturesPage() {
 
       const result = await response.json();
       console.log("Notifications response:", result);
-      if (result.success) {
-        setNotifications(result.data);
-        setNotificationPage(page);
-        setNotificationTotalPages(result.totalPages || 1);
-      }
+      
+      // 직접 응답 구조를 사용
+      setNotifications(result.content || []);
+      setNotificationPage(result.number || 0);
+      setNotificationTotalPages(result.totalPages || 1);
     } catch (error) {
       console.error("공지사항 조회 실패:", error);
     }
