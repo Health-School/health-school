@@ -190,12 +190,12 @@ export default function LecturePage() {
                         {opt.label === "전체"
                           ? ""
                           : opt.label === "초급"
-                          ? "누구나 들을 수 있는"
-                          : opt.label === "중급"
-                          ? "선수 지식이 필요한"
-                          : opt.label === "고급"
-                          ? "전문성을 높이는"
-                          : ""}
+                            ? "누구나 들을 수 있는"
+                            : opt.label === "중급"
+                              ? "선수 지식이 필요한"
+                              : opt.label === "고급"
+                                ? "전문성을 높이는"
+                                : ""}
                       </div>
                     </div>
                   </label>
@@ -217,7 +217,7 @@ export default function LecturePage() {
                 router.push(`/lecture/${lecture.id}`);
               }}
             >
-              <div className="relative w-full h-36 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+              <div className="relative w-full h-48 rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                 {lecture.coverImageUrl ? (
                   <Image
                     src={lecture.coverImageUrl}
