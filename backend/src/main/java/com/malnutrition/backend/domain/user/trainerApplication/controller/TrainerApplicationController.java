@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/trainerApplications")
 @RequiredArgsConstructor
@@ -25,9 +27,9 @@ public class TrainerApplicationController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)// 멀티 파트 파일로 인식
     public ResponseEntity<ApiResponse<Void>> registerTrainerApplication(
             @Valid @RequestPart("trainerApplicationRequestDto") TrainerApplicationRequestDto dto,
-            @RequestPart("certificationImage") MultipartFile image
+            @RequestPart("certificationImages") List<MultipartFile> images
     ){
-      trainerApplicationService.registerTrainerApplication(dto, image);
+      trainerApplicationService.registerTrainerApplication(dto, images);
       return ResponseEntity.ok().body(ApiResponse.success(null, "트레이너 신청 성공"));
     }
 }

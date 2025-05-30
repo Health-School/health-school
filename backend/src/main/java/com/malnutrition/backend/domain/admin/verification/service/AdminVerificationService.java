@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -148,6 +149,9 @@ public class AdminVerificationService {
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + userId + "에 해당하는 사용자를 찾을 수 없습니다."));
 
+        log.info("트레이너 자격 검증 API 호출됨 - userId: {}, requestDto: {}", userId, requestDto);
+
+
         TrainerVerificationStatus result = requestDto.getResult();
         String reason = requestDto.getReason();
 
@@ -179,6 +183,21 @@ public class AdminVerificationService {
         } else {
             log.info("관리자 활동: 관리자 ID [{}](이)가 사용자 ID [{}]의 트레이너 자격을 반려했습니다. 사유: [{}]",
                     adminUser.getEmail(), userId, reasonForLog);
+        }
+
+        Optional<TrainerApplication> latestApplicationOpt = trainerApplicationRepository.findTopByUserOrderByCreatedDateDesc(targetUser);
+        if (latestApplicationOpt.isPresent()) {
+            TrainerApplication latestApplication = latestApplicationOpt.get();
+
+            if (latestApplication.getVerificationResult() == TrainerVerificationStatus.PENDING_VERIFICATION ||
+                    latestApplication.getVerificationResult() != result) { // 이미 같은 상태로 처리된 경우 중복 로그 방지
+                latestApplication.setVerificationResult(result);
+
+                trainerApplicationRepository.save(latestApplication); // 변경된 신청서 저장
+                log.info("TrainerApplication ID [{}]의 상태가 [{}]로 변경되었습니다.", latestApplication.getId(), result);
+            }
+        } else {
+            log.warn("사용자 ID [{}]에 대한 TrainerApplication 을 찾을 수 없어 상태를 업데이트하지 못했습니다.", userId);
         }
 
         TrainerVerificationLog verificationLog = TrainerVerificationLog.builder()
