@@ -44,7 +44,7 @@ public class AdminVerificationController {
     public ResponseEntity<ApiResponse<Page<TrainerApplicationSummaryDto>>> getTrainerApplications(
             @Parameter(description = "조회할 신청 상태")
             @RequestParam(required = false) TrainerVerificationStatus result,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
+            @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC)Pageable pageable
             ) {
 
         TrainerVerificationStatus verificationResult = (result == null) ? TrainerVerificationStatus.PENDING_VERIFICATION : result;
