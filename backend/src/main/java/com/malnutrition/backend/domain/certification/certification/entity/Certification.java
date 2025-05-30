@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 public class Certification extends BaseEntity {
 
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "certification_category_id", nullable = false)
     private CertificationCategory certificationCategory;
 
