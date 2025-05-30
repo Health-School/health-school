@@ -14,7 +14,6 @@ public class AlarmEventHandler {
     private final AlarmService alarmService;
 
     @EventListener
-    @Async
     public void handleAlarmMessageSend(AlarmSendEvent alarmMessageRequestDto) {
         log.info("event listener");
         log.info("alarmMessageRequestDto {}",  alarmMessageRequestDto);

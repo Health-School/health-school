@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.alarm.alarm.event.AlarmSendEvent;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class AlarmEventService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Rq rq;
+
 
     public void sendOrderCompleteAlarm() {
         String title = AlarmType.SYSTEM_NOTICE.formatTitle();
