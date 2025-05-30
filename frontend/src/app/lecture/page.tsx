@@ -190,12 +190,12 @@ export default function LecturePage() {
                         {opt.label === "전체"
                           ? ""
                           : opt.label === "초급"
-                          ? "누구나 들을 수 있는"
-                          : opt.label === "중급"
-                          ? "선수 지식이 필요한"
-                          : opt.label === "고급"
-                          ? "전문성을 높이는"
-                          : ""}
+                            ? "누구나 들을 수 있는"
+                            : opt.label === "중급"
+                              ? "선수 지식이 필요한"
+                              : opt.label === "고급"
+                                ? "전문성을 높이는"
+                                : ""}
                       </div>
                     </div>
                   </label>

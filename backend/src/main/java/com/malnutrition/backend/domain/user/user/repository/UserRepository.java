@@ -44,18 +44,5 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
     Optional<User> findByPhoneNumber(String phoneNumber);
     List<User> findByRole(Role role);
 
-    @Query("SELECT new com.malnutrition.backend.domain.user.user.dto.TrainerInfoProcessDto( " +
-            "t.nickname, COUNT(lu.id), AVG(COALESCE(lk.score, 0)), img.id, img.path) " +
-            "FROM LectureUser lu " +
-            "JOIN lu.lecture l " +
-            "JOIN l.trainer t " +
-            "LEFT JOIN Like lk ON lk.lectureUser = lu " +
-            "LEFT JOIN t.profileImage img " +
-            "GROUP BY t.id, t.nickname, img.id, img.path " +
-            "HAVING AVG(COALESCE(lk.score, 0)) >= 4.0 " +
-            "ORDER BY COUNT(lu.id) DESC")
-    List<TrainerInfoProcessDto> findPopularTrainersWithHighScore(Pageable pageable);
-
-
 
 }

@@ -45,7 +45,6 @@ export default function Home() {
         console.log("Popular trainers data:", data);
         setTrainers(data.data || []);
       });
-
     console.log("Fetching hot lectures...");
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/hot`)
       .then((res) => res.json())
@@ -225,17 +224,34 @@ export default function Home() {
             {trainers.map((trainer, index) => (
               <div key={index} className="text-center">
                 <div className="relative">
-                  <Image
-                    src={
-                      trainer.profileImagePath || "/images/default-trainer.jpg"
-                    }
-                    alt={trainer.name}
-                    width={200}
-                    height={200}
-                    className="rounded-full mx-auto w-32 h-32 object-cover"
-                  />
-                  <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    ⭐ {trainer.averageLectureScore.toFixed(1)}
+                  {trainer.profileImagePath ? (
+                    <Image
+                      src={trainer.profileImagePath}
+                      alt={trainer.name}
+                      width={200}
+                      height={200}
+                      className="rounded-full mx-auto w-32 h-32 object-cover"
+                    />
+                  ) : (
+                    <div className="rounded-full mx-auto w-32 h-32 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                      <span className="text-4xl font-bold text-white">
+                        {trainer.name
+                          ? trainer.name.charAt(0).toUpperCase()
+                          : "T"}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute -top-2 -right-2 bg-yellow-300 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    <div className="absolute -top-2 -right-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                      </svg>
+                      {trainer.averageLectureScore.toFixed(1)}
+                    </div>
                   </div>
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
