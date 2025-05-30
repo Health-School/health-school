@@ -151,17 +151,17 @@ public class OrderService {
         Page<Order> orders = switch (period) {
             case "1개월" -> {
                 start = end.minusMonths(1);
-                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+                yield orderRepository.findCompletedOrdersByUserAndApprovedAtBetween(user, start, end, pageable);
             }
             case "3개월" -> {
                 start = end.minusMonths(3);
-                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+                yield orderRepository.findCompletedOrdersByUserAndApprovedAtBetween(user, start, end, pageable);
             }
             case "6개월" -> {
                 start = end.minusMonths(6);
-                yield orderRepository.findAllByUserAndApprovedAtBetween(user, start, end, pageable);
+                yield orderRepository.findCompletedOrdersByUserAndApprovedAtBetween(user, start, end, pageable);
             }
-            case "전체 기간" -> orderRepository.findByUser(user, pageable);
+            case "전체 기간" -> orderRepository.findCompletedOrdersByUser(user, pageable);
             default -> throw new IllegalArgumentException("유효하지 않은 기간입니다: " + period);
         };
 
