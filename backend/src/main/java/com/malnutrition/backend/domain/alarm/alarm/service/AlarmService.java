@@ -62,74 +62,35 @@ public class AlarmService {
 
 
 
-//    public SseEmitter subscribe(Long userId, String lastEventId) {
-//        String emitterId = makeTimeIncludeId(userId);
-//        SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
-//
-//        emitter.onCompletion( () -> emitterRepository.deleteById(emitterId) );
-//        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
-//
-//        //연결 유지용 더미 이벤트
-//        Map<String, String> dummyData = new HashMap<>();
-//        dummyData.put("message", "EventStream Created.");
-//        dummyData.put("createdAt", LocalDateTime.now().toString());
-//
-//
-//        //등록 후 SseEmitter 유효시간동안 어느 데이터도 전송되지 않는 다면 503 에러를 발생시키므로 이것에 대한 방지로 더이 이벤트 발생
-//        sendAlarmMessage(emitter, AlarmEventType.DUMMY,  emitterId, dummyData);
-//
-//        if (hasLostData(lastEventId)) {
-//            sendLostData(lastEventId, userId, emitter);
-//        }else {
-//            PageRequest pageable = PageRequest.of(0, 15, Sort.by("createdDate").descending());
-//            List<Alarm> content = alarmRepository.findByListener_Id(userId, pageable).getContent();
-//            content.forEach( (alarmMessage -> {
-//                /*if(!alarmMessage.getIsRead())*/ sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
-//            }) );
-//        }
-//        return emitter;
-//    }
-
-    // AlarmService.java
     public SseEmitter subscribe(Long userId, String lastEventId) {
-        log.info("=== SSE 구독 시작 ===");
-        log.info("사용자 ID: {}", userId);
-        log.info("Last Event ID: {}", lastEventId);
-
         String emitterId = makeTimeIncludeId(userId);
-        log.info("생성된 Emitter ID: {}", emitterId);
-
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
-        log.info("Emitter 생성 및 저장 완료");
 
-        emitter.onCompletion(() -> {
-            log.info("SSE 연결 완료: {}", emitterId);
-            emitterRepository.deleteById(emitterId);
-        });
+        emitter.onCompletion( () -> emitterRepository.deleteById(emitterId) );
+        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
 
-        emitter.onTimeout(() -> {
-            log.warn("SSE 연결 타임아웃: {}", emitterId);
-            emitterRepository.deleteById(emitterId);
-        });
-
-        emitter.onError((error) -> {
-            log.error("SSE 연결 에러: {}, 에러: {}", emitterId, error.getMessage());
-            emitterRepository.deleteById(emitterId);
-        });
-
-        // 더미 데이터 전송
+        //연결 유지용 더미 이벤트
         Map<String, String> dummyData = new HashMap<>();
         dummyData.put("message", "EventStream Created.");
         dummyData.put("createdAt", LocalDateTime.now().toString());
 
-        log.info("더미 이벤트 전송 시도");
-        sendAlarmMessage(emitter, AlarmEventType.DUMMY, emitterId, dummyData);
 
-        // ... 나머지 로직
+        //등록 후 SseEmitter 유효시간동안 어느 데이터도 전송되지 않는 다면 503 에러를 발생시키므로 이것에 대한 방지로 더이 이벤트 발생
+        sendAlarmMessage(emitter, AlarmEventType.DUMMY,  emitterId, dummyData);
 
-        log.info("=== SSE 구독 완료 ===");
+        if (hasLostData(lastEventId)) {
+            sendLostData(lastEventId, userId, emitter);
+        }else {
+            PageRequest pageable = PageRequest.of(0, 15, Sort.by("createdDate").descending());
+            List<Alarm> content = alarmRepository.findByListener_Id(userId, pageable).getContent();
+            content.forEach( (alarmMessage -> {
+                /*if(!alarmMessage.getIsRead())*/ sendAlarmMessage(emitter,AlarmEventType.ALARM , emitterId, AlarmResponseDto.from(alarmMessage));
+            }) );
+        }
         return emitter;
     }
+
+
     private String makeTimeIncludeId(Long userId) {
 
         return userId + "_" + System.currentTimeMillis();
