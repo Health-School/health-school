@@ -355,7 +355,7 @@ export default function MyOrderListPage() {
                     아직 구매한 강의가 없어요. 새로운 강의를 둘러보세요!
                   </p>
                   <Link
-                    href="/lectures"
+                    href="/lecture"
                     className="inline-flex items-center px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                   >
                     강의 둘러보기

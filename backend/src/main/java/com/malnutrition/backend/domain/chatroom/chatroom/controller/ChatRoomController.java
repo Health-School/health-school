@@ -2,6 +2,7 @@ package com.malnutrition.backend.domain.chatroom.chatroom.controller;
 
 import com.malnutrition.backend.domain.chatroom.chatmessage.dto.ChatMessageResponseDto;
 import com.malnutrition.backend.domain.chatroom.chatmessage.repository.ChatMessageRepository;
+//import com.malnutrition.backend.domain.chatroom.chatmessage.service.ChatService;
 import com.malnutrition.backend.domain.chatroom.chatmessage.service.ChatService;
 import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomRequestDto;
 import com.malnutrition.backend.domain.chatroom.chatroom.dto.ChatRoomResponseDto;

@@ -26,12 +26,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     List<ChatMessage> findByChatRoomIdOrderByCreatedDateAsc(@Param("chatRoomId") Long chatRoomId);
 
 
-    @Query("SELECT cm FROM ChatMessage cm " +
-            "JOIN FETCH cm.chatRoom cr " +
-            "WHERE cr.id = :chatRoomId AND cm.sender.id = :senderId " +
-            "ORDER BY cm.createdDate DESC")
-    Optional<ChatMessage> findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(@Param("chatRoomId") Long chatRoomId,
-                                                                               @Param("senderId") Long senderId);
+    Optional<ChatMessage> findTopByChatRoomIdAndSenderIdOrderByCreatedDateDesc(Long chatRoomId, Long senderId);
+
 
     @Modifying
     @Query("DELETE FROM ChatMessage cm WHERE cm.chatRoom = :chatRoom")

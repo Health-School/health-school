@@ -446,14 +446,19 @@ export default function LectureDashboard() {
               {lectureData.lectureTitle}
             </h1>
             <div className="flex items-center space-x-3 mt-2">
-              <img
-                src={
-                  lectureData.trainerProfileUrl ||
-                  "https://via.placeholder.com/40"
-                }
-                alt={lectureData.trainerNickname}
-                className="w-10 h-10 rounded-full object-cover"
-              />
+              {lectureData.trainerProfileUrl ? (
+                <img
+                  src={lectureData.trainerProfileUrl}
+                  alt={lectureData.trainerNickname}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-medium">
+                  {lectureData.trainerNickname
+                    ? lectureData.trainerNickname.charAt(0).toUpperCase()
+                    : "T"}
+                </div>
+              )}
               <div className="text-base text-gray-600">
                 {lectureData.trainerNickname} 트레이너
                 {lectureData.trainerCertificationNames?.length > 0 && (

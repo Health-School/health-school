@@ -72,7 +72,7 @@ export default function AlarmBell() {
           ? { "Last-Event-ID": lastEventIdRef.current }
           : {}),
       },
-      heartbeatTimeout: 10000, // 1 단축
+      heartbeatTimeout: 30000, // 1 단축
     });
 
     eventSourceRef.current = eventSource;
