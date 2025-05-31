@@ -254,7 +254,7 @@ export default function StudentsPage() {
   const fetchLectures = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/lectures/trainer-lecture`,
         { credentials: "include" }
       );
 
@@ -263,8 +263,9 @@ export default function StudentsPage() {
       }
 
       const result = await response.json();
+      console.log("Lectures API Response:", result); // 디버깅용
       if (result.success) {
-        setLectures(result.data.content);
+        setLectures(result.data);
       }
     } catch (error) {
       console.error("강의 목록 조회 실패:", error);

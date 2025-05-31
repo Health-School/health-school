@@ -23,6 +23,7 @@ export default function ReceiptModal({ orderId, onClose }: ReceiptModalProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefunding, setIsRefunding] = useState(false);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -48,6 +49,53 @@ export default function ReceiptModal({ orderId, onClose }: ReceiptModalProps) {
 
     fetchOrderDetails();
   }, [orderId]);
+
+  const handleRefund = async () => {
+    if (!order) return;
+
+    const isConfirmed = window.confirm(
+      `정말로 환불하시겠습니까?\n강의: ${order.lectureTitle}\n금액: ${order.amount.toLocaleString()}원`
+    );
+
+    if (!isConfirmed) return;
+
+    setIsRefunding(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/tosspayments/cancel-order`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            orderId: order.id,
+            cancelReason: "강의 불만족",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("환불이 성공적으로 처리되었습니다.");
+        // 주문 상태 업데이트
+        setOrder((prev) =>
+          prev ? { ...prev, orderStatus: "결제 취소" } : null
+        );
+      } else {
+        console.log("환불 실패:", data);
+        alert(data.message || "환불 처리에 실패했습니다.");
+      }
+    } catch (err) {
+      console.error("환불 요청 중 오류:", err);
+      alert("환불 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsRefunding(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -111,10 +159,42 @@ export default function ReceiptModal({ orderId, onClose }: ReceiptModalProps) {
             </div>
 
             <div className="mt-6 text-center">
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+              <span
+                className={`px-5 py-2 rounded-full text-xl ${
+                  order.orderStatus === "결제 완료"
+                    ? "bg-green-100 text-green-800"
+                    : order.orderStatus === "결제 취소"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+                }`}
+              >
                 {order.orderStatus}
               </span>
             </div>
+
+            {/* 환불 버튼 - 결제 완료 상태일 때만 표시 */}
+            {/* {order.orderStatus === "결제 완료" && (
+              <div className="mt-6  text-right">
+                <button
+                  onClick={handleRefund}
+                  disabled={isRefunding}
+                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                    isRefunding
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-red-500 text-white hover:bg-red-600"
+                  }`}
+                >
+                  {isRefunding ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      환불 처리중...
+                    </span>
+                  ) : (
+                    "환불"
+                  )}
+                </button>
+              </div>
+            )} */}
           </div>
         ) : null}
       </div>

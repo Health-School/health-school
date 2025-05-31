@@ -34,7 +34,7 @@ public class ReportController {
 
         Long userId = rq.getActor().getId();
 
-        reportService.addReport(userId, lectureId, request.getTitle(), request.getContent());
+        reportService.addReport(userId, lectureId, request.getTitle(), request.getContent(), request.getReportType());
         return ResponseEntity.ok(ApiResponse.success(null,"신고가 접수되었습니다."));
     }
 

@@ -174,13 +174,13 @@ export default function LectureDetailPage() {
     <div className="bg-gray-50 min-h-screen">
       {/* 상단 강의 이미지 */}
       <div className="w-full h-80 relative">
-        <Image
-          src={data.coverImageUrl || "/lecture-main.jpg"}
-          alt="강의 대표 이미지"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-b-xl"
-        />
+      <Image
+    src={data.coverImageUrl}
+    alt="강의 이미지"
+    fill  // layout="fill" 대신 사용
+    style={{ objectFit: "contain" }}  // 또는 "cover"
+    className="rounded-lg"
+  />
       </div>
 
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 mt-8">

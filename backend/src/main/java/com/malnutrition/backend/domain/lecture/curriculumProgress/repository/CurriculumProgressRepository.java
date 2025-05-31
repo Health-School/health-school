@@ -18,5 +18,6 @@ public interface CurriculumProgressRepository extends JpaRepository<CurriculumPr
 
     long countByUserIdAndLectureId(Long userId, Long lectureId);
 
+    boolean existsByLectureId (Long lectureId);
 
 }

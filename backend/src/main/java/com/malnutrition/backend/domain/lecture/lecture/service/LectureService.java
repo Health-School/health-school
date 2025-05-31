@@ -318,4 +318,12 @@ public class LectureService {
                 .map(LectureDto::from); // coverImageUrl, averageScore 필요 없으면 간단하게
     }
 
+    public List<LectureTrainerDto> getLectureTrainers(){
+
+        List<Lecture> lectures = lectureRepository.findByTrainerId(rq.getActor().getId());
+        return lectures.stream()
+                .map(LectureTrainerDto::from)
+                .toList();
+    }
+
 }
