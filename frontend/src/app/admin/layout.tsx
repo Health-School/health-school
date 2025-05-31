@@ -16,7 +16,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string>('dashboard');
-  const [isInstructorMenuOpen, setIsInstructorMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
       if (!authContext || authContext.isLoginUserPending) {
@@ -39,13 +38,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       setIsAuthorized(true);
 }, [authContext, router]);
 
-useEffect(() => {
-    if (activeMenuItem.startsWith('instructor-')) {
-        setIsInstructorMenuOpen(true);
-    } else if (activeMenuItem !== 'instructor') {
-        setIsInstructorMenuOpen(false);
-    }
-  }, [activeMenuItem]); // activeMenuItem이 바뀔 때만 실행
 
 if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
 
@@ -83,25 +75,12 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
     if (activeMenuItem === 'dashboard') return '대시보드';
     if (activeMenuItem === 'users') return '회원 관리';
     if (activeMenuItem === 'trainer-applications') return '강사 신청 관리';
-    if (activeMenuItem === 'courses') return '강의 관리';
     if (activeMenuItem === 'reports') return '신고 관리';
-    if (activeMenuItem === 'equipment') return '운동 기구 관리';
-    if (activeMenuItem === 'notices') return '공지사항 관리';
-    if (activeMenuItem === 'qna') return 'Q&A 관리';
-    if (activeMenuItem === 'payments') return '결제 관리';
+    if (activeMenuItem === 'categories') return '카테고리 관리';
     return '관리자 페이지';
   };
 
-  const handleInstructorMenuToggle = () => {
 
-    if (isInstructorMenuOpen && (activeMenuItem.startsWith('instructor-') || activeMenuItem === 'instructor')) {
-      setIsInstructorMenuOpen(false);
-
-    } else {
-      setActiveMenuItem('instructor-approval');
-      setIsInstructorMenuOpen(true);
-    }
-  };
 
   return (
 
@@ -161,46 +140,9 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
                 <i className="fa-solid fa-chalkboard-teacher w-5 text-center"></i>
                 <span>강사 신청 관리</span>
               </button>
-
-              {isInstructorMenuOpen && (
-                <ul className="mt-2 space-y-1">
-                  <li>
-                    <button
-                      onClick={() => setActiveMenuItem('instructor-list')}
-                      className={`w-full flex items-center space-x-3 pl-12 py-2 ${activeMenuItem === 'instructor-list' ? 'text-[#2ECC71]' : 'text-gray-300 hover:text-white'} transition-colors duration-200 cursor-pointer text-sm`}
-                    >
-                      <span>강사 목록</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveMenuItem('instructor-approval')}
-                      className={`w-full flex items-center space-x-3 pl-12 py-2 ${activeMenuItem === 'instructor-approval' ? 'text-[#2ECC71]' : 'text-gray-300 hover:text-white'} transition-colors duration-200 cursor-pointer text-sm`}
-                    >
-                      <span>강사 자격 신청 관리</span>
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => setActiveMenuItem('instructor-certification')}
-                      className={`w-full flex items-center space-x-3 pl-12 py-2 ${activeMenuItem === 'instructor-certification' ? 'text-[#2ECC71]' : 'text-gray-300 hover:text-white'} transition-colors duration-200 cursor-pointer text-sm`}
-                    >
-                      <span>강사 자격증 관리</span>
-                    </button>
-                  </li>
-                </ul>
-              )}
             </li>
 
-            <li>
-              <button
-                onClick={() => setActiveMenuItem('courses')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'courses' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
-              >
-                <i className="fa-solid fa-book w-5 text-center"></i>
-                <span>강의 관리</span>
-              </button>
-            </li>
+
             <li>
               <button
                 onClick={() => setActiveMenuItem('reports')}
@@ -212,40 +154,16 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
             </li>
             <li>
               <button
-                onClick={() => setActiveMenuItem('equipment')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'equipment' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
+              onClick={() => {
+              setActiveMenuItem('categories');
+              router.push('/admin/categories');
+              }}
+              className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'categories' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
               >
-                <i className="fa-solid fa-dumbbell w-5 text-center"></i>
-                <span>운동 기구 관리</span>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveMenuItem('notices')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'notices' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
-              >
-                <i className="fa-solid fa-bullhorn w-5 text-center"></i>
-                <span>공지사항 관리</span>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveMenuItem('qna')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'qna' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
-              >
-                <i className="fa-solid fa-question-circle w-5 text-center"></i>
-                <span>Q&A 관리</span>
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveMenuItem('payments')}
-                className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'payments' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
-              >
-                <i className="fa-solid fa-credit-card w-5 text-center"></i>
-                <span>결제 관리</span>
-              </button>
-            </li>
+               <i className="fa-solid fa-tags w-5 text-center"></i>
+              <span>카테고리 관리</span>
+             </button>
+             </li>
             <li>
               <button
                 onClick={() => router.push('/')} // 클릭하면 메인 페이지('/')로 이동

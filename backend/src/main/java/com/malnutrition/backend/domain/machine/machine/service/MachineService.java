@@ -33,11 +33,7 @@ public class MachineService {
     private final BodyRepository bodyRepository;
     private final Rq rq;
 
-    private void checkAdmin(User user) {
-        if (!user.getRole().name().equals("ADMIN")) {
-            throw new SecurityException("관리자 권한이 필요합니다.");
-        }
-    }
+
 
     @Transactional(readOnly = true)
     public List<MachineResponseDto> getAllApprovedMachines() {
@@ -74,49 +70,9 @@ public class MachineService {
         );
     }
 
-    @Transactional
-    public MachineDto updateMachine(Long machineId, String name, Long machineTypeId, List<Long> bodyIds) {
-        User user = rq.getActor();
-        checkAdmin(user);
 
-        Machine machine = machineRepository.findById(machineId)
-                .orElseThrow(() -> new IllegalArgumentException("운동기구가 존재하지 않습니다."));
 
-        MachineType newType = machineTypeRepository.findById(machineTypeId)
-                .orElseThrow(() -> new IllegalArgumentException("운동기구 타입이 존재하지 않습니다."));
 
-        machine.setName(name);
-        machine.setMachineType(newType);
-
-        // 기존 machineBodies 삭제
-        machine.getMachineBodies().clear();
-        machineBodyRepository.deleteAllByMachine(machine);
-
-        // 새로운 body 매핑
-        for (Long bodyId : bodyIds) {
-            Body body = bodyRepository.findById(bodyId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 Body가 존재하지 않습니다."));
-            MachineBody machineBody = MachineBody.builder()
-                    .machine(machine)
-                    .body(body)
-                    .build();
-            machine.getMachineBodies().add(machineBody);
-        }
-
-        return new MachineDto(machine.getId(), machine.getName(), machine.getMachineType().getName(), machine.isApproved());
-    }
-
-    // 기구 삭제
-    @Transactional
-    public void deleteMachine(Long machineId) {
-        User user = rq.getActor();
-        checkAdmin(user);
-
-        Machine machine = machineRepository.findById(machineId)
-                .orElseThrow(() -> new IllegalArgumentException("운동기구가 존재하지 않습니다."));
-
-        machineRepository.delete(machine); // 연관된 machineBody도 같이 삭제됨
-    }
 
     @Transactional
     public MachineDto registerMachine(MachineRegisterRequest request) {
@@ -169,12 +125,6 @@ public class MachineService {
         return machineRepository.findAllByMachineBodiesBodyId(bodyId, pageable)
                 .map(MachineResponseDto::from);
     }
-
-
-
-
-
-
 
 
 }
