@@ -5,6 +5,7 @@ import com.malnutrition.backend.domain.machine.machinetype.entity.MachineType;
 import org.hibernate.type.descriptor.converter.spi.JpaAttributeConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +24,14 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
 
     // 둘 다 조건으로 검색하는 메서드 예시 (필요하면)
     Page<Machine> findAllByMachineBodiesBodyIdAndMachineTypeId(Long bodyId, Long machineTypeId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "machineType", "machineBodies", "machineBodies.body"})
+    Page<Machine> findAllByApproved(boolean approved, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "machineType", "machineBodies", "machineBodies.body"})
+    Page<Machine> findAll(Pageable pageable);
+
+    boolean existsByName(String name);
+
 }
 
