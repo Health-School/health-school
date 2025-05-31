@@ -90,5 +90,10 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 
     Page<Lecture> findByTrainerId(Long trainerId, Pageable pageable);
 
+    @Query("SELECT lc.categoryName AS categoryName, COUNT(l.id) AS lectureCount " +
+            "FROM Lecture l JOIN l.lectureCategory lc " +
+            "GROUP BY lc.categoryName")
+    List<Object[]> countLecturesByCategory();
+
 
 }

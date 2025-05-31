@@ -1,13 +1,12 @@
 package com.malnutrition.backend.domain.admin.dashboard.service;
 
-import com.malnutrition.backend.domain.admin.dashboard.dto.ChartDataDto;
-import com.malnutrition.backend.domain.admin.dashboard.dto.DataPointDto;
-import com.malnutrition.backend.domain.admin.dashboard.dto.MetricWidgetDto;
-import com.malnutrition.backend.domain.admin.dashboard.dto.AdminUserDashboardSummaryDto;
+import com.malnutrition.backend.domain.admin.dashboard.dto.*;
 import com.malnutrition.backend.domain.admin.metric.entity.DailyMetricSnapshot;
 import com.malnutrition.backend.domain.admin.metric.enums.MetricType;
 import com.malnutrition.backend.domain.admin.metric.repository.DailyMetricSnapshotRepository;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
+import com.malnutrition.backend.domain.lecture.report.enums.ReportType;
+import com.malnutrition.backend.domain.lecture.report.repository.ReportRepository;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
 import com.malnutrition.backend.domain.order.repository.OrderRepository;
@@ -39,6 +38,7 @@ public class AdminDashboardService {
     private final DailyMetricSnapshotRepository dailyMetricSnapshotRepository;
     private final LectureRepository lectureRepository;
     private final OrderRepository orderRepository;
+    private final ReportRepository reportRepository;
 
 
     public MetricWidgetDto getTotalUsersMetric() {
@@ -392,6 +392,24 @@ public class AdminDashboardService {
                 .bannedUsersCount(bannedUsers)
                 .deletedUsersCount(deletedUsers)
                 .build();
+    }
+
+    public List<DistributionDataDto> getLectureCategoryDistribution() {
+        List<Object[]> results = lectureRepository.countLecturesByCategory();
+        return results.stream()
+                .map(result -> new DistributionDataDto((String) result[0], (Long) result[1]))
+                .collect(Collectors.toList());
+    }
+
+    public List<DistributionDataDto> getReportTypeDistribution() {
+        List<Object[]> results = reportRepository.countReportsByType(); // 방금 추가한 메소드 호출
+        return results.stream()
+                .map(result -> {
+                    ReportType reportType = (ReportType) result[0];
+                    Long count = (Long) result[1];
+                    return new DistributionDataDto(reportType.getDescription(), count); // ReportType enum의 getDescription() 사용
+                })
+                .collect(Collectors.toList());
     }
 
 
