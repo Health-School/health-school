@@ -2,6 +2,7 @@ package com.malnutrition.backend.global.exception;
 
 import com.malnutrition.backend.global.ut.JwtUt;
 import com.malnutrition.backend.global.rp.ApiResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,13 @@ public class GlobalExceptionHandler {
         log.error("IllegalArgumentException: ", e);  // 스택트레이스 포함
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.fail("Error: " + e.getMessage()));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleEntityNotFoundException(EntityNotFoundException e) {
+        log.error("EntityNotFoundException: ", e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(e.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)

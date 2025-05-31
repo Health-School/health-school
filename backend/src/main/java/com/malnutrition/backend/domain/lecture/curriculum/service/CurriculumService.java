@@ -1,5 +1,7 @@
 package com.malnutrition.backend.domain.lecture.curriculum.service;
 
+import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
+import com.malnutrition.backend.domain.alarm.alarm.service.AlarmService;
 import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumResponseDto;
 import com.malnutrition.backend.domain.lecture.curriculum.dto.CurriculumUpdateRequestDto;
 import com.malnutrition.backend.domain.lecture.curriculum.entity.Curriculum;
@@ -7,6 +9,7 @@ import com.malnutrition.backend.domain.lecture.curriculum.repository.CurriculumR
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.enums.LectureStatus;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class CurriculumService {
     private final CurriculumS3Service curriculumS3Service;
     private final CurriculumRepository curriculumRepository;
     private final LectureRepository lectureRepository;
+    private final AlarmService alarmService;
     private final Rq rq;
 
     private static final long MAX_VIDEO_SIZE = 500L * 1024 * 1024; // 500MB
@@ -88,11 +92,15 @@ public class CurriculumService {
         }
 
         try {
-            return curriculumRepository.save(curriculum);
+            Curriculum savedCurriculum = curriculumRepository.save(curriculum);
+            alarmService.saveCurriculumRegisterMessage(lectureId); // 알람 메시지 전송
+            return savedCurriculum;
         } catch (DataIntegrityViolationException e) {
             throw new IllegalStateException("같은 순서(sequence)의 커리큘럼이 이미 존재합니다.");
         }
     }
+
+
 
     @Transactional
     public Curriculum updateCurriculum(Long curriculumId, CurriculumUpdateRequestDto dto) throws IOException {

@@ -3,10 +3,16 @@ package com.malnutrition.backend.domain.order.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.entity.CurriculumProgress;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.repository.CurriculumProgressRepository;
+import com.malnutrition.backend.domain.lecture.curriculumProgress.service.CurriculumProgressService;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
+import com.malnutrition.backend.domain.order.dto.CancelTossPaymentResponseDto;
 import com.malnutrition.backend.domain.order.dto.ConfirmPaymentRequestDto;
 import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
 import com.malnutrition.backend.domain.order.entity.Order;
 import com.malnutrition.backend.domain.order.enums.OrderStatus;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +32,8 @@ public class TossPaymentService {
 
     private final ObjectMapper objectMapper;
     private final OrderService orderService;
+    private final CurriculumProgressRepository curriculumProgressRepository;
+    private final LectureUserRepository lectureUserRepository;
     @Value("${tossPayments.secret-key}")
     private  String secretKey;
 
@@ -73,22 +81,34 @@ public class TossPaymentService {
     }
 
     @Transactional
-    public String requestPaymentCancel(String orderId, String cancelReason) throws IOException, InterruptedException {
+    public CancelTossPaymentResponseDto requestPaymentCancel(String orderId, String cancelReason) throws IOException, InterruptedException {
         ObjectNode body = objectMapper.createObjectNode();
         Order order = orderService.findById(orderId);
-        order.setOrderStatus(OrderStatus.CANCEL);
+        Long lectureId = order.getLecture().getId();
+        boolean exists = curriculumProgressRepository.existsByLectureId(lectureId);
 
+        if(exists){
+            throw new EntityNotFoundException("강의를 시청한 회원은 환불이 불가능합니다.");
+        }
+        order.setOrderStatus(OrderStatus.CANCEL);
+//        lectureUserRepository.deleteLectureUserByUserIdAndLectureId(order.getUser().getId(), lectureId); // 강의 삭제
         String paymentKey = order.getPaymentKey();
         body.put("cancelReason", cancelReason);
-        return webClient.post()
-                .uri("/"+ paymentKey + "/cancel")
-                .header("Authorization",getAuthorizations())
+        CancelTossPaymentResponseDto cancelTossPaymentResponseDto = webClient.post()
+                .uri("/" + paymentKey + "/cancel")
+                .header("Authorization", getAuthorizations())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
-                .toEntity(String.class)
+                .toEntity(CancelTossPaymentResponseDto.class)
                 .block()
                 .getBody();
+
+        order.setTossPaymentStatus(cancelTossPaymentResponseDto.getStatus());
+        order.setRequestedAt(cancelTossPaymentResponseDto.getRequestedAt().toLocalDateTime());
+        order.setApprovedAt(cancelTossPaymentResponseDto.getApprovedAt().toLocalDateTime());
+
+        return cancelTossPaymentResponseDto;
     }
     private String getAuthorizations(){
         String rawAuthKey = secretKey + ":";
