@@ -15,11 +15,24 @@ public class ReportResponseDto {
     private String title;
     private String content;
     private String lectureTitle;
+    private String reportTypeDescription; // 신고 유형의 한글 설명
+
 
     public ReportResponseDto(Report report) {
         this.id = report.getId();
         this.title = report.getTitle();
         this.content = report.getContent();
         this.lectureTitle = report.getLecture().getTitle(); // JOIN FETCH 필요!
+        this.reportTypeDescription = report.getReportType().getDescription();
+    }
+
+    public static ReportResponseDto fromEntity(Report report) {
+        return new ReportResponseDto(
+                report.getId(),
+                report.getTitle(),
+                report.getContent(),
+                report.getLecture().getTitle(),
+                report.getReportType().getDescription()
+                );
     }
 }
