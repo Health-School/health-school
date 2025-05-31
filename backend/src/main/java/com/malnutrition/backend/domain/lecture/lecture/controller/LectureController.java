@@ -100,6 +100,13 @@ public class LectureController {
         return ResponseEntity.ok(ApiResponse.success(lectures, "조회 성공!"));
     }
 
+    @GetMapping("/trainer-lecture")
+    public ResponseEntity<?> getTrainerLectures(){
+        List<LectureTrainerDto> lectureTrainers = lectureService.getLectureTrainers();
+
+        return ResponseEntity.ok(ApiResponse.success(lectureTrainers, "트레이너 강의 조회 성공"));
+    }
+
     @Operation(summary = "강의 대시보드 조회", description = "강의 대시보드 조회")
     @GetMapping("/{lectureId}/dashboard")
     public ResponseEntity<ApiResponse<LectureCurriculumDetailDto>> getLectureDashBoard(@PathVariable("lectureId") Long lectureId) {
@@ -107,6 +114,7 @@ public class LectureController {
 
         return ResponseEntity.ok(ApiResponse.success(lectureCurriculumDetailDto, "강의 대시보드 조회"));
     }
+
 
     @Operation(summary = "인기 강의 조회 ", description = "인기 강의 TOP 4 조회")
     @GetMapping("/popular")
