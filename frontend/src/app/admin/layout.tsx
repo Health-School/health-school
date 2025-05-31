@@ -145,7 +145,10 @@ if (!authContext || authContext.isLoginUserPending || !isAuthorized) {
 
             <li>
               <button
-                onClick={() => setActiveMenuItem('reports')}
+                onClick={() => {
+                    setActiveMenuItem('reports')
+                    router.push('/admin/reports');
+               }}
                 className={`w-full flex items-center space-x-3 px-6 py-3 ${activeMenuItem === 'reports' ? 'bg-[#34495E] text-[#2ECC71]' : 'text-gray-300 hover:bg-[#34495E] hover:text-white'} transition-colors duration-200 cursor-pointer`}
               >
                 <i className="fa-solid fa-flag w-5 text-center"></i>
