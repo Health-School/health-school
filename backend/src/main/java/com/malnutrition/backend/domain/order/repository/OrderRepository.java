@@ -40,7 +40,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     // 기간 조건 (1개월, 3개월, 6개월)
     List<Order> findAllByUserAndApprovedAtBetween(User user, LocalDateTime from, LocalDateTime to);
 
-    @Query("SELECT o FROM Order o WHERE o.user = :user AND o.approvedAt BETWEEN :start AND :end AND o.orderStatus = 'COMPLETED'")
+    @Query("SELECT o FROM Order o WHERE o.user = :user AND o.approvedAt BETWEEN :start AND :end AND o.orderStatus != 'PENDING'")
     Page<Order> findCompletedOrdersByUserAndApprovedAtBetween(
             @Param("user") User user,
             @Param("start") LocalDateTime start,
@@ -48,7 +48,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             Pageable pageable
     );
 
-    @Query("SELECT o FROM Order o WHERE o.user = :user AND o.orderStatus = 'COMPLETED'")
+    @Query("SELECT o FROM Order o WHERE o.user = :user AND o.orderStatus != 'PENDING'")
     Page<Order> findCompletedOrdersByUser(
             @Param("user") User user,
             Pageable pageable

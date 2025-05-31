@@ -1,6 +1,8 @@
 package com.malnutrition.backend.domain.order.controller;
 
 import com.malnutrition.backend.domain.lecture.lecture.service.LectureRankingRedisService;
+import com.malnutrition.backend.domain.order.dto.CancelOrderRequestDto;
+import com.malnutrition.backend.domain.order.dto.CancelTossPaymentResponseDto;
 import com.malnutrition.backend.domain.order.dto.ConfirmPaymentRequestDto;
 import com.malnutrition.backend.domain.order.dto.TossPaymentsResponse;
 import com.malnutrition.backend.domain.order.service.OrderService;
@@ -52,5 +54,14 @@ public class TossPaymentsController {
         }
         return ResponseEntity.internalServerError().body("결제 실패");
     }
+
+    @PostMapping("/cancel-order")
+    public ResponseEntity<ApiResponse<CancelTossPaymentResponseDto>> cancelOrder (@RequestBody CancelOrderRequestDto cancelOrderRequestDto) throws
+            IOException, InterruptedException {
+        CancelTossPaymentResponseDto cancelTossPaymentResponseDto = tossPaymentsService.requestPaymentCancel(cancelOrderRequestDto.getOrderId(), cancelOrderRequestDto.getCancelReason());
+
+        return ResponseEntity.ok(ApiResponse.success(cancelTossPaymentResponseDto, "환불 성공"));
+    }
+
 
 }

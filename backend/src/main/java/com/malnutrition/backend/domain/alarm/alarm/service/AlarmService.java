@@ -1,12 +1,15 @@
 package com.malnutrition.backend.domain.alarm.alarm.service;
 
+import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmType;
 import com.malnutrition.backend.domain.alarm.alarm.event.AlarmSendEvent;
 import com.malnutrition.backend.domain.alarm.alarm.dto.AlarmResponseDto;
 import com.malnutrition.backend.domain.alarm.alarm.entity.Alarm;
 import com.malnutrition.backend.domain.alarm.alarm.enums.AlarmEventType;
 import com.malnutrition.backend.domain.alarm.alarm.repository.alarmRepository.AlarmRepository;
 import com.malnutrition.backend.domain.alarm.alarm.repository.emitterRepository.EmitterRepositoryImpl;
+import com.malnutrition.backend.domain.lecture.lectureuser.repository.LectureUserRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
+import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,8 @@ public class AlarmService {
     private final Long DEFAULT_TIMEOUT = 60L * 1000L * 60L;
     private final EmitterRepositoryImpl emitterRepository;
     private final AlarmRepository alarmRepository;
+    private final LectureUserRepository lectureUserRepository;
+    private final Rq rq;
 
 
     @Transactional
@@ -153,6 +159,15 @@ public class AlarmService {
                 }
         );
     }
+    @Transactional
+    public void saveAllAlarmMessages(List<User> users,String title, String message, String url){
+        ArrayList<Alarm> alarms = new ArrayList<>();
+        users.forEach( listener -> {
+            Alarm alarm = createAlarmMessage(listener, title, message, url);
+            alarms.add(alarm);
+        });
+        alarmRepository.saveAll(alarms);
+    }
 
 
     private Alarm createAlarmMessage(User listener,String title, String message, String url) {
@@ -165,8 +180,17 @@ public class AlarmService {
                 .createdDate(LocalDateTime.now())
                 .build();
     }
-
     public void deleteAlarm(Long alarmId){
         alarmRepository.deleteById(alarmId);
     }
+
+    @Transactional
+    public void saveCurriculumRegisterMessage(Long lectureId) {
+        List<User> users = lectureUserRepository.findUsersByLectureId(lectureId);
+        String AlarmTitle = AlarmType.TRAINER_REPLY.formatTitle();
+        String AlarmMessage = AlarmType.TRAINER_REPLY.formatMessage(rq.getActor().getNickname(),"강의 등록");
+        String url = "/user/dashboard/my-lecture";
+        saveAllAlarmMessages(users,AlarmTitle,AlarmMessage, url);
+    }
+
 }

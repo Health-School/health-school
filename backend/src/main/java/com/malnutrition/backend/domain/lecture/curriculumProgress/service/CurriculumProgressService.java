@@ -96,4 +96,5 @@ public class CurriculumProgressService {
                 .build();
         curriculumProgressRepository.save(progress);
     }
+
 }

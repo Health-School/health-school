@@ -88,4 +88,8 @@ public interface LectureUserRepository extends JpaRepository<LectureUser, Long> 
 """)
     List<Lecture> findWithDetailsByIdIn(@Param("ids") List<Long> ids);
 
+    @Query("SELECT lu.user FROM LectureUser lu WHERE lu.lecture.id = :lectureId")
+    List<User> findUsersByLectureId(@Param("lectureId") Long lectureId);
+
+    void deleteLectureUserByUserIdAndLectureId(Long userId, Long lectureId);
 }

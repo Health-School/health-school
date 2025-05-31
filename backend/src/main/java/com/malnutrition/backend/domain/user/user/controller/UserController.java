@@ -33,11 +33,6 @@ public class UserController {
     private final UserCommandService userCommandService;
     private final Rq rq;
 
-    @GetMapping("/test")
-    public void test() throws BadRequestException, CredentialException {
-        throw new CredentialException("신용 불량자");
-    }
-
     @Operation(
             summary = "회원가입",
             description = "이메일과 비밀번호 닉네임을 입력하여 회원가입합니다..",
@@ -106,6 +101,8 @@ public class UserController {
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<Void>> withdrawalUser(@RequestBody PasswordRequestDto passwordRequestDto){
         User actor = rq.getActor();
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
         userService.deleteUser(actor.getId(), passwordRequestDto.getPassword());
         return ResponseEntity.ok(ApiResponse.success(null, "회원탈퇴 성공"));
     }

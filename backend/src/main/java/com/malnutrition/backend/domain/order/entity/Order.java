@@ -53,7 +53,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private TossPaymentStatus tossPaymentStatus;
 
-
     LocalDateTime requestedAt; //결제 요청 시간
 
     LocalDateTime approvedAt; //결제 승인 시간

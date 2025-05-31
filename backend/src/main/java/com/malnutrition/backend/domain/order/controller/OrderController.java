@@ -28,7 +28,6 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final TossPaymentService tossPaymentService;
     private final Rq rq;
 
     // 사용자의 결제 내역을 조회
@@ -80,14 +79,6 @@ public class OrderController {
     }
 
 
-
-    @PostMapping("/cancel-order")
-    public ResponseEntity<ApiResponse<String>> cancelOrder (@RequestBody CancelOrderRequestDto cancelOrderRequestDto) throws
-            IOException, InterruptedException {
-        String cancelContent = tossPaymentService.requestPaymentCancel(cancelOrderRequestDto.getOrderId(), cancelOrderRequestDto.getCancelReason());
-
-        return ResponseEntity.ok(ApiResponse.success(cancelContent, "환불 성공"));
-    }
 
     @GetMapping("/settlements")
     public ResponseEntity<?> getTrainerSettlementOrders(
