@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.admin.dashboard.controller;
 
 import com.malnutrition.backend.domain.admin.dashboard.dto.ChartDataDto;
+import com.malnutrition.backend.domain.admin.dashboard.dto.DistributionDataDto;
 import com.malnutrition.backend.domain.admin.dashboard.dto.MetricWidgetDto;
 import com.malnutrition.backend.domain.admin.dashboard.dto.AdminUserDashboardSummaryDto;
 import com.malnutrition.backend.domain.admin.dashboard.service.AdminDashboardService;
@@ -47,7 +48,7 @@ public class AdminDashboardController {
     public ResponseEntity<ApiResponse<ChartDataDto>> getUserGrowthTrend(
             @Parameter(description = "데이터 간격 ('daily', 'weekly', 'monthly')", example = "daily")
             @RequestParam(defaultValue = "daily") String interval) {
-        try{
+        try {
             ChartDataDto chartData = adminDashboardService.getUserGrowthTrendByInterval(interval);
             return ResponseEntity.ok(ApiResponse.success(chartData, "사용자 증가 추이 조회 성공"));
 
@@ -63,13 +64,13 @@ public class AdminDashboardController {
     )
     @GetMapping("/sales-amount-trend")
     public ResponseEntity<ApiResponse<ChartDataDto>> getSalesAmountTrend(
-            @Parameter(description = "데이터 간격 ('daily', 'weekly', 'monthly' ", example  = "daily")
+            @Parameter(description = "데이터 간격 ('daily', 'weekly', 'monthly' ", example = "daily")
             @RequestParam(defaultValue = "daily") String interval) {
 
-        try{
+        try {
             ChartDataDto chartData = adminDashboardService.getSalesAmountTrendByInterval(interval);
             return ResponseEntity.ok(ApiResponse.success(chartData, "결제 금액 추이 조회 성공"));
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.fail(e.getMessage()));
         }
 
@@ -94,5 +95,25 @@ public class AdminDashboardController {
 
     }
 
+    @Operation(summary = "강의 카테고리별 분포 조회",
+            description = "각 강의 카테고리에 속한 강의의 수를 조회합니다.",
+            tags = {"Admin Dashboard API"})
+    @GetMapping("/lecture-category-distribution")
+    public ResponseEntity<ApiResponse<List<DistributionDataDto>>> getLectureCategoryDistribution() {
+        List<DistributionDataDto> distributionData = adminDashboardService.getLectureCategoryDistribution();
+        return ResponseEntity.ok(ApiResponse.success(distributionData, "강의 카테고리 분포 조회 성공"));
+    }
+
+
+    @Operation(summary = "신고 유형별 분포 조회",
+            description = "각 신고 유형별 신고 건수를 조회합니다.",
+            tags = {"Admin Dashboard API"})
+    @GetMapping("/report-type-distribution")
+    public ResponseEntity<ApiResponse<List<DistributionDataDto>>> getReportTypeDistribution() {
+        List<DistributionDataDto> distributionData = adminDashboardService.getReportTypeDistribution();
+        return ResponseEntity.ok(ApiResponse.success(distributionData, "신고 유형별 분포 조회 성공"));
+
+
+    }
 
 }

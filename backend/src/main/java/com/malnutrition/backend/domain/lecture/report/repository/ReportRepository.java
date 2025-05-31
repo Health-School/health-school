@@ -34,4 +34,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     @Query("SELECT r FROM Report r JOIN FETCH r.lecture l WHERE r.id = :reportId")
     Optional<Report> findByIdWithLecture(@Param("reportId") Long reportId);
+
+    @Query("SELECT r.reportType AS reportType, COUNT(r.id) AS reportCount " +
+            "FROM Report r " +
+            "GROUP BY r.reportType")
+    List<Object[]> countReportsByType();
 }

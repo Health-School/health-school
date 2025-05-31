@@ -17,6 +17,12 @@ interface ChartDataDto {
   dataPoints: DataPoint[];
 }
 
+interface PieChartDataPoint { name: string; value: number; }
+interface PieChartDataDto {
+  chartName?: string;
+  dataPoints: PieChartDataPoint[];
+}
+
 const metricDisplayConfig: {
   [key: string]: {
     icon: string;
@@ -89,6 +95,17 @@ const DashboardPageContent: React.FC = () => {
   const [salesChartPeriod, setSalesChartPeriod] = useState<
     "daily" | "weekly" | "monthly"
   >("daily");
+
+
+   // 강의 카테고리 분포 차트 데이터
+   const [categoryDistributionData, setCategoryDistributionData] = useState<PieChartDataDto | null>(null);
+   const [categoryDistributionLoading, setCategoryDistributionLoading] = useState<boolean>(true);
+   const [categoryDistributionError, setCategoryDistributionError] = useState<string | null>(null);
+
+   // 신고 유형별 현황 차트 데이터
+   const [reportTypeData, setReportTypeData] = useState<PieChartDataDto | null>(null);
+   const [reportTypeLoading, setReportTypeLoading] = useState<boolean>(true);
+   const [reportTypeError, setReportTypeError] = useState<string | null>(null);
 
   //   const handleViewNotice = (notice: Notice) => {
   //     setSelectedNotice({
@@ -169,6 +186,98 @@ const DashboardPageContent: React.FC = () => {
 
     fetchMetrics();
   }, []);
+
+  useEffect(() => {
+    const fetchCategoryDistributionData = async () => {
+      setCategoryDistributionLoading(true); // 데이터 가져오기 시작! 로딩 중으로 표시
+      setCategoryDistributionError(null);   // 이전 에러가 있었다면 초기화
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8090";
+
+      try {
+        // 백엔드 API 호출!
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/admin/dashboard/lecture-category-distribution`, // 우리가 백엔드에 만들기로 약속한 API 주소
+          {
+            method: "GET", // 데이터를 가져올 때는 GET 방식
+            credentials: "include", // 백엔드와 쿠키를 주고받기 위한 설정
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        // API 응답이 성공적이지 않으면 에러 처리
+        if (!response.ok) {
+          if (response.status === 403) { // 권한 없음 에러
+            throw new Error("강의 카테고리 분포 데이터를 불러올 권한이 없습니다.");
+          }
+          // 기타 에러
+          const errorData = await response.json().catch(() => ({
+            message: `HTTP error! status: ${response.status}`,
+          }));
+          throw new Error(errorData.message || `강의 카테고리 분포 데이터 로딩 실패: ${response.status}`);
+        }
+
+        const result: { success: boolean; data: PieChartDataPoint[]; message: string; } = await response.json();
+
+        if (result.success && result.data) {
+          setCategoryDistributionData({ chartName: "강의 카테고리 분포", dataPoints: result.data });
+        } else {
+          throw new Error(result.message || "강의 카테고리 분포 데이터 형식이 올바르지 않습니다.");
+        }
+      } catch (err: any) {
+        setCategoryDistributionError(err.message);
+        console.error("Error fetching category distribution data:", err);
+      } finally {
+        setCategoryDistributionLoading(false);
+      }
+    };
+    fetchCategoryDistributionData();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchReportTypeData = async () => {
+      setReportTypeLoading(true);
+      setReportTypeError(null);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8090";
+
+      try {
+        const response = await fetch(
+          `${apiBaseUrl}/api/v1/admin/dashboard/report-type-distribution`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 403) {
+            throw new Error("신고 유형별 현황 데이터를 불러올 권한이 없습니다.");
+          }
+
+          const errorData = await response.json().catch(() => ({
+            message: `HTTP error! status: ${response.status}`,
+          }));
+          throw new Error(errorData.message || `신고 유형별 현황 데이터 로딩 실패: ${response.status}`);
+        }
+
+        const result: { success: boolean; data: PieChartDataPoint[]; message: string; } = await response.json();
+
+        if (result.success && result.data) {
+          setReportTypeData({ chartName: "신고 유형별 현황", dataPoints: result.data });
+        } else {
+          throw new Error(result.message || "신고 유형별 현황 데이터 형식이 올바르지 않습니다.");
+        }
+      } catch (err: any) {
+        setReportTypeError(err.message);
+        console.error("Error fetching report type data:", err);
+      } finally {
+        setReportTypeLoading(false);
+      }
+    };
+    fetchReportTypeData();
+  }, []);
+
 
   useEffect(() => {
     const fetchUserGrowthData = async () => {
@@ -372,99 +481,120 @@ const DashboardPageContent: React.FC = () => {
     }
 
     const categoryChartElement = document.getElementById(
-      "categoryDistributionChart"
-    );
-    if (categoryChartElement) {
-      const categoryChart =
-        echarts.getInstanceByDom(categoryChartElement) ||
-        echarts.init(categoryChartElement);
-      const categoryOption = {
-        animation: false,
-        tooltip: { trigger: "item" },
-        legend: {
-          orient: "vertical" as const,
-          left: "left" as const,
-          textStyle: { color: "#2C3E50" },
-        },
-        series: [
-          {
-            name: "강의 카테고리",
-            type: "pie" as const,
-            radius: "70%",
-            data: [
-              { value: 35, name: "요가" },
-              { value: 25, name: "필라테스" },
-              { value: 20, name: "웨이트 트레이닝" },
-              { value: 15, name: "홈트레이닝" },
-              { value: 5, name: "기타" },
-            ],
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: "rgba(0, 0, 0, 0.5)",
-              },
-            },
-            itemStyle: {
-              color: function (params: any) {
-                const colorList = [
-                  "#2ECC71",
-                  "#3498DB",
-                  "#9B59B6",
-                  "#F1C40F",
-                  "#E74C3C",
-                ];
-                return colorList[params.dataIndex];
-              },
-            },
-          },
-        ],
-      };
-      categoryChart.setOption(categoryOption);
-    }
+          "categoryDistributionChart"
+        );
+        if (categoryChartElement) {
+          const categoryChart =
+            echarts.getInstanceByDom(categoryChartElement) ||
+            echarts.init(categoryChartElement);
 
-    const reportChartElement = document.getElementById("reportTypeChart");
-    if (reportChartElement) {
-      const reportChart =
-        echarts.getInstanceByDom(reportChartElement) ||
-        echarts.init(reportChartElement);
-      const reportOption = {
-        animation: false,
-        tooltip: { trigger: "item" },
-        legend: {
-          orient: "vertical" as const,
-          left: "left" as const,
-          textStyle: { color: "#2C3E50" },
-        },
-        series: [
-          {
-            name: "신고 유형",
-            type: "pie" as const,
-            radius: "70%",
-            data: [
-              { value: 40, name: "부적절한 콘텐츠" },
-              { value: 25, name: "허위 정보" },
-              { value: 20, name: "저작권 침해" },
-              { value: 15, name: "기타" },
-            ],
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: "rgba(0, 0, 0, 0.5)",
+          // 로딩 중일 때 처리
+          if (categoryDistributionLoading) {
+            categoryChart.showLoading();
+          }
+          // 에러 발생 시 처리
+          else if (categoryDistributionError) {
+            categoryChart.hideLoading();
+            categoryChartElement.innerHTML = `<div class="flex items-center justify-center h-full text-red-500 p-4">⚠️ 강의 카테고리 분포 로딩 실패: ${categoryDistributionError}</div>`;
+          }
+          else if (categoryDistributionData && categoryDistributionData.dataPoints && categoryDistributionData.dataPoints.length > 0) {
+            categoryChart.hideLoading();
+            const categoryOption: EChartsOption = {
+              animation: false,
+              tooltip: { trigger: "item" },
+              legend: {
+                orient: "vertical" as const,
+                left: "left" as const,
+                textStyle: { color: "#2C3E50" },
               },
-            },
-            itemStyle: {
-              color: function (params: any) {
-                const colorList = ["#E74C3C", "#F39C12", "#3498DB", "#95A5A6"];
-                return colorList[params.dataIndex];
+              series: [
+                {
+                  name: categoryDistributionData.chartName || "강의 카테고리",
+                  type: "pie" as const,
+                  radius: "70%",
+                  data: categoryDistributionData.dataPoints,
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: "rgba(0, 0, 0, 0.5)",
+                    },
+                  },
+                  itemStyle: {
+                    color: function (params: any) {
+                      const colorList = [
+                        "#2ECC71", "#3498DB", "#9B59B6", "#F1C40F",
+                        "#E74C3C", "#1ABC9C", "#E67E22", "#BDC3C7"
+                      ];
+                      return colorList[params.dataIndex % colorList.length];
+                    },
+                  },
+                },
+              ],
+            };
+            categoryChart.setOption(categoryOption);
+          }
+          // 데이터가 없거나 비어있을 때 처리
+          else {
+             categoryChart.hideLoading();
+             categoryChartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500 p-4">📊 강의 카테고리 데이터가 없습니다.</div>`;
+          }
+        }
+
+     const reportChartElement = document.getElementById("reportTypeChart");
+        if (reportChartElement) {
+          const reportChart =
+            echarts.getInstanceByDom(reportChartElement) ||
+            echarts.init(reportChartElement);
+
+          if (reportTypeLoading) {
+            reportChart.showLoading();
+          }
+
+          else if (reportTypeError) {
+            reportChart.hideLoading();
+            reportChartElement.innerHTML = `<div class="flex items-center justify-center h-full text-red-500 p-4">⚠️ 신고 유형 현황 로딩 실패: ${reportTypeError}</div>`;
+          }
+          else if (reportTypeData && reportTypeData.dataPoints && reportTypeData.dataPoints.length > 0) {
+            reportChart.hideLoading();
+            const reportOption: EChartsOption = {
+              animation: false,
+              tooltip: { trigger: "item" },
+              legend: {
+                orient: "vertical" as const,
+                left: "left" as const,
+                textStyle: { color: "#2C3E50" },
               },
-            },
-          },
-        ],
-      };
-      reportChart.setOption(reportOption);
-    }
+              series: [
+                {
+                  name: reportTypeData.chartName || "신고 유형", //
+                  type: "pie" as const,
+                  radius: "70%",
+                  data: reportTypeData.dataPoints, //
+                  emphasis: {
+                    itemStyle: {
+                      shadowBlur: 10,
+                      shadowOffsetX: 0,
+                      shadowColor: "rgba(0, 0, 0, 0.5)",
+                    },
+                  },
+                  itemStyle: {
+                    color: function (params: any) {
+                      const colorList = ["#E74C3C", "#F39C12", "#3498DB",
+                                         "#95A5A6", "#16A085", "#D35400"];
+                      return colorList[params.dataIndex % colorList.length];
+                    },
+                  },
+                },
+              ],
+            };
+            reportChart.setOption(reportOption);
+          }
+          else {
+            reportChart.hideLoading();
+            reportChartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500 p-4">🚨 신고 유형 데이터가 없습니다.</div>`;
+          }
+        }
 
     const handleResize = () => {
       if (userChartElement && echarts.getInstanceByDom(userChartElement))
@@ -505,6 +635,12 @@ const DashboardPageContent: React.FC = () => {
     salesAmountData,
     salesAmountLoading,
     salesAmountError,
+    categoryDistributionData,
+    categoryDistributionLoading,
+    categoryDistributionError,
+    reportTypeData,
+    reportTypeLoading,
+    reportTypeError
   ]);
 
   return (
