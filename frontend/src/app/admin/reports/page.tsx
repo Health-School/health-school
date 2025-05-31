@@ -148,7 +148,7 @@ const App: React.FC = () => {
     // setIsLoading(true); // 로딩 상태 관리한다면 주석 해제
 
     try {
-      const apiUrl = `${API_BASE_URL}/api/v1/admin/reports/${selectedReport.id}/notify-trainer`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/reports/${selectedReport.id}/notify-trainer`;
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -198,7 +198,7 @@ const App: React.FC = () => {
     // 지금은 detailModalSelectedStatus가 이미 Enum 값(PENDING, RESOLVED, REJECTED)이라고 가정
 
     try {
-      const apiUrl = `${API_BASE_URL}/api/v1/admin/reports/${selectedReport.id}/status`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/admin/reports/${selectedReport.id}/status`;
       const response = await fetch(apiUrl, {
         method: "PUT",
         headers: {
