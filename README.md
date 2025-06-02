@@ -133,7 +133,7 @@
 <summary>🧑‍💬 실시간 상담 및 챗봇</summary>
 
 - WebSocket 기반 1:1 상담 채팅
-  <p>
+<p>
   <td>
       <img src="https://github.com/user-attachments/assets/3b827694-e1ad-4e70-adfc-f5017b431735" width="600")/>
       </td>
@@ -151,10 +151,10 @@
 <summary>💬 커뮤니티 및 QnA</summary>
 
 - 강의별 QnA 게시판 운영
-  <p>
+<p>
   <td>
       <img src="https://github.com/user-attachments/assets/9404e996-6a39-4fc4-abf1-3871dba0b20b" width="600")/>
-      </td>
+    </td>
 </p>
 - 댓글 및 좋아요 기능 제공  
 <p>
@@ -169,10 +169,10 @@
 <summary>📩 알림 시스템</summary>
 
 - 강의 등록, 댓글 작성 등 이벤트 기반 알림 제공
-- <p>
+<p>
   <td>
       <img src="https://github.com/user-attachments/assets/7da89598-5589-4965-a03f-997b0d897d2d" width="600")/>
-      </td>
+    </td>
 </p>
 - Redis 기반 빠른 푸시/실시간 처리  
 <p>
@@ -184,10 +184,10 @@
 <summary>📁 파일 업로드 (이미지 & 영상)</summary>
 
 - Amazon S3를 이용한 이미지/강의영상 업로드 및 스트리밍
-  <p>
+<p>
   <td>
       <img src="https://github.com/user-attachments/assets/8ae0b502-5569-49a7-9772-b03d3d73d19f" width="600")/>
-      </td>
+    </td>
 </p>
 - 이미지 업로드 시 전역 관리 시스템 포함  
 <p>
