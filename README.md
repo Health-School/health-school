@@ -1,4 +1,4 @@
-![트레이너_강의등록](https://github.com/user-attachments/assets/93632b7c-1322-47f5-b7b0-efe6a451628c)<div align="center">
+<div align="center">
   <img src="https://github.com/user-attachments/assets/35f6c90c-5417-477d-b06b-dfa0b51d50d8" />
 </div>
 
@@ -46,7 +46,7 @@
 
 - 트레이너가 강의를 등록하고 사용자에게 노출
       <td>
-        <img src="![트레이너_강의등록](https://github.com/user-attachments/assets/d0c25b5c-849e-4c58-87c5-a49e5e9b3385)" />
+      ![트레이너_강의등록](https://github.com/user-attachments/assets/93632b7c-1322-47f5-b7b0-efe6a451628c)
       </td>
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
 - 수강률 기반 진도율 관리 및 완료 체크 기능  
