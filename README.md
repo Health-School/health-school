@@ -60,19 +60,19 @@
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/43e8c709-cfd1-4fc0-a528-34a7e6db97a8" width="600")/>
-      </td>
+  </td>
 </p>
 - 강의 및 커리큘럼 신고 기능 
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/113d060b-9239-4181-8ba8-36311168a962" width="600")/>
-      </td>
+  </td>
 </p>
 - 강의에 관한 검색 기능
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/af2e68e5-763e-4024-b0bf-193bce9fcf58" width="600")/>
-      </td>
+  </td>
 </p>
 
 
@@ -85,15 +85,14 @@
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/af2e68e5-763e-4024-b0bf-193bce9fcf58" width="600")/>
-      </td>
+   </td>
 </p>
 
 - 운동기구와 사용자 목표 달성을 위한 운동기록 내역 제공
-
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/ab18e119-98e8-4619-816c-466601c7b60d" width="600")/>
-      </td>
+    </td>
 </p>
 
 </details>
@@ -102,7 +101,7 @@
 <summary>📦 주문 및 결제 시스템</summary>
 
 - 강의 결제 및 수강 신청 처리
-  <p>
+<p>
   <td>
       <img src="https://github.com/user-attachments/assets/12652c88-243c-42cf-a6b6-faf4081d21e9" width="600")/>
       </td>
@@ -112,7 +111,7 @@
 <p>
   <td>
       <img src="https://github.com/user-attachments/assets/93c50758-f92d-45db-a1fb-a05a60daa977" width="600")/>
-      </td>
+   </td>
 </p>
 
 </details>
@@ -125,7 +124,7 @@
   <p>
   <td>
       <img src="https://github.com/user-attachments/assets/7c02516b-7a7b-472e-90b9-8a6480df47cd" width="600")/>
-      </td>
+    </td>
 </p>
 
 </details>
