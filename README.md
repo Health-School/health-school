@@ -29,7 +29,7 @@
 |:------------------------------------------:|:--------------------------------------:|:---------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
 |     <img src="" alt="강성민" width="150">     |   <img src="" alt="강준호" width="150">   |   <img src="" alt="권태윤" width="150">    |    <img src="" alt="유광륜" width="150">     |     <img src="" alt="최정인" width="150">    |
 |                     팀장                     |                  부팀장                   |                   팀원                    |                    팀원                     |                    팀원                     |
-|  [GitHub](https://github.com/thatisbummer)  | [GitHub](https://github.com/0320kangk) | [GitHub]() | [GitHub](https://github.com/yoogwangryun) | [GitHub]() |
+|  [GitHub](https://github.com/thatisbummer)  | [GitHub](https://github.com/0320kangk) | [GitHub](https://github.com/Kwon-TaeYun) | [GitHub](https://github.com/yoogwangryun) | [GitHub](https://github.com/bombab) |
 
 
 ---
