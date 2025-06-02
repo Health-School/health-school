@@ -51,6 +51,11 @@
       </td>
 </p>
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/be39f71d-6e5f-4fa0-9ab6-40504bad2f03" width="600")/>
+      </td>
+</p>
 - 수강률 기반 진도율 관리 및 완료 체크 기능  
 - 강의 및 커리큘럼 신고 기능  
 - 강의에 관한 검색 기능
