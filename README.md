@@ -45,11 +45,10 @@
 <summary>🎓 강의 및 커리큘럼 관리</summary>
 
 - 트레이너가 강의를 등록하고 사용자에게 노출
-  <tr>
       <td>
       <img src="https://github.com/user-attachments/assets/6705170f-64e0-4e9a-8830-7d86f83d70aa" width="600"/>
       </td>
-  </tr>
+      <p></p>
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
 - 수강률 기반 진도율 관리 및 완료 체크 기능  
 - 강의 및 커리큘럼 신고 기능  
