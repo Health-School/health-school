@@ -47,7 +47,7 @@
 - 트레이너가 강의를 등록하고 사용자에게 노출
   <tr>
       <td>
-      <img src="![트레이너_새클래스 등록](https://github.com/user-attachments/assets/6705170f-64e0-4e9a-8830-7d86f83d70aa)" />
+      <img src="https://github.com/user-attachments/assets/6705170f-64e0-4e9a-8830-7d86f83d70aa" width="600"/>
       </td>
   </tr>
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
