@@ -47,7 +47,6 @@
 - 트레이너가 강의를 등록하고 사용자에게 노출
       <td>
       ![트레이너_새클래스 등록](https://github.com/user-attachments/assets/095a5730-0c85-4685-b65c-4f7ba2e1b84e),
-      ![트레이너_강의등록](https://github.com/user-attachments/assets/93632b7c-1322-47f5-b7b0-efe6a451628c)
       </td>
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
 - 수강률 기반 진도율 관리 및 완료 체크 기능  
