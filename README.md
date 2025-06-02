@@ -56,9 +56,24 @@
       <img src="https://github.com/user-attachments/assets/be39f71d-6e5f-4fa0-9ab6-40504bad2f03" width="600")/>
       </td>
 </p>
-- 수강률 기반 진도율 관리 및 완료 체크 기능  
-- 강의 및 커리큘럼 신고 기능  
+- 수강생 관리 및 진도율 체크
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/43e8c709-cfd1-4fc0-a528-34a7e6db97a8" width="600")/>
+      </td>
+</p>
+- 강의 및 커리큘럼 신고 기능 
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/113d060b-9239-4181-8ba8-36311168a962" width="600")/>
+      </td>
+</p>
 - 강의에 관한 검색 기능
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/af2e68e5-763e-4024-b0bf-193bce9fcf58" width="600")/>
+      </td>
+</p>
 
 
 </details>
