@@ -87,12 +87,11 @@ public class SecurityConfig {
     }
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.healthschool.site")); // 프론트 도메인
+        config.setAllowedOrigins(List.of("http://localhost:3000", "https://www.healthschool.site")); // 요청 도메인
         config.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"));
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-
         // SSE를 위한 추가 헤더 설정
         config.setExposedHeaders(List.of("Last-Event-ID", "Cache-Control", "Connection"));
 
