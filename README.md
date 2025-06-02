@@ -53,6 +53,7 @@
 - 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
 <p>
   <td>
+    <img src="https://github.com/user-attachments/assets/c6957ba7-1f48-4228-bb1a-a6b226f2344a" width="600"/>
   </td>
 </p>
 - 수강생 관리 및 진도율 체크
@@ -198,8 +199,18 @@
 <details>
 <summary>🧾 사용자 인증 관리</summary>
 
-- 사용자 인증서 업로드 및 관리자 검수  
-- 인증 상태 및 이력 확인 가능  
+- 사용자 인증서 업로드 및 관리자 검수
+  <p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/9010194b-a618-411a-87a3-4c4f4999835c" width="600")/>
+      </td>
+</p>
+- 인증 상태 및 이력 확인 가능
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/4ef34f67-855a-450d-b2e5-d3ea418926cd" width="600")/>
+      </td>
+</p>
 
 </details>
 
