@@ -253,10 +253,11 @@ export default function ChatRoom({ roomId, onClose }: ChatRoomProps) {
             );
 
             // 퇴장 메시지 구독
-            console.log(
-              "퇴장 메시지 구독 시도:",
-              `/subscribe/leave/room/${roomId}`
-            );
+            // console.log(
+            //   "퇴장 메시지 구독 시도:",
+            //   `/subscribe/leave/room/${roomId}`
+            // );
+
             leaveSubscription = client.subscribe(
               `/subscribe/leave/room/${roomId}`,
               (message) => {
