@@ -35,7 +35,7 @@ public class QnaBoardController {
             @Parameter(description = "사용자 ID") @RequestParam("userId") Long userId,
             @RequestBody QnaBoardRequestDto requestDto) {
         return ResponseEntity.ok(ApiResponse.success(qnaBoardService.createQna(userId, requestDto),"생성성공"));
-        }
+    }
 
     @Operation(summary = "Q&A 질문 단건 조회", description = "QnA 게시글 ID로 특정 질문을 조회합니다.")
     @GetMapping("/{qnaId}")
