@@ -4,6 +4,7 @@ interface QnaBoardRequestDto {
   title: string;
   content: string;
   lectureId: number;
+  openStatus: "OPEN" | "CLOSED"; // OpenStatus enum 추가
 }
 
 interface QnaFormProps {
@@ -15,6 +16,7 @@ interface QnaFormProps {
 const QnaForm: React.FC<QnaFormProps> = ({ lectureId, userId, onSuccess }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [openStatus, setOpenStatus] = useState<"OPEN" | "CLOSED">("OPEN"); // 기본값은 공개(OPEN)
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -27,6 +29,7 @@ const QnaForm: React.FC<QnaFormProps> = ({ lectureId, userId, onSuccess }) => {
       title,
       content,
       lectureId,
+      openStatus, // openStatus 추가
     };
 
     try {
@@ -43,6 +46,7 @@ const QnaForm: React.FC<QnaFormProps> = ({ lectureId, userId, onSuccess }) => {
       if (res.ok) {
         setTitle("");
         setContent("");
+        setOpenStatus("OPEN"); // 폼 초기화 시 공개 상태로 되돌림
         setSuccess(true);
         alert("QnA가 성공적으로 등록되었습니다."); // 등록 완료 시 알림창
         setTimeout(() => setSuccess(false), 1000); // 1초 후 등록 완료 문구 사라짐
@@ -87,6 +91,34 @@ const QnaForm: React.FC<QnaFormProps> = ({ lectureId, userId, onSuccess }) => {
           rows={4}
           className="w-full mb-4 px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-base resize-y focus:outline-none focus:ring-2 focus:ring-green-200"
         />
+        
+        {/* 공개/비공개 선택 버튼 그룹 추가 */}
+        <div className="flex mb-4 space-x-2">
+          <span className="text-gray-700 mr-2">공개 설정:</span>
+          <button
+            type="button"
+            onClick={() => setOpenStatus("OPEN")}
+            className={`px-4 py-2 text-sm rounded-lg ${
+              openStatus === "OPEN"
+                ? "bg-green-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            공개
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpenStatus("CLOSED")}
+            className={`px-4 py-2 text-sm rounded-lg ${
+              openStatus === "CLOSED"
+                ? "bg-red-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            비공개
+          </button>
+        </div>
+        
         <button
           type="submit"
           disabled={loading}
