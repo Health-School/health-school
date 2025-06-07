@@ -473,16 +473,16 @@ export default function LectureManagePage({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/comment`,
+        // 수정된 API 경로
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/comment/${qnaBoardId}/comments`,
         {
           method: "POST",
-          credentials: "include", // 이 옵션으로 인해 쿠키의 인증 정보가 전송됨
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             content,
-            qnaboardId: qnaBoardId,
             parentCommentId: null,
             userId: loginUser?.id,
           }),

@@ -40,44 +40,179 @@
 
 # 🔥주요기능 
 
-### 🎓 강의 및 커리큘럼 관리
+
+<details>
+<summary>🎓 강의 및 커리큘럼 관리</summary>
+
 - 트레이너가 강의를 등록하고 사용자에게 노출
-- 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장
-- 수강률 기반 진도율 관리 및 완료 체크 기능
-- 강의 및 커리큘럼 신고 기능
+<p>
+      <td>
+      <img src="https://github.com/user-attachments/assets/6705170f-64e0-4e9a-8830-7d86f83d70aa" width="600"/>
+      </td>
+</p>
+- 커리큘럼 단위로 콘텐츠 구성 및 시청 기록 저장  
+<p>
+  <td>
+    <img src="https://github.com/user-attachments/assets/c6957ba7-1f48-4228-bb1a-a6b226f2344a" width="600"/>
+  </td>
+</p>
+- 수강생 관리 및 진도율 체크
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/43e8c709-cfd1-4fc0-a528-34a7e6db97a8" width="600")/>
+  </td>
+</p>
+- 강의 및 커리큘럼 신고 기능 
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/113d060b-9239-4181-8ba8-36311168a962" width="600")/>
+  </td>
+</p>
 - 강의에 관한 검색 기능
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/af2e68e5-763e-4024-b0bf-193bce9fcf58" width="600")/>
+  </td>
+</p>
 
-### 🏋️‍♀️ 운동 루틴 및 기구 추천
-- 운동기구/부위별 연관성 기반 루틴 추천
-- 운동기구와 사용자 목표(근비대, 다이어트 등)에 맞춘 콘텐츠 제공
 
-### 📦 주문 및 결제 시스템
+</details>
+
+<details>
+<summary>🏋️‍♀️ 운동 루틴 및 기구 추천</summary>
+
+- 운동기구/부위별 연관성 기반 기구 추천
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/af2e68e5-763e-4024-b0bf-193bce9fcf58" width="600")/>
+   </td>
+</p>
+
+- 운동기구와 사용자 목표 달성을 위한 운동기록 내역 제공
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/ab18e119-98e8-4619-816c-466601c7b60d" width="600")/>
+    </td>
+</p>
+
+</details>
+
+<details>
+<summary>📦 주문 및 결제 시스템</summary>
+
 - 강의 결제 및 수강 신청 처리
-- Toss Payments API 연동을 통한 안전한 결제 지원
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/12652c88-243c-42cf-a6b6-faf4081d21e9" width="600")/>
+      </td>
+</p>
 
-### 👥 사용자 권한 및 인증
+- Toss Payments API 연동을 통한 안전한 결제 지원
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/93c50758-f92d-45db-a1fb-a05a60daa977" width="600")/>
+   </td>
+</p>
+
+</details>
+
+<details>
+<summary>👥 사용자 권한 및 인증</summary>
+
 - 일반 사용자 / 트레이너 / 관리자 권한 구분
 - 소셜 로그인 (카카오) 및 JWT 기반 인증 처리
+  <p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/7c02516b-7a7b-472e-90b9-8a6480df47cd" width="600")/>
+    </td>
+</p>
 
-### 🧑‍💬 실시간 상담 및 챗봇
+</details>
+
+<details>
+<summary>🧑‍💬 실시간 상담 및 챗봇</summary>
+
 - WebSocket 기반 1:1 상담 채팅
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/3b827694-e1ad-4e70-adfc-f5017b431735" width="600")/>
+      </td>
+</p>
 - 챗봇을 통한 기본 질문 응답 기능 제공
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/ef8c8140-9b6d-439a-aa00-ca1a3f842629" width="600")/>
+      </td>
+</p>
 
-### 💬 커뮤니티 및 QnA
+</details>
+
+<details>
+<summary>💬 커뮤니티 및 QnA</summary>
+
 - 강의별 QnA 게시판 운영
-- 댓글 및 좋아요 기능 제공
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/9404e996-6a39-4fc4-abf1-3871dba0b20b" width="600")/>
+    </td>
+</p>
+- 댓글 및 좋아요 기능 제공  
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/7fe9d7cd-6b5e-4549-8d3a-f4b727a5f0c5" width="600")/>
+      </td>
+</p>
 
-### 📩 알림 시스템
+</details>
+
+<details>
+<summary>📩 알림 시스템</summary>
+
 - 강의 등록, 댓글 작성 등 이벤트 기반 알림 제공
-- Redis 기반 빠른 푸시/실시간 처리
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/7da89598-5589-4965-a03f-997b0d897d2d" width="600")/>
+    </td>
+</p>
+- Redis 기반 빠른 푸시/실시간 처리  
+<p>
+</p>
 
-### 📁 파일 업로드 (이미지 & 영상)
+</details>
+
+<details>
+<summary>📁 파일 업로드 (이미지 & 영상)</summary>
+
 - Amazon S3를 이용한 이미지/강의영상 업로드 및 스트리밍
-- 이미지 업로드 시 전역 관리 시스템 포함
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/8ae0b502-5569-49a7-9772-b03d3d73d19f" width="600")/>
+    </td>
+</p>
+- 이미지 업로드 시 전역 관리 시스템 포함  
+<p>
+</p>
 
-### 🧾 사용자 인증 관리
+</details>
+
+<details>
+<summary>🧾 사용자 인증 관리</summary>
+
 - 사용자 인증서 업로드 및 관리자 검수
+  <p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/9010194b-a618-411a-87a3-4c4f4999835c" width="600")/>
+      </td>
+</p>
 - 인증 상태 및 이력 확인 가능
+<p>
+  <td>
+      <img src="https://github.com/user-attachments/assets/4ef34f67-855a-450d-b2e5-d3ea418926cd" width="600")/>
+      </td>
+</p>
+
+</details>
+
 
 ---
 
