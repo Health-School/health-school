@@ -2,7 +2,6 @@ package com.malnutrition.backend.domain.user.user.service;
 
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
-import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.TrainerUserDto;
 import com.malnutrition.backend.domain.user.user.dto.UserJoinRequestDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -132,18 +131,17 @@ public class UserService {
     }
 
     @Transactional
-    public User modifyOrJoin(UserJoinRequestDto userJoinRequestDto, String provider) {
+    public Optional<User> modifyUserInfo(String email, String nickname) {
 
-        Optional<User> opUser = findByEmail(userJoinRequestDto.getEmail());
+        Optional<User> opUser = findByEmail(email);
 
         if (opUser.isPresent()) {
             User user = opUser.get();
-
-            modify(user, userJoinRequestDto.getNickname());
-            return user;
+            modify(user, nickname);
         }
+        // 비밀번호가 있다면 return
 
-        return join(userJoinRequestDto, provider);
+        return opUser;
     }
 
     public String login(String email, String password) {

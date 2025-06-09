@@ -7,8 +7,10 @@ import com.malnutrition.backend.domain.user.user.service.UserCommandService;
 import com.malnutrition.backend.domain.user.user.service.UserService;
 import com.malnutrition.backend.global.rp.ApiResponse;
 import com.malnutrition.backend.global.rq.Rq;
+import com.malnutrition.backend.global.security.dto.OauthJoinInfoDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +41,10 @@ public class UserController {
             tags = {"User"}
     )
     @PostMapping("/join")//리플래시토큰과 쿠키 생성이 필요함
-    public ResponseEntity<ApiResponse<User>> joinUser(@RequestBody @Valid UserJoinRequestDto userJoinRequestDto){
+    public ResponseEntity<ApiResponse<String>> joinUser(@RequestBody @Valid UserJoinRequestDto userJoinRequestDto){
         User join = userService.join (userJoinRequestDto, "");
-        ApiResponse<User> joinSuccess = ApiResponse.success( join,"join success");
+        ApiResponse<String> joinSuccess = ApiResponse.success( join.getEmail(),"join success");
+
         return ResponseEntity.ok(joinSuccess);
     }
 
@@ -126,6 +129,23 @@ public class UserController {
         return ResponseEntity.ok().body(ApiResponse.success(null, "phoneNumber 변경 성공"));
     }
 
+
+    @PostMapping("/oauth2/additional-info")
+    public ResponseEntity<ApiResponse<String>> processAdditionalInfo(@RequestBody @Valid Oauth2SignUpAdditionalInfo oauth2SignUpAdditionalInfo, HttpSession session) {
+
+        // 세션에 저장된 기본 OAuth 정보와 합쳐서 회원가입 처리
+        OauthJoinInfoDto sessionDto = (OauthJoinInfoDto) session.getAttribute("oauthJoinInfo");
+        if (sessionDto == null) {
+            return ResponseEntity.internalServerError().body(ApiResponse.fail("oauth 회원가입 session 정보가 없습니다."));
+        }
+
+        UserJoinRequestDto userJoinRequestDto = sessionDto.from(oauth2SignUpAdditionalInfo.getPhoneNumber());
+        // 회원 가입
+        User join = userService.join(userJoinRequestDto, sessionDto.getProvider());
+        session.removeAttribute("oauthJoinInfo");
+
+        return ResponseEntity.ok(ApiResponse.success(join.getEmail(), "oauth2 회원가입 성공!")); // 또는 원하는 페이지로
+    }
 
 
 }
