@@ -170,8 +170,11 @@ export default function JoinPage() {
           }),
         }
       );
+      const data = await response.json();
+
       if (!response.ok) {
-        alert("회원가입에 실패했습니다.");
+        console.log(response);
+        alert("회원가입에 실패했습니다. \n" + data.message);
         return;
       }
       alert("회원가입 완료!");

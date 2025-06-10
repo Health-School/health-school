@@ -1,5 +1,6 @@
 package com.malnutrition.backend.global.config.security;
 
+import com.malnutrition.backend.global.security.oauth.CustomOAuth2AuthenticationFailureHandler;
 import com.malnutrition.backend.global.security.oauth.CustomOauth2AuthenticationSuccessHandler;
 import com.malnutrition.backend.global.security.security.CustomAuthenticationEntryPoint;
 import com.malnutrition.backend.global.security.security.CustomAuthenticationFilter;
@@ -36,6 +37,7 @@ public class SecurityConfig {
     private final CustomOauth2AuthenticationSuccessHandler customOauth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomOAuth2AuthenticationFailureHandler customOAuth2AuthenticationFailureHandler;
     //통과 시킬꺼 넣어야함
 
     @Bean
@@ -71,11 +73,14 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .oauth2Login( oauth2Login ->
-                        oauth2Login.successHandler(customOauth2AuthenticationSuccessHandler)
-                                .authorizationEndpoint( authorizationEndpoint ->
+                        oauth2Login
+                                .successHandler(customOauth2AuthenticationSuccessHandler)
+                                .failureHandler(customOAuth2AuthenticationFailureHandler)
+                                .authorizationEndpoint(authorizationEndpoint ->
                                         authorizationEndpoint
                                                 .authorizationRequestResolver(customAuthorizationRequestResolver)
                                 )
+
                 )
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(customAuthenticationEntryPoint)
