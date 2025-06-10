@@ -13,16 +13,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OauthJoinInfoDto {
     private String email;
-    private String nickname;
     private String provider;
 
 
-    public UserJoinRequestDto from(String phoneNumber){
+    public UserJoinRequestDto from(String phoneNumber, String nickname){
         return UserJoinRequestDto.builder()
                 .email(this.email)
                 .password("")
-                .nickname(this.nickname)
                 .phoneNumber(phoneNumber)
+                .nickname(nickname)
                 .build();
 
     }

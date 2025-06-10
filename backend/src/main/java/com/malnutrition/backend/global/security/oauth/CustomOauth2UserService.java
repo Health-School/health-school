@@ -38,14 +38,14 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Map<String, String> attributesProperties = (Map<String, String>) attributes.get("properties");
-        String nickname = attributesProperties.get("nickname");
+//        String nickname = attributesProperties.get("nickname");
         String email = ((Map<String, Object>) attributes.get("kakao_account")).get("email").toString();
 
 //        log.info("email {}", email2);
 //        log.info("attributes {}", attributes);
 //        String email = providerTypeCode + "__" + oauthId;
 
-        Optional<User> opUser = userService.modifyUserInfo(email, nickname);
+        Optional<User> opUser = userService.findByEmail(email);
 
         // 신규 사용자라면 phoneNumber 입력 필요 -> 임시 세션 저장 후 리다이렉트
         if (opUser.isEmpty()) {
@@ -53,7 +53,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             HttpSession session = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getSession();
             OauthJoinInfoDto oauthJoinInfoDto = OauthJoinInfoDto.builder()
                     .email(email)
-                    .nickname(nickname)
                     .provider(providerTypeCode)
                     .build();
 

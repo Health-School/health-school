@@ -46,15 +46,16 @@ public class UserService {
         String password = userJoinRequestDto.getPassword();
         String nickname = userJoinRequestDto.getNickname();
         String phoneNumber = userJoinRequestDto.getPhoneNumber();
-        userRepository
-                .findByEmail(email)
-                .ifPresent(member -> {
-                    throw new RuntimeException("해당 email은 이미 사용중입니다.");
-                });
-        if (StringUtils.hasText(password)) password = passwordEncoder.encode(password);
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("이미 가입한 email 입니다.");
         }
+        else if(userRepository.existsByNickname(nickname)){
+            throw new IllegalArgumentException("이미 사용중인 nickname 입니다.");
+        }
+
+        if (StringUtils.hasText(password)) password = passwordEncoder.encode(password);
+
+
 
         User user = User.builder()
                 .email(email)
@@ -130,7 +131,7 @@ public class UserService {
         user.setNickname(nickname);
     }
 
-    @Transactional
+/*    @Transactional
     public Optional<User> modifyUserInfo(String email, String nickname) {
 
         Optional<User> opUser = findByEmail(email);
@@ -142,7 +143,7 @@ public class UserService {
         // 비밀번호가 있다면 return
 
         return opUser;
-    }
+    }*/
 
     public String login(String email, String password) {
         Optional<User> optionalUser = userRepository.findByEmail(email);

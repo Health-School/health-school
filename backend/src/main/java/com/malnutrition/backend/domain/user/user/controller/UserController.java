@@ -138,14 +138,11 @@ public class UserController {
         if (sessionDto == null) {
             return ResponseEntity.internalServerError().body(ApiResponse.fail("oauth 회원가입 session 정보가 없습니다."));
         }
-
-        UserJoinRequestDto userJoinRequestDto = sessionDto.from(oauth2SignUpAdditionalInfo.getPhoneNumber());
+        UserJoinRequestDto userJoinRequestDto = sessionDto.from(oauth2SignUpAdditionalInfo.getPhoneNumber(), oauth2SignUpAdditionalInfo.getNickname());
         // 회원 가입
         User join = userService.join(userJoinRequestDto, sessionDto.getProvider());
         session.removeAttribute("oauthJoinInfo");
 
         return ResponseEntity.ok(ApiResponse.success(join.getEmail(), "oauth2 회원가입 성공!")); // 또는 원하는 페이지로
     }
-
-
 }
