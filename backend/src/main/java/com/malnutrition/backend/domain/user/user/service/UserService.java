@@ -2,7 +2,6 @@ package com.malnutrition.backend.domain.user.user.service;
 
 import com.malnutrition.backend.domain.image.entity.Image;
 import com.malnutrition.backend.domain.image.service.ImageService;
-import com.malnutrition.backend.domain.user.user.dto.MyPageDto;
 import com.malnutrition.backend.domain.user.user.dto.TrainerUserDto;
 import com.malnutrition.backend.domain.user.user.dto.UserJoinRequestDto;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -47,15 +46,16 @@ public class UserService {
         String password = userJoinRequestDto.getPassword();
         String nickname = userJoinRequestDto.getNickname();
         String phoneNumber = userJoinRequestDto.getPhoneNumber();
-        userRepository
-                .findByEmail(email)
-                .ifPresent(member -> {
-                    throw new RuntimeException("해당 email은 이미 사용중입니다.");
-                });
-        if (StringUtils.hasText(password)) password = passwordEncoder.encode(password);
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("이미 가입한 email 입니다.");
         }
+        else if(userRepository.existsByNickname(nickname)){
+            throw new IllegalArgumentException("이미 사용중인 nickname 입니다.");
+        }
+
+        if (StringUtils.hasText(password)) password = passwordEncoder.encode(password);
+
+
 
         User user = User.builder()
                 .email(email)
@@ -131,20 +131,19 @@ public class UserService {
         user.setNickname(nickname);
     }
 
-    @Transactional
-    public User modifyOrJoin(UserJoinRequestDto userJoinRequestDto, String provider) {
+/*    @Transactional
+    public Optional<User> modifyUserInfo(String email, String nickname) {
 
-        Optional<User> opUser = findByEmail(userJoinRequestDto.getEmail());
+        Optional<User> opUser = findByEmail(email);
 
         if (opUser.isPresent()) {
             User user = opUser.get();
-
-            modify(user, userJoinRequestDto.getNickname());
-            return user;
+            modify(user, nickname);
         }
+        // 비밀번호가 있다면 return
 
-        return join(userJoinRequestDto, provider);
-    }
+        return opUser;
+    }*/
 
     public String login(String email, String password) {
         Optional<User> optionalUser = userRepository.findByEmail(email);

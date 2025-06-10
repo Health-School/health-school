@@ -6,6 +6,7 @@ import com.malnutrition.backend.domain.user.sms.dto.SmsVerificationRequestDto;
 import com.malnutrition.backend.domain.user.sms.service.SmsService;
 import com.malnutrition.backend.domain.user.user.service.UserService;
 import com.malnutrition.backend.global.rp.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.exception.NurigoEmptyResponseException;
 import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;
@@ -22,17 +23,18 @@ public class SmsController {
     private final SmsService smsService;
     private final UserService userService;
     @PostMapping("/join/send-code")
-    public ResponseEntity<ApiResponse<Void>> sendCode(@RequestBody SmsRequestDto smsRequestDto) throws NurigoMessageNotReceivedException, NurigoEmptyResponseException, NurigoUnknownException {
+    public ResponseEntity<ApiResponse<Void>> sendCode(@RequestBody @Valid SmsRequestDto smsRequestDto) throws NurigoMessageNotReceivedException, NurigoEmptyResponseException, NurigoUnknownException {
         String phoneNumber = smsRequestDto.getPhoneNumber();
-        if(userService.existsByPhoneNumber(phoneNumber)){
-            return ResponseEntity.ok().body(ApiResponse.fail("이미 가입한 핸드폰 번호입니다."));
-        }
+        //같은 핸드폰 번호로 여러 아이디 가입 가능
+//        if(userService.existsByPhoneNumber(phoneNumber)){
+//            return ResponseEntity.ok().body(ApiResponse.fail("이미 가입한 핸드폰 번호입니다."));
+//        }
         smsService.sendVerificationCode(phoneNumber);
         return ResponseEntity.ok(ApiResponse.success(null, "인증번호 전송 완료"));
     }
 
     @PostMapping("/join/verify-code")
-    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody SmsVerificationRequestDto smsVerificationRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> verifyCode(@RequestBody @Valid SmsVerificationRequestDto smsVerificationRequestDto) {
         boolean verifyCode = smsService.verifyCode(smsVerificationRequestDto.getPhoneNumber(), smsVerificationRequestDto.getCode());
         if (verifyCode) {
             return ResponseEntity.ok(ApiResponse.success(null, "인증 성공"));
@@ -42,7 +44,7 @@ public class SmsController {
     }
 
     @PostMapping("/find-email/send-code")
-    public ResponseEntity<ApiResponse<Void>> findEmail(@RequestBody SmsRequestDto smsRequestDto) throws NurigoMessageNotReceivedException, NurigoEmptyResponseException, NurigoUnknownException {
+    public ResponseEntity<ApiResponse<Void>> findEmail(@RequestBody @Valid SmsRequestDto smsRequestDto) throws NurigoMessageNotReceivedException, NurigoEmptyResponseException, NurigoUnknownException {
         String phoneNumber = smsRequestDto.getPhoneNumber();
         if(!userService.existsByPhoneNumber(phoneNumber)){
             return ResponseEntity.ok().body(ApiResponse.fail("존재하지 않는 핸드폰 번호입니다."));
@@ -52,7 +54,7 @@ public class SmsController {
     }
     //아이디 찾기 성공하면 아이디 데이터 보내기
     @PostMapping("/find-email/verify-code")
-    public ResponseEntity<ApiResponse<SmsFindEmailResponseDto>> findEmailVerifyCode(@RequestBody SmsVerificationRequestDto smsVerificationRequestDto) {
+    public ResponseEntity<ApiResponse<SmsFindEmailResponseDto>> findEmailVerifyCode(@RequestBody @Valid  SmsVerificationRequestDto smsVerificationRequestDto) {
         String phoneNumber = smsVerificationRequestDto.getPhoneNumber();
         boolean verifyCode = smsService.verifyCode(phoneNumber, smsVerificationRequestDto.getCode());
         if (verifyCode) {
