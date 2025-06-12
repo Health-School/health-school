@@ -10,6 +10,8 @@ import NotificationCreateModal from "@/components/NotificationCreateModal"; // A
 import NotificationEditModal from "@/components/NotificationEditModal"; // Add import for edit modal
 import { useGlobalLoginUser } from "@/stores/auth/loginUser";
 import CurriculumEditModal from "@/components/CurriculumEditModal"; // Add this import
+import GroupChatRoom from "@/components/GroupChatRoom"; // Import GroupChatRoom 컴포넌트
+
 // 강의 상세 DTO
 interface LectureDetailDto {
   id: number;
@@ -213,7 +215,9 @@ export default function LectureManagePage({
   const [editingCurriculum, setEditingCurriculum] =
     useState<CurriculumDto | null>(null);
   // Add state for group chat rooms
-  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoomResponse[]>([]);
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoomResponse[]>(
+    []
+  );
   // Add state for creating chat room
   const [showCreateChatRoomModal, setShowCreateChatRoomModal] = useState(false);
   const [newChatRoomName, setNewChatRoomName] = useState("");
@@ -329,7 +333,7 @@ export default function LectureManagePage({
       .then((response) => {
         // 응답이 바로 배열 형태로 오는 경우 처리
         console.log("그룹 채팅방 응답:", response);
-        
+
         // response 자체가 배열인 경우 (success 필드 없음)
         if (Array.isArray(response)) {
           setGroupChatRooms(response);
@@ -744,7 +748,7 @@ export default function LectureManagePage({
           },
           body: JSON.stringify({
             lectureId: Number(lectureIdRef),
-            name: newChatRoomName.trim()
+            name: newChatRoomName.trim(),
           }),
         }
       );
@@ -756,7 +760,7 @@ export default function LectureManagePage({
       const result = await response.json();
       console.log("채팅방 생성 응답:", result);
       alert("그룹 채팅방이 생성되었습니다.");
-      
+
       // 목록 갱신 - 수정된 코드
       const listResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureIdRef}`,
@@ -764,14 +768,14 @@ export default function LectureManagePage({
           credentials: "include",
         }
       );
-      
+
       if (!listResponse.ok) {
         throw new Error(`채팅방 목록 조회 실패: ${listResponse.status}`);
       }
-      
+
       const listResult = await listResponse.json();
       console.log("채팅방 목록 새로고침:", listResult);
-      
+
       // 응답 형식에 따른 처리
       if (Array.isArray(listResult)) {
         setGroupChatRooms(listResult);
@@ -787,6 +791,17 @@ export default function LectureManagePage({
     } finally {
       setIsCreatingChatRoom(false);
     }
+  };
+
+  // 그룹 채팅방 입장 기능을 위한 상태 및 함수
+  const [activeChatRoomId, setActiveChatRoomId] = useState<number | null>(null);
+
+  const handleEnterChatRoom = (chatRoomId: number) => {
+    setActiveChatRoomId(chatRoomId);
+  };
+
+  const handleCloseChatRoom = () => {
+    setActiveChatRoomId(null);
   };
 
   return (
@@ -889,21 +904,26 @@ export default function LectureManagePage({
 
       {/* 탭 메뉴 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex gap-4 border-b">
-        {["클래스 관리", "강의 목록", "공지사항", "수강생 목록", "Q&A", "그룹 채팅"].map(
-          (tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 border-b-2 ${
-                activeTab === tab
-                  ? "border-green-500 font-bold text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } transition-colors`}
-            >
-              {tab}
-            </button>
-          )
-        )}
+        {[
+          "클래스 관리",
+          "강의 목록",
+          "공지사항",
+          "수강생 목록",
+          "Q&A",
+          "그룹 채팅",
+        ].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 border-b-2 ${
+              activeTab === tab
+                ? "border-green-500 font-bold text-green-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } transition-colors`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Conditional content based on active tab */}
@@ -1751,62 +1771,104 @@ export default function LectureManagePage({
             <div>
               <h3 className="font-bold text-xl text-gray-800">그룹 채팅</h3>
               <p className="text-sm text-gray-500 mt-1">
-                강의에 참여하는 수강생들과 함께 소통할 수 있는 그룹 채팅방입니다.
+                강의에 참여하는 수강생들과 함께 소통할 수 있는 그룹
+                채팅방입니다.
               </p>
             </div>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-green-600 transition-colors shadow-sm"
               onClick={() => setShowCreateChatRoomModal(true)}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               <span>새 채팅방 만들기</span>
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {groupChatRooms.map((chatRoom) => (
-              <div 
-                key={chatRoom.id} 
+              <div
+                key={chatRoom.id}
                 className="border border-gray-200 rounded-lg p-5 hover:border-green-300 hover:shadow-md transition-all bg-white relative overflow-hidden group"
               >
                 {/* 채팅 아이콘 배경 (장식) */}
                 <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100"
+                    height="100"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                   </svg>
                 </div>
-                
+
                 <div className="flex flex-col h-full relative z-10">
                   <div className="flex-grow">
                     <div className="flex items-start justify-between">
-                      <h4 className="font-medium text-lg text-gray-800">{chatRoom.name}</h4>
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">활성</span>
+                      <h4 className="font-medium text-lg text-gray-800">
+                        {chatRoom.name}
+                      </h4>
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                        활성
+                      </span>
                     </div>
-                    
+
                     <div className="mt-2 flex items-center text-sm text-gray-500 gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
                       <span>생성자: {chatRoom.createdBy}</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-100">
                     <div className="text-xs text-gray-500">
                       채팅방 ID: {chatRoom.id}
                     </div>
-                    <button 
+                    <button
                       className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors shadow-sm flex items-center gap-1"
-                      onClick={() => {
-                        // 채팅방 입장 로직 구현
-                        alert(`${chatRoom.name} 채팅방 입장 기능은 아직 구현 중입니다.`);
-                      }}
+                      onClick={() => handleEnterChatRoom(chatRoom.id)}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M14 9l6 6-6 6"></path>
                         <path d="M4 4v7a4 4 0 0 0 4 4h11"></path>
                       </svg>
@@ -1816,21 +1878,45 @@ export default function LectureManagePage({
                 </div>
               </div>
             ))}
-            
+
             {groupChatRooms.length === 0 && (
               <div className="col-span-full flex flex-col items-center justify-center py-16 text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300 mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="64"
+                  height="64"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-300 mb-4"
+                >
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg>
-                <p className="text-lg font-medium mb-2">생성된 그룹 채팅방이 없습니다</p>
+                <p className="text-lg font-medium mb-2">
+                  생성된 그룹 채팅방이 없습니다
+                </p>
                 <p className="text-sm text-center max-w-md">
-                  위의 '새 채팅방 만들기' 버튼을 클릭하여 강의 참여자들과 소통할 수 있는 그룹 채팅방을 생성해보세요.
+                  위의 '새 채팅방 만들기' 버튼을 클릭하여 강의 참여자들과 소통할
+                  수 있는 그룹 채팅방을 생성해보세요.
                 </p>
                 <button
                   className="mt-6 bg-green-500 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-green-600 transition-colors shadow-sm"
                   onClick={() => setShowCreateChatRoomModal(true)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
@@ -1845,32 +1931,50 @@ export default function LectureManagePage({
       {/* 그룹 채팅방 생성 모달 - 개선된 UI */}
       {showCreateChatRoomModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
+          <div
             className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
             onClick={() => setShowCreateChatRoomModal(false)}
           ></div>
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fadeIn">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">그룹 채팅방 생성</h3>
-              <button 
+              <h3 className="text-xl font-bold text-gray-800">
+                그룹 채팅방 생성
+              </h3>
+              <button
                 onClick={() => setShowCreateChatRoomModal(false)}
                 className="text-gray-400 hover:text-gray-600 focus:outline-none"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
             <p className="text-sm text-gray-500 mb-6">
-              강의에 참여하는 수강생들과 함께 소통할 수 있는 그룹 채팅방을 생성합니다.
+              강의에 참여하는 수강생들과 함께 소통할 수 있는 그룹 채팅방을
+              생성합니다.
             </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              createGroupChatRoom();
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createGroupChatRoom();
+              }}
+            >
               <div className="mb-6">
-                <label htmlFor="chatRoomName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="chatRoomName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   채팅방 이름
                 </label>
                 <input
@@ -1883,7 +1987,8 @@ export default function LectureManagePage({
                   required
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  참여자들이 채팅방을 쉽게 식별할 수 있는 명확한 이름을 입력해주세요.
+                  참여자들이 채팅방을 쉽게 식별할 수 있는 명확한 이름을
+                  입력해주세요.
                 </p>
               </div>
               <div className="flex justify-end gap-3">
@@ -1898,16 +2003,32 @@ export default function LectureManagePage({
                   type="submit"
                   disabled={isCreatingChatRoom}
                   className={`px-4 py-2 rounded-lg text-white font-medium ${
-                    isCreatingChatRoom 
-                      ? "bg-green-400 cursor-not-allowed" 
+                    isCreatingChatRoom
+                      ? "bg-green-400 cursor-not-allowed"
                       : "bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   } transition-colors shadow-sm`}
                 >
                   {isCreatingChatRoom ? (
                     <span className="flex items-center gap-2">
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 0116 0V16a8 8 0 01-16 0z"
+                        ></path>
                       </svg>
                       생성 중...
                     </span>
@@ -1919,6 +2040,14 @@ export default function LectureManagePage({
             </form>
           </div>
         </div>
+      )}
+
+      {/* 그룹 채팅방 입장 모달 */}
+      {activeChatRoomId && (
+        <GroupChatRoom
+          roomId={activeChatRoomId}
+          onClose={handleCloseChatRoom}
+        />
       )}
     </div>
   );
