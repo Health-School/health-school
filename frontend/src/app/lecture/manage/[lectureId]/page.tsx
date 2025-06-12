@@ -149,6 +149,16 @@ const REVERSE_LEVEL_MAPPING = {
   ADVANCED: "고급",
 } as const;
 
+interface GroupChatRoomCreateRequest {
+  lectureId: number;
+  name: string;
+}
+
+interface GroupChatRoomResponse {
+  id: number;
+  name: string;
+}
+
 export default function LectureManagePage({
   params,
 }: {
@@ -201,6 +211,12 @@ export default function LectureManagePage({
   // Add state for editing curriculum
   const [editingCurriculum, setEditingCurriculum] =
     useState<CurriculumDto | null>(null);
+  // Add state for group chat rooms
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoomResponse[]>([]);
+  // Add state for creating chat room
+  const [showCreateChatRoomModal, setShowCreateChatRoomModal] = useState(false);
+  const [newChatRoomName, setNewChatRoomName] = useState("");
+  const [isCreatingChatRoom, setIsCreatingChatRoom] = useState(false);
   const { isLogin, loginUser, logoutAndHome, isLoginUserPending } =
     useGlobalLoginUser();
 
@@ -295,6 +311,21 @@ export default function LectureManagePage({
         }
       })
       .catch((error) => console.error("QnA 목록 조회 실패:", error));
+
+    // Fetch group chat rooms
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureIdRef}`,
+      {
+        credentials: "include",
+      }
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.success) {
+          setGroupChatRooms(response.data);
+        }
+      })
+      .catch((error) => console.error("그룹 채팅방 목록 조회 실패:", error));
   }, [lectureIdRef, currentPage, qnaPageSize]);
 
   // Update the updateLectureStatus function
@@ -672,6 +703,61 @@ export default function LectureManagePage({
     }
   };
 
+  // 그룹 채팅방 생성 함수 추가
+  const createGroupChatRoom = async () => {
+    if (!newChatRoomName.trim()) {
+      alert("채팅방 이름을 입력해주세요.");
+      return;
+    }
+
+    setIsCreatingChatRoom(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            lectureId: Number(lectureIdRef),
+            name: newChatRoomName.trim()
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("채팅방 생성 실패");
+      }
+
+      const result = await response.json();
+      alert("그룹 채팅방이 생성되었습니다.");
+      
+      // 목록 갱신
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureIdRef}`,
+        {
+          credentials: "include",
+        }
+      )
+        .then((res) => res.json())
+        .then((response) => {
+          if (response.success) {
+            setGroupChatRooms(response.data);
+          }
+        });
+
+      setNewChatRoomName("");
+      setShowCreateChatRoomModal(false);
+    } catch (error) {
+      console.error("채팅방 생성 실패:", error);
+      alert("채팅방 생성에 실패했습니다.");
+    } finally {
+      setIsCreatingChatRoom(false);
+    }
+  };
+
   return (
     <div
       className={`bg-gray-50 min-h-screen ${
@@ -772,7 +858,7 @@ export default function LectureManagePage({
 
       {/* 탭 메뉴 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex gap-4 border-b">
-        {["클래스 관리", "강의 목록", "공지사항", "수강생 목록", "Q&A"].map(
+        {["클래스 관리", "강의 목록", "공지사항", "수강생 목록", "Q&A", "그룹 채팅"].map(
           (tab) => (
             <button
               key={tab}
@@ -1242,6 +1328,7 @@ export default function LectureManagePage({
                 <th className="py-2 text-left px-4">프로필</th>
                 <th className="py-2 text-left px-4">이름</th>
                 <th className="py-2 text-left px-4">이메일</th>
+                <th className="py-2 text-left px-4">전화번호</th>
               </tr>
             </thead>
             <tbody>
@@ -1624,6 +1711,104 @@ export default function LectureManagePage({
             setEditingCurriculum(null);
           }}
         />
+      )}
+
+      {/* 그룹 채팅 탭 내용 */}
+      {activeTab === "그룹 채팅" && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 bg-white rounded-xl shadow p-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg">그룹 채팅</h3>
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded font-semibold"
+              onClick={() => setShowCreateChatRoomModal(true)}
+            >
+              + 그룹 채팅방 생성
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupChatRooms.map((chatRoom) => (
+              <div 
+                key={chatRoom.id} 
+                className="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:shadow-md transition-all"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium text-lg">{chatRoom.name}</h4>
+                    <p className="text-sm text-gray-500">채팅방 ID: {chatRoom.id}</p>
+                  </div>
+                  <button 
+                    className="bg-green-100 text-green-700 px-3 py-1 rounded-lg hover:bg-green-200 transition-colors"
+                    onClick={() => {
+                      // 채팅방 입장 로직 구현
+                      alert(`${chatRoom.name} 채팅방 입장 기능은 아직 구현 중입니다.`);
+                    }}
+                  >
+                    입장
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            {groupChatRooms.length === 0 && (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                생성된 그룹 채팅방이 없습니다.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 그룹 채팅방 생성 모달 */}
+      {showCreateChatRoomModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowCreateChatRoomModal(false)}
+          ></div>
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold mb-4">그룹 채팅방 생성</h3>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              createGroupChatRoom();
+            }}>
+              <div className="mb-4">
+                <label htmlFor="chatRoomName" className="block text-sm font-medium text-gray-700 mb-1">
+                  채팅방 이름
+                </label>
+                <input
+                  id="chatRoomName"
+                  type="text"
+                  value={newChatRoomName}
+                  onChange={(e) => setNewChatRoomName(e.target.value)}
+                  placeholder="채팅방 이름을 입력하세요"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateChatRoomModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingChatRoom}
+                  className={`px-4 py-2 rounded text-white ${
+                    isCreatingChatRoom 
+                      ? "bg-green-400 cursor-not-allowed" 
+                      : "bg-green-500 hover:bg-green-600"
+                  }`}
+                >
+                  {isCreatingChatRoom ? "생성 중..." : "생성하기"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

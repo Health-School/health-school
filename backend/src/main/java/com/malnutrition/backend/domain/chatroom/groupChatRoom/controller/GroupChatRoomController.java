@@ -28,4 +28,6 @@ public class GroupChatRoomController {
         GroupChatRoomResponse response = new GroupChatRoomResponse(chatRoom.getId(), chatRoom.getName());
         return ResponseEntity.ok(response);
     }
+
+
 }
