@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import NotificationList from "@/components/notification/NotificationList";
 import NotificationModal from "@/components/notification/NotificationModal";
 import { Notification } from "@/components/notification/Notification";
@@ -69,6 +69,7 @@ export default function LectureDashboard() {
   const lectureId = params.lectureId as string;
   const searchParams = useSearchParams();
   const curriculumId = searchParams.get("curriculumId");
+  const router = useRouter();
 
   const [lectureData, setLectureData] =
     useState<LectureCurriculumDetailDto | null>(null);
@@ -83,6 +84,20 @@ export default function LectureDashboard() {
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+
+  // 그룹 채팅방 인터페이스 추가
+  interface GroupChatRoom {
+    id: number;
+    name: string;
+    createdBy: string;
+  }
+
+  // 상태 추가
+  const [activeTab, setActiveTab] = useState("공지사항");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoom[]>([]);
+  const [loadingChatRooms, setLoadingChatRooms] = useState(false);
 
   // 별 클릭 시 서버에 평점 등록
   const handleStarClick = async (score: number) => {
@@ -288,11 +303,6 @@ export default function LectureDashboard() {
     Promise.all(promises).then(setVideoDurations);
   }, [lectureData]);
 
-  // 상태 추가
-  const [activeTab, setActiveTab] = useState("공지사항");
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-
   // 공지사항 가져오는 함수
   const fetchNotifications = async () => {
     console.log("=== 공지사항 API 호출 시작 ===");
@@ -357,12 +367,61 @@ export default function LectureDashboard() {
     }
   };
 
+  // 그룹 채팅방 목록 조회 함수 추가
+  const fetchGroupChatRooms = async () => {
+    if (!lectureId) return;
+
+    setLoadingChatRooms(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`그룹 채팅방 목록 조회 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("그룹 채팅방 목록:", data);
+
+      // 응답 형식에 따라 처리
+      if (Array.isArray(data)) {
+        setGroupChatRooms(data);
+      } else if (data.success && Array.isArray(data.data)) {
+        setGroupChatRooms(data.data);
+      } else {
+        console.error("예상치 못한 응답 형식:", data);
+        setGroupChatRooms([]);
+      }
+    } catch (error) {
+      console.error("그룹 채팅방 목록 조회 실패:", error);
+      setGroupChatRooms([]);
+    } finally {
+      setLoadingChatRooms(false);
+    }
+  };
+
+  // 채팅방 입장 함수
+  const enterChatRoom = (chatRoomId: number) => {
+    router.push(`/chat?roomId=${chatRoomId}`);
+  };
+
   // 공지사항 탭 클릭 시 데이터 로드
   useEffect(() => {
     if (activeTab === "공지사항" && lectureId) {
       fetchNotifications();
     }
   }, [activeTab, lectureId]);
+
+  // 채팅 탭 선택 시 그룹 채팅방 목록 조회
+  useEffect(() => {
+    if (selectedTab === "groupChat") {
+      fetchGroupChatRooms();
+    }
+  }, [selectedTab, lectureId]);
 
   // 렌더링 시점의 상태 확인
   console.log("렌더링 시점 - activeTab:", activeTab);
@@ -567,9 +626,9 @@ export default function LectureDashboard() {
 
         {/* 오른쪽 사이드 */}
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
-          {/* 탭 - 학습자료 탭 제거 */}
+          {/* 탭 수정 - 그룹 채팅 탭 추가 */}
           <div className="flex space-x-6 border-b pb-3">
-            {["curriculum", "qna", "notifications"].map((tab) => (
+            {["curriculum", "qna", "notifications", "groupChat"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -584,6 +643,7 @@ export default function LectureDashboard() {
                     curriculum: "커리큘럼",
                     qna: "Q&A",
                     notifications: "공지사항",
+                    groupChat: "그룹 채팅",
                   }[tab]
                 }
               </button>
@@ -715,6 +775,136 @@ export default function LectureDashboard() {
           {/* Q&A 탭일 때 QnaTab 보여주기 */}
           {selectedTab === "qna" && userId !== null && (
             <QnaTab lectureId={Number(lectureId)} userId={userId} />
+          )}
+
+          {/* 그룹 채팅 탭일 때 그룹 채팅방 목록 보여주기 */}
+          {selectedTab === "groupChat" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">그룹 채팅방</h3>
+                <button
+                  className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
+                  onClick={fetchGroupChatRooms}
+                  aria-label="새로고침"
+                  title="새로고침"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-transform hover:rotate-180 duration-500"
+                  >
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
+                  </svg>
+                </button>
+              </div>
+
+              {loadingChatRooms ? (
+                <div className="flex justify-center py-8">
+                  <svg
+                    className="animate-spin h-8 w-8 text-green-500"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </div>
+              ) : groupChatRooms.length > 0 ? (
+                <div className="space-y-3 max-h-[550px] overflow-y-auto pr-2">
+                  {groupChatRooms.map((room) => (
+                    <div
+                      key={room.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-green-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-base">{room.name}</h4>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          활성
+                        </span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        생성자: {room.createdBy}
+                      </div>
+                      <button
+                        onClick={() => enterChatRoom(room.id)}
+                        className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                          />
+                        </svg>
+                        채팅방 입장
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 mx-auto mb-3 text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                  <p className="text-lg font-medium mb-2">개설된 그룹 채팅방이 없습니다</p>
+                  <p className="text-sm max-w-md mx-auto">
+                    강사가 그룹 채팅방을 개설하면 이곳에 표시됩니다.
+                    <br />나중에 다시 확인해 주세요.
+                  </p>
+                </div>
+              )}
+            </div>
           )}
         </aside>
 
