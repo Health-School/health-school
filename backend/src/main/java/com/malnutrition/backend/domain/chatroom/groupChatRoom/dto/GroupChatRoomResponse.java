@@ -12,11 +12,13 @@ public class GroupChatRoomResponse {
 
     private Long id;
     private String name;
+    private String createdBy;
 
     public static GroupChatRoomResponse from(GroupChatRoom chatRoom) {
         return GroupChatRoomResponse.builder()
                 .id(chatRoom.getId())
                 .name(chatRoom.getName())
+                .createdBy(chatRoom.getCreatedBy().getNickname())
                 .build();
     }
 }

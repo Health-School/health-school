@@ -11,10 +11,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Getter
@@ -50,5 +52,10 @@ public class GroupChatRoomService {
                 .build();
 
         return groupChatRoomRepository.save(chatRoom);
+    }
+
+    @Transactional
+    public List<GroupChatRoom> getGroupChatRoomsByLecture(Long lectureId) {
+        return groupChatRoomRepository.findAllByLectureIdWithCreator(lectureId);
     }
 }

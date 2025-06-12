@@ -7,10 +7,9 @@ import com.malnutrition.backend.domain.chatroom.groupChatRoom.service.GroupChatR
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/group-chat-rooms")
@@ -25,7 +24,18 @@ public class GroupChatRoomController {
             @RequestBody GroupChatRoomCreateRequest request
     ) {
         GroupChatRoom chatRoom = groupChatRoomService.createGroupChatRoom(request);
-        GroupChatRoomResponse response = new GroupChatRoomResponse(chatRoom.getId(), chatRoom.getName());
+        GroupChatRoomResponse response = new GroupChatRoomResponse(chatRoom.getId(), chatRoom.getName(), chatRoom.getCreatedBy().getNickname());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/lecture/{lectureId}")
+    public ResponseEntity<List<GroupChatRoomResponse>> getGroupChatRoomsByLecture(
+            @PathVariable Long lectureId
+    ) {
+        List<GroupChatRoom> rooms = groupChatRoomService.getGroupChatRoomsByLecture(lectureId);
+        List<GroupChatRoomResponse> response = rooms.stream()
+                .map(GroupChatRoomResponse::from)
+                .toList();
         return ResponseEntity.ok(response);
     }
 
