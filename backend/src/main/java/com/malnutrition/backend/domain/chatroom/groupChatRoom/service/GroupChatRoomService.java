@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.chatroom.groupChatRoom.service;
 
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomCreateRequest;
+import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomResponseDto;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.repository.GroupChatRoomRepository;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
@@ -11,10 +12,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter
@@ -50,5 +54,19 @@ public class GroupChatRoomService {
                 .build();
 
         return groupChatRoomRepository.save(chatRoom);
+    }
+
+    @Transactional
+    public List<GroupChatRoomResponseDto> getChatRoomsByLectureId(Long lectureId) {
+        List<GroupChatRoom> chatRooms = groupChatRoomRepository.findByLectureIdWithUser(lectureId);
+        return chatRooms.stream()
+                .map(chatRoom -> GroupChatRoomResponseDto.builder()
+                        .id(chatRoom.getId())
+                        .name(chatRoom.getName())
+                        .trainerId(chatRoom.getCreatedBy().getId())
+                        .trainerName(chatRoom.getCreatedBy().getNickname()) // User 엔티티에 name 필드가 있다고 가정
+                        .lectureId(chatRoom.getLecture().getId())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
