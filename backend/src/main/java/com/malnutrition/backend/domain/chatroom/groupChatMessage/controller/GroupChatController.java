@@ -1,10 +1,10 @@
 package com.malnutrition.backend.domain.chatroom.groupChatMessage.controller;
 
-import com.malnutrition.backend.domain.chatroom.chatmessage.dto.ChatEnterRequestDto;
-import com.malnutrition.backend.domain.chatroom.chatmessage.dto.ChatEnterResponseMessageDto;
 import com.malnutrition.backend.domain.chatroom.chatmessage.enums.UserType;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatEnterRequestDto;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatEnterResponseMessageDto;
+import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatUserListBroadcastDto;
+import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatUserListResponseDto;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.entity.GroupChatMessage;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.repository.GroupChatMessageRepository;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
@@ -23,6 +23,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class GroupChatController {
     private final GroupChatMessageRepository groupChatMessageRepository;
     private final GroupChatUserRepository groupChatUserRepository;
     private final SimpMessagingTemplate messageTemplate;
+
     @MessageMapping(value = "/chat/group/room/enter/{roomId}")
     @Transactional
     public void enterGroupChatRoom(
@@ -44,7 +47,7 @@ public class GroupChatController {
         User sender = userRepository.findByNickname(enterMessage.getWriterName())
                 .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
 
-        // ✅ 유저가 해당 방에 등록되어 있지 않으면 새로 저장
+        // ✅ 1. 유저가 그룹에 등록되어 있지 않으면 저장
         boolean isUserAlreadyInRoom = groupChatUserRepository
                 .existsByGroupChatRoomIdAndUserId(roomId, sender.getId());
 
@@ -56,7 +59,7 @@ public class GroupChatController {
             groupChatUserRepository.save(groupChatUser);
         }
 
-        // 2. 마지막 메시지가 LEAVE인 경우만 입장 메시지 전송
+        // ✅ 2. 마지막 메시지가 LEAVE가 아니면 입장 메시지 전송하지 않음
         GroupChatMessage lastMessage = groupChatMessageRepository
                 .findTopByGroupChatRoomIdAndSenderIdOrderByCreatedDateDesc(roomId, sender.getId())
                 .orElse(null);
@@ -67,7 +70,7 @@ public class GroupChatController {
 
         String msg = sender.getNickname() + "님이 그룹 채팅방에 참여하였습니다.";
 
-        // 3. 메시지 저장
+        // ✅ 3. 입장 메시지 저장
         GroupChatMessage chatMessage = GroupChatMessage.builder()
                 .groupChatRoom(groupChatRoom)
                 .sender(sender)
@@ -76,7 +79,7 @@ public class GroupChatController {
                 .build();
         groupChatMessageRepository.save(chatMessage);
 
-        // 4. 메시지 브로드캐스트
+        // ✅ 4. 입장 메시지 브로드캐스트
         GroupChatEnterResponseMessageDto message = GroupChatEnterResponseMessageDto.builder()
                 .roomId(groupChatRoom.getId())
                 .writerName(sender.getNickname())
@@ -84,5 +87,22 @@ public class GroupChatController {
                 .userType(UserType.ENTER)
                 .build();
         messageTemplate.convertAndSend("/subscribe/group/enter/room/" + roomId, message);
+
+        // ✅ 5. 전체 참여자 목록 브로드캐스트
+        List<GroupChatUserListResponseDto> participants = groupChatUserRepository
+                .findAllByGroupChatRoomId(roomId)
+                .stream()
+                .map(user -> GroupChatUserListResponseDto.builder()
+                        .userId(user.getUser().getId())
+                        .nickname(user.getUser().getNickname())
+                        .build())
+                .toList();
+
+        GroupChatUserListBroadcastDto participantListMessage = GroupChatUserListBroadcastDto.builder()
+                .roomId(roomId)
+                .participants(participants)
+                .build();
+
+        messageTemplate.convertAndSend("/subscribe/group/users/room/" + roomId, participantListMessage);
     }
 }
