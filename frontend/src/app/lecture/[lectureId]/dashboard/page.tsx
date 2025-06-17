@@ -6,6 +6,7 @@ import NotificationList from "@/components/notification/NotificationList";
 import NotificationModal from "@/components/notification/NotificationModal";
 import { Notification } from "@/components/notification/Notification";
 import QnaTab from "@/components/qna/QnaTab";
+import GroupChatRoom from "@/components/GroupChatRoom";
 
 interface CurriculumDetailDto {
   curriculumId: number;
@@ -100,6 +101,17 @@ export default function LectureDashboard() {
   // 탭 목록에 "그룹 채팅" 추가
   const [activeTab, setActiveTab] = useState<string>("커리큘럼"); // 기존 상태일 것으로 추정
   const tabs = ["커리큘럼", "Q&A", "공지사항", "채팅방"]; // "채팅방" 탭 추가
+
+  // 상태 변수 추가 - 다른 useState 선언 근처에
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(
+    null
+  );
+
+  // enterChatRoom 함수 수정 또는 추가
+  const enterChatRoom = (chatRoomId: number) => {
+    console.log(`채팅방 ${chatRoomId} 입장`);
+    setSelectedChatRoomId(chatRoomId);
+  };
 
   // 별 클릭 시 서버에 평점 등록
   const handleStarClick = async (score: number) => {
@@ -828,7 +840,7 @@ export default function LectureDashboard() {
                     <div
                       key={room.id}
                       className="bg-white border border-gray-200 hover:border-green-300 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
-                      // onClick={() => enterChatRoom(room.id)}
+                      onClick={() => enterChatRoom(room.id)}
                     >
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
@@ -853,20 +865,26 @@ export default function LectureDashboard() {
                         </div>
 
                         <div className="mt-3 flex items-center justify-end">
-                          <button className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium">
+                          {/* 그룹 채팅 탭 내용 중 채팅방 카드 부분의 입장 버튼 */}
+                          <button
+                            onClick={() => enterChatRoom(room.id)}
+                            className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg transition-colors flex items-center justify-center gap-1"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 mr-1"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
                             >
                               <path
-                                fillRule="evenodd"
-                                d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-                                clipRule="evenodd"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                               />
                             </svg>
-                            채팅방 입장 &rarr;
+                            채팅방 입장
                           </button>
                         </div>
                       </div>
@@ -892,6 +910,14 @@ export default function LectureDashboard() {
           />
         )}
       </main>
+
+      {/* 파일 끝부분의 최상위 div 바로 앞에 추가 */}
+      {selectedChatRoomId && (
+        <GroupChatRoom
+          roomId={selectedChatRoomId}
+          onClose={() => setSelectedChatRoomId(null)}
+        />
+      )}
     </div>
   );
 }

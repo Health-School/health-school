@@ -10,6 +10,8 @@ import NotificationCreateModal from "@/components/NotificationCreateModal"; // A
 import NotificationEditModal from "@/components/NotificationEditModal"; // Add import for edit modal
 import { useGlobalLoginUser } from "@/stores/auth/loginUser";
 import CurriculumEditModal from "@/components/CurriculumEditModal"; // Add this import
+import GroupChatRoom from "@/components/GroupChatRoom"; // 그룹 채팅방 컴포넌트 import
+
 // 강의 상세 DTO
 interface LectureDetailDto {
   id: number;
@@ -165,11 +167,20 @@ interface GroupChatRoomResponse {
 export default function LectureManagePage({
   params,
 }: {
-  params: Promise<{ lectureId: string }>;
+  params: { lectureId: string };
 }) {
   const router = useRouter();
-  // Next.js 14+에서 params는 Promise이므로 use()로 언래핑
-  const { lectureId } = use(params);
+  const lectureId = params.lectureId;
+
+  // 기존 상태 변수들
+  const [lectureData, setLectureData] = useState<LectureDetailDto | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState("curriculum");
+
+  // 추가할 상태 변수
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(
+    null
+  );
 
   // 이제 lectureId를 안전하게 사용
   const lectureIdRef = lectureId;
@@ -215,7 +226,9 @@ export default function LectureManagePage({
   const [editingCurriculum, setEditingCurriculum] =
     useState<CurriculumDto | null>(null);
   // Add state for group chat rooms
-  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoomResponse[]>([]);
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoomResponse[]>(
+    []
+  );
   // Add state for creating chat room
   const [showCreateChatRoomModal, setShowCreateChatRoomModal] = useState(false);
   const [newChatRoomName, setNewChatRoomName] = useState("");
@@ -728,7 +741,7 @@ export default function LectureManagePage({
           },
           body: JSON.stringify({
             lectureId: Number(lectureIdRef),
-            name: newChatRoomName.trim()
+            name: newChatRoomName.trim(),
           }),
         }
       );
@@ -739,7 +752,7 @@ export default function LectureManagePage({
 
       const result = await response.json();
       alert("그룹 채팅방이 생성되었습니다.");
-      
+
       // 목록 갱신
       fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureIdRef}`,
@@ -762,6 +775,11 @@ export default function LectureManagePage({
     } finally {
       setIsCreatingChatRoom(false);
     }
+  };
+
+  // enterChatRoom 함수 수정
+  const enterChatRoom = (chatRoomId: number) => {
+    setSelectedChatRoomId(chatRoomId);
   };
 
   return (
@@ -864,21 +882,26 @@ export default function LectureManagePage({
 
       {/* 탭 메뉴 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 flex gap-4 border-b">
-        {["클래스 관리", "강의 목록", "공지사항", "수강생 목록", "Q&A", "그룹 채팅"].map(
-          (tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 border-b-2 ${
-                activeTab === tab
-                  ? "border-green-500 font-bold text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              } transition-colors`}
-            >
-              {tab}
-            </button>
-          )
-        )}
+        {[
+          "클래스 관리",
+          "강의 목록",
+          "공지사항",
+          "수강생 목록",
+          "Q&A",
+          "그룹 채팅",
+        ].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 border-b-2 ${
+              activeTab === tab
+                ? "border-green-500 font-bold text-green-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } transition-colors`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Conditional content based on active tab */}
@@ -1658,8 +1681,6 @@ export default function LectureManagePage({
                       {i + 1}
                     </button>
                   );
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
-                  return <span key={i}>...</span>;
                 }
                 return null;
               })}
@@ -1725,59 +1746,103 @@ export default function LectureManagePage({
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="font-bold text-2xl text-gray-800">그룹 채팅</h3>
-              <p className="text-gray-500 mt-1">수강생들과 소통할 수 있는 채팅방을 관리하세요</p>
+              <p className="text-gray-500 mt-1">
+                수강생들과 소통할 수 있는 채팅방을 관리하세요
+              </p>
             </div>
             <button
               className="bg-green-500 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center gap-2 shadow-sm"
               onClick={() => setShowCreateChatRoomModal(true)}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               채팅방 생성
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {groupChatRooms.map((chatRoom) => (
-              <div 
-                key={chatRoom.id} 
+              <div
+                key={chatRoom.id}
                 className="bg-white border border-gray-200 rounded-xl p-6 hover:border-green-300 hover:shadow-lg transition-all duration-200"
               >
                 <div className="flex flex-col h-full">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                        <svg
+                          className="w-6 h-6 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                          />
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-lg text-gray-800">{chatRoom.name}</h4>
-                        <p className="text-sm text-gray-500">ID: {chatRoom.id}</p>
+                        <h4 className="font-semibold text-lg text-gray-800">
+                          {chatRoom.name}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          ID: {chatRoom.id}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        <svg
+                          className="w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
                         </svg>
-                        <span className="font-medium">강사:</span> {chatRoom.trainerName}
+                        <span className="font-medium">강사:</span>{" "}
+                        {chatRoom.trainerName}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-6 pt-4 border-t border-gray-100">
-                    <button 
+                    <button
                       className="w-full bg-green-50 text-green-700 px-4 py-2.5 rounded-lg hover:bg-green-100 transition-colors flex items-center justify-center gap-2 font-medium"
-                      onClick={() => {
-                        // 채팅방 입장 로직 구현
-                        alert(`${chatRoom.name} 채팅방 입장 기능은 아직 구현 중입니다.`);
-                      }}
+                      onClick={() => setSelectedChatRoomId(chatRoom.id)} // 채팅방 ID 설정으로 변경
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                        />
                       </svg>
                       채팅방 입장
                     </button>
@@ -1785,21 +1850,45 @@ export default function LectureManagePage({
                 </div>
               </div>
             ))}
-            
+
             {groupChatRooms.length === 0 && (
               <div className="col-span-full">
                 <div className="text-center py-12 px-4 bg-gray-50 rounded-xl">
-                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  <svg
+                    className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3l18 18M3 21L21 3"
+                    />
                   </svg>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">생성된 채팅방이 없습니다</h3>
-                  <p className="text-gray-500 mb-4">새로운 채팅방을 생성하여 수강생들과 소통을 시작해보세요</p>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    생성된 채팅방이 없습니다
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    새로운 채팅방을 생성하여 수강생들과 소통을 시작해보세요
+                  </p>
                   <button
                     className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                     onClick={() => setShowCreateChatRoomModal(true)}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                     채팅방 생성하기
                   </button>
@@ -1813,28 +1902,45 @@ export default function LectureManagePage({
       {/* 그룹 채팅방 생성 모달 */}
       {showCreateChatRoomModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
+          <div
             className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
             onClick={() => setShowCreateChatRoomModal(false)}
           ></div>
           <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">그룹 채팅방 생성</h3>
-              <button 
+              <h3 className="text-xl font-bold text-gray-900">
+                그룹 채팅방 생성
+              </h3>
+              <button
                 onClick={() => setShowCreateChatRoomModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              createGroupChatRoom();
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createGroupChatRoom();
+              }}
+            >
               <div className="mb-6">
-                <label htmlFor="chatRoomName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="chatRoomName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   채팅방 이름
                 </label>
                 <input
@@ -1859,23 +1965,49 @@ export default function LectureManagePage({
                   type="submit"
                   disabled={isCreatingChatRoom}
                   className={`px-4 py-2.5 rounded-lg text-white flex items-center gap-2 ${
-                    isCreatingChatRoom 
-                      ? "bg-green-400 cursor-not-allowed" 
+                    isCreatingChatRoom
+                      ? "bg-green-400 cursor-not-allowed"
                       : "bg-green-500 hover:bg-green-600"
                   }`}
                 >
                   {isCreatingChatRoom ? (
                     <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       생성 중...
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                       생성하기
                     </>
@@ -1885,6 +2017,13 @@ export default function LectureManagePage({
             </form>
           </div>
         </div>
+      )}
+
+      {selectedChatRoomId && (
+        <GroupChatRoom
+          roomId={selectedChatRoomId}
+          onClose={() => setSelectedChatRoomId(null)}
+        />
       )}
     </div>
   );
