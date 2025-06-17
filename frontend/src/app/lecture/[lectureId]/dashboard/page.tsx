@@ -33,6 +33,15 @@ interface LectureCurriculumDetailDto {
   curriculumDetailDtoList: CurriculumDetailDto[];
 }
 
+// GroupChatRoomResponse 인터페이스 수정 (기존 인터페이스와 일치하도록)
+interface GroupChatRoom {
+  id: number;
+  name: string;
+  trainerId: number;
+  trainerName: string;
+  lectureId: number;
+}
+
 // 시청 위치 및 누적 시청 시간 저장 함수
 async function saveCurriculumProgress(
   lectureId: number,
@@ -83,6 +92,14 @@ export default function LectureDashboard() {
   const [userScore, setUserScore] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+
+  // 그룹 채팅 관련 상태 추가
+  const [groupChatRooms, setGroupChatRooms] = useState<GroupChatRoom[]>([]);
+  const [loadingChatRooms, setLoadingChatRooms] = useState(false);
+
+  // 탭 목록에 "그룹 채팅" 추가
+  const [activeTab, setActiveTab] = useState<string>("커리큘럼"); // 기존 상태일 것으로 추정
+  const tabs = ["커리큘럼", "Q&A", "공지사항", "채팅방"]; // "채팅방" 탭 추가
 
   // 별 클릭 시 서버에 평점 등록
   const handleStarClick = async (score: number) => {
@@ -289,7 +306,6 @@ export default function LectureDashboard() {
   }, [lectureData]);
 
   // 상태 추가
-  const [activeTab, setActiveTab] = useState("공지사항");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
 
@@ -416,6 +432,60 @@ export default function LectureDashboard() {
     };
     fetchUserInfo();
   }, []);
+
+  // 그룹 채팅방 데이터를 가져오는 함수
+  const fetchGroupChatRooms = async () => {
+    if (!lectureId) return;
+
+    setLoadingChatRooms(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat-rooms/lecture/${lectureId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`채팅방 목록 조회 실패`);
+      }
+
+      const data = await response.json();
+      setGroupChatRooms(data);
+    } catch (error) {
+      console.error("채팅방 목록 조회 실패:", error);
+      setGroupChatRooms([]);
+    } finally {
+      setLoadingChatRooms(false);
+    }
+  };
+
+  // useEffect에 추가
+  useEffect(() => {
+    fetchGroupChatRooms();
+  }, [activeTab, lectureId]);
+
+  // 탭 변경 핸들러 (만약 없다면)
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  // 탭 선택에 따른 데이터 로드 (useEffect)
+  useEffect(() => {
+    if (selectedTab === "groupChat") {
+      fetchGroupChatRooms();
+    }
+  }, [selectedTab, lectureId]);
+
+  // 1. 현재 선택된 탭을 확인하기 위한 로그 추가
+  useEffect(() => {
+    console.log("현재 선택된 탭:", selectedTab);
+    console.log("채팅방 데이터:", groupChatRooms);
+
+    if (selectedTab === "groupChat") {
+      fetchGroupChatRooms();
+    }
+  }, [selectedTab]);
 
   if (!lectureData || !selectedCurriculum) {
     return (
@@ -569,7 +639,7 @@ export default function LectureDashboard() {
         <aside className="bg-white rounded-xl p-6 shadow-lg space-y-6">
           {/* 탭 - 학습자료 탭 제거 */}
           <div className="flex space-x-6 border-b pb-3">
-            {["curriculum", "qna", "notifications"].map((tab) => (
+            {["curriculum", "qna", "notifications", "groupChat"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -584,6 +654,7 @@ export default function LectureDashboard() {
                     curriculum: "커리큘럼",
                     qna: "Q&A",
                     notifications: "공지사항",
+                    groupChat: "그룹 채팅",
                   }[tab]
                 }
               </button>
@@ -715,6 +786,101 @@ export default function LectureDashboard() {
           {/* Q&A 탭일 때 QnaTab 보여주기 */}
           {selectedTab === "qna" && userId !== null && (
             <QnaTab lectureId={Number(lectureId)} userId={userId} />
+          )}
+
+          {/* 그룹 채팅 탭일 때 그룹 채팅방 리스트 보여주기 */}
+          {selectedTab === "groupChat" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">그룹 채팅방</h3>
+                <button
+                  onClick={fetchGroupChatRooms}
+                  className="flex items-center text-xs font-medium text-green-600 px-2 py-1 rounded-full bg-green-50 hover:bg-green-100"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  새로고침
+                </button>
+              </div>
+
+              {loadingChatRooms ? (
+                <div className="py-4 text-center">
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-green-500 border-t-transparent"></div>
+                  <p className="mt-2 text-gray-500">
+                    채팅방 목록을 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {groupChatRooms.map((room) => (
+                    <div
+                      key={room.id}
+                      className="bg-white border border-gray-200 hover:border-green-300 rounded-lg shadow-sm hover:shadow transition-all cursor-pointer"
+                      // onClick={() => enterChatRoom(room.id)}
+                    >
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-900">
+                            {room.name}
+                          </h4>
+                          {/* <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                            디버깅 모드
+                          </span> */}
+                        </div>
+
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center text-sm text-gray-600">
+                            <span className="font-medium">트레이너:</span>
+                            <span className="ml-2">{room.trainerName}</span>
+                          </div>
+
+                          <div className="flex items-center text-sm text-gray-600">
+                            <span className="font-medium">방번호:</span>
+                            <span className="ml-2">{room.id}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-end">
+                          <button className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 mr-1"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            채팅방 입장 &rarr;
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {groupChatRooms.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>개설된 그룹 채팅방이 없습니다.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </aside>
 
