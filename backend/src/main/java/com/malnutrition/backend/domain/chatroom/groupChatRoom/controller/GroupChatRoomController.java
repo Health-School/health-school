@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.chatroom.groupChatRoom.controller;
 
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomCreateRequest;
+import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomDetailDto;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomResponse;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomResponseDto;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
@@ -32,6 +33,12 @@ public class GroupChatRoomController {
     @GetMapping("/lecture/{lectureId}")
     public List<GroupChatRoomResponseDto> getChatRoomsByLecture(@PathVariable Long lectureId) {
         return groupChatRoomService.getChatRoomsByLectureId(lectureId);
+    }
+
+    @GetMapping("/{roomId}")
+    public ResponseEntity<GroupChatRoomDetailDto> getGroupChatRoom(@PathVariable Long roomId) {
+        GroupChatRoomDetailDto response = groupChatRoomService.getGroupChatRoomById(roomId);
+        return ResponseEntity.ok(response);
     }
 
 

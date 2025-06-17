@@ -1,6 +1,7 @@
 package com.malnutrition.backend.domain.chatroom.groupChatRoom.repository;
 
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
+import com.malnutrition.backend.domain.chatroom.groupChatUser.entity.GroupChatUser;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,4 +13,5 @@ public interface GroupChatRoomRepository extends JpaRepository<GroupChatRoom, Lo
     boolean existsByLecture(Lecture lecture);
     @Query("SELECT g FROM GroupChatRoom g JOIN FETCH g.createdBy WHERE g.lecture.id = :lectureId")
     List<GroupChatRoom> findByLectureIdWithUser(@Param("lectureId") Long lectureId);
+
 }

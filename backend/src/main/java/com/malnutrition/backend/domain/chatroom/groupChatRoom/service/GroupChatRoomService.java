@@ -1,9 +1,11 @@
 package com.malnutrition.backend.domain.chatroom.groupChatRoom.service;
 
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomCreateRequest;
+import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomDetailDto;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.dto.GroupChatRoomResponseDto;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.repository.GroupChatRoomRepository;
+import com.malnutrition.backend.domain.chatroom.groupChatUser.repository.GroupChatUserRepository;
 import com.malnutrition.backend.domain.lecture.lecture.entity.Lecture;
 import com.malnutrition.backend.domain.lecture.lecture.repository.LectureRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class GroupChatRoomService {
     private final LectureRepository lectureRepository;
     private final GroupChatRoomRepository groupChatRoomRepository;
+    private final GroupChatUserRepository groupChatUserRepository;
     private final Rq rq;
     public GroupChatRoom createGroupChatRoom(GroupChatRoomCreateRequest request) {
         User user = rq.getActor();
@@ -68,5 +71,23 @@ public class GroupChatRoomService {
                         .lectureId(chatRoom.getLecture().getId())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public GroupChatRoomDetailDto getGroupChatRoomById(Long roomId) {
+        GroupChatRoom room = groupChatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("그룹 채팅방이 존재하지 않습니다."));
+
+        List<String> participantNames = groupChatUserRepository.findByGroupChatRoomId(roomId).stream()
+                .map(groupChatUser -> groupChatUser.getUser().getNickname())
+                .toList();
+
+        return GroupChatRoomDetailDto.builder()
+                .id(room.getId())
+                .name(room.getName())
+                .trainerName(room.getCreatedBy().getNickname())
+                .lectureId(room.getLecture().getId())
+                .participants(participantNames)
+                .build();
     }
 }

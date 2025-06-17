@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "group_chat_messages")
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupChatMessage extends BaseEntity {
