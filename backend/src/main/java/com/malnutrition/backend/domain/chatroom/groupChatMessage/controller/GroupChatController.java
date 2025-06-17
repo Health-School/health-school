@@ -9,6 +9,7 @@ import com.malnutrition.backend.domain.chatroom.groupChatMessage.entity.GroupCha
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.repository.GroupChatMessageRepository;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.repository.GroupChatRoomRepository;
+import com.malnutrition.backend.domain.chatroom.groupChatUser.entity.GroupChatUser;
 import com.malnutrition.backend.domain.chatroom.groupChatUser.repository.GroupChatUserRepository;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
@@ -43,9 +44,17 @@ public class GroupChatController {
         User sender = userRepository.findByNickname(enterMessage.getWriterName())
                 .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
 
-        // 1. 유저가 해당 방에 참가한 적 있는지 확인
-//        groupChatUserRepository.findByGroupChatRoomIdAndUserId(roomId, sender.getId())
-//                .orElseThrow(() -> new IllegalArgumentException("이 그룹 채팅방에 접근 권한이 없습니다."));
+        // ✅ 유저가 해당 방에 등록되어 있지 않으면 새로 저장
+        boolean isUserAlreadyInRoom = groupChatUserRepository
+                .existsByGroupChatRoomIdAndUserId(roomId, sender.getId());
+
+        if (!isUserAlreadyInRoom) {
+            GroupChatUser groupChatUser = new GroupChatUser();
+            groupChatUser.setGroupChatRoom(groupChatRoom);
+            groupChatUser.setUser(sender);
+            groupChatUser.setMuted(false);
+            groupChatUserRepository.save(groupChatUser);
+        }
 
         // 2. 마지막 메시지가 LEAVE인 경우만 입장 메시지 전송
         GroupChatMessage lastMessage = groupChatMessageRepository
