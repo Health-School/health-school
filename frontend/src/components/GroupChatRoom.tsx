@@ -791,10 +791,10 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
           </div>
         </div>
 
-        {/* 참가자 목록 - 이미지와 동일한 스타일로 수정 */}
+        {/* 참가자 목록 - 프로필 이미지 표시 추가 */}
         {showParticipants && (
           <div className="bg-white h-[600px] w-[250px] flex flex-col border-l shadow-md">
-            {/* 헤더 - 더 연한 녹색으로 변경 */}
+            {/* 헤더 - 이미지와 정확히 일치하는 색상으로 수정 */}
             <div
               className="flex items-center justify-between p-3"
               style={{ backgroundColor: "#e8fff0" }}
@@ -811,7 +811,7 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
               </button>
             </div>
 
-            {/* 참가자 목록 - 흰색 배경 */}
+            {/* 참가자 목록 - 프로필 이미지 표시 */}
             <div className="flex-1 overflow-y-auto bg-white">
               {participants.length === 0 ? (
                 <div className="text-center text-gray-500 text-sm p-4">
@@ -825,25 +825,40 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                       key={`user-${index}`}
                       className="flex items-center p-3 border-b border-gray-100"
                     >
-                      {/* 프로필 이미지 - 이미지와 같은 회색 원 */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-gray-200 flex items-center justify-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-500"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                            clipRule="evenodd"
+                      {/* 프로필 이미지 - 실제 이미지 표시 */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                        {user?.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            alt={`${typeof user === "string" ? user : user?.nickname || "사용자"} 프로필`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // 이미지 로드 실패 시 기본 아이콘 표시
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src =
+                                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239ca3af'%3E%3Cpath fill-rule='evenodd' d='M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z' clip-rule='evenodd'/%3E%3C/svg%3E";
+                            }}
                           />
-                        </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
                       </div>
 
                       {/* 사용자 정보 */}
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-800">
                           {typeof user === "string"
                             ? user
                             : user?.nickname || "사용자"}
