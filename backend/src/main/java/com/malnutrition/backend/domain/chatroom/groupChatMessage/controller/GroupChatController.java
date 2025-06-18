@@ -1,10 +1,7 @@
 package com.malnutrition.backend.domain.chatroom.groupChatMessage.controller;
 
 import com.malnutrition.backend.domain.chatroom.chatmessage.enums.UserType;
-import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatEnterRequestDto;
-import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatEnterResponseMessageDto;
-import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatUserListBroadcastDto;
-import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.GroupChatUserListResponseDto;
+import com.malnutrition.backend.domain.chatroom.groupChatMessage.dto.*;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.entity.GroupChatMessage;
 import com.malnutrition.backend.domain.chatroom.groupChatMessage.repository.GroupChatMessageRepository;
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRoom;
@@ -104,5 +101,37 @@ public class GroupChatController {
                 .build();
 
         messageTemplate.convertAndSend("/subscribe/group/users/room/" + roomId, participantListMessage);
+    }
+
+    @MessageMapping(value = "/chat/group/room/message/{roomId}")
+    @Transactional
+    public void sendGroupChatMessage(
+            @DestinationVariable("roomId") Long roomId,
+            @Payload GroupChatSendMessageDto sendMessageDto) {
+
+        GroupChatRoom groupChatRoom = groupChatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("그룹 채팅방이 존재하지 않습니다."));
+
+        User sender = userRepository.findByNickname(sendMessageDto.getWriterName())
+                .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+
+        // ✅ 1. 메시지 저장
+        GroupChatMessage chatMessage = GroupChatMessage.builder()
+                .groupChatRoom(groupChatRoom)
+                .sender(sender)
+                .message(sendMessageDto.getMessage())
+                .userType(UserType.TALK) // 일반 메시지
+                .build();
+        groupChatMessageRepository.save(chatMessage);
+
+        // ✅ 2. 메시지 브로드캐스트
+        GroupChatBroadcastMessageDto broadcastMessage = GroupChatBroadcastMessageDto.builder()
+                .roomId(roomId)
+                .writerName(sender.getNickname())
+                .message(sendMessageDto.getMessage())
+                .userType(UserType.TALK)
+                .build();
+
+        messageTemplate.convertAndSend("/subscribe/group/message/room/" + roomId, broadcastMessage);
     }
 }
