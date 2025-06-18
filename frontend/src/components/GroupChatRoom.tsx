@@ -251,7 +251,7 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
 
           // 채팅 메시지 구독
           client.subscribe(
-            `/subscribe/group/chat/room/${roomId}`,
+            `/subscribe/group/message/room/${roomId}`,
             (message) => {
               try {
                 const chatMessage = JSON.parse(message.body);
@@ -407,7 +407,7 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
       };
 
       stompClient.current.send(
-        `/publish/chat/group/message/${roomId}`,
+        `/publish/chat/group/room/message/${roomId}`,
         { "Content-Type": "application/json" },
         JSON.stringify(messageData)
       );
@@ -415,6 +415,33 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
       setMessage("");
     } catch (error) {
       console.error("메시지 전송 실패:", error);
+    }
+  };
+
+  // 메시지 전송 함수
+  const sendMessage = () => {
+    if (!stompClient.current || !currentUser || !message.trim()) {
+      return;
+    }
+
+    // 백엔드 GroupChatSendMessageDto와 일치하는 형식으로 데이터 구성
+    const messageData = {
+      writerName: currentUser.nickname,
+      message: message.trim(),
+    };
+
+    try {
+      // Spring의 MessageMapping 경로로 메시지 전송
+      stompClient.current.send(
+        `/publish/chat/group/room/message/${roomId}`,
+        { "Content-Type": "application/json" },
+        JSON.stringify(messageData)
+      );
+
+      console.log("그룹 메시지 전송:", messageData);
+      setMessage(""); // 입력창 비우기
+    } catch (error) {
+      console.error("그룹 메시지 전송 실패:", error);
     }
   };
 
@@ -748,66 +775,67 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
                 <p className="text-gray-500">메시지를 불러오는 중...</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {timelineMessages.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <svg
-                      className="w-12 h-12 mx-auto mb-2 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                      />
-                    </svg>
-                    <p>아직 메시지가 없습니다.</p>
-                    <p className="text-sm mt-1">첫 메시지를 보내보세요!</p>
-                  </div>
-                ) : (
-                  timelineMessages.map((msg, index) => (
-                    <div
-                      key={msg.id || `msg-${index}`}
-                      className={
-                        msg.type === "system"
-                          ? "flex justify-center"
-                          : msg.writerName === currentUser?.nickname
-                            ? "flex justify-end"
-                            : "flex justify-start"
-                      }
-                    >
-                      {msg.type === "system" ? (
-                        <div className="bg-gray-200 rounded-full px-4 py-2 text-sm text-gray-600">
+              <div className="space-y-4">
+                {timelineMessages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`flex flex-col ${
+                      msg.writerName === currentUser?.nickname
+                        ? "items-end"
+                        : "items-start"
+                    }`}
+                  >
+                    {msg.type === "system" ? (
+                      // 시스템 메시지
+                      <div className="bg-gray-200/70 rounded-full px-4 py-2 text-sm text-gray-600 mx-auto">
+                        {msg.message}
+                      </div>
+                    ) : (
+                      // 채팅 메시지
+                      <div className="max-w-[70%]">
+                        {/* 사용자 이름 (말풍선 밖) */}
+                        <div
+                          className={`text-xs font-medium mb-1 ${
+                            msg.writerName === currentUser?.nickname
+                              ? "text-right"
+                              : "text-left"
+                          }`}
+                        >
+                          {msg.writerName}
+                        </div>
+
+                        {/* 말풍선 메시지 */}
+                        <div
+                          className={`relative inline-block ${
+                            msg.writerName === currentUser?.nickname
+                              ? "rounded-tl-2xl rounded-tr-none rounded-bl-2xl rounded-br-2xl"
+                              : "rounded-tl-none rounded-tr-2xl rounded-bl-2xl rounded-br-2xl"
+                          } p-3 ${
+                            msg.writerName === currentUser?.nickname
+                              ? "bg-green-500 text-white"
+                              : "bg-white border border-gray-200"
+                          }`}
+                        >
                           {msg.message}
                         </div>
-                      ) : (
+
+                        {/* 시간 (말풍선 밖) */}
                         <div
-                          className={`max-w-[70%] ${
+                          className={`text-xs text-gray-500 mt-1 ${
                             msg.writerName === currentUser?.nickname
-                              ? "bg-green-400 text-white"
-                              : "bg-white border border-gray-200 text-gray-800"
-                          } rounded-lg p-3 shadow-sm`}
+                              ? "text-right"
+                              : "text-left"
+                          }`}
                         >
-                          {msg.writerName !== currentUser?.nickname && (
-                            <div className="font-medium text-xs mb-1">
-                              {msg.writerName}
-                            </div>
-                          )}
-                          <div>{msg.message}</div>
-                          <div className="text-xs mt-1 text-right opacity-70">
-                            {new Date(msg.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </div>
-                      )}
-                    </div>
-                  ))
-                )}
+                      </div>
+                    )}
+                  </div>
+                ))}
                 <div ref={messageEndRef} />
               </div>
             )}
@@ -820,12 +848,12 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                 placeholder="메시지 입력..."
                 className="flex-1 rounded-full px-4 py-2 border focus:outline-none focus:border-green-400"
               />
               <button
-                onClick={handleSendMessage}
+                onClick={sendMessage}
                 disabled={!message.trim() || loading}
                 className="px-4 py-2 bg-green-400 text-white rounded-full hover:bg-green-500 disabled:opacity-50"
               >
