@@ -63,7 +63,7 @@ interface GroupChatRoomProps {
   onClose: () => void;
 }
 
-export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
+const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
   const [chatRoom, setChatRoom] = useState<GroupChatRoom | null>(null);
   const [timelineMessages, setTimelineMessages] = useState<TimelineMessage[]>(
     []
@@ -72,7 +72,10 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [participants, setParticipants] = useState<ChatParticipant[]>([]);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [participantsError, setParticipantsError] = useState<string | null>(
+    null
+  );
   const [showParticipants, setShowParticipants] = useState(false); // 상태 추가
 
   const stompClient = useRef<CompatClient | null>(null);
@@ -169,9 +172,15 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
     }
   };
 
-  // 참가자 목록을 가져오는 함수
+  // 참가자 목록 상태 정의
+  const [participantsState, setParticipantsState] = useState<any[]>([]);
+  const [showParticipantsState, setShowParticipantsState] = useState(false);
+
+  // 참가자 목록 가져오는 함수
   const fetchParticipants = async () => {
     try {
+      console.log("참가자 목록 가져오기 시작");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/group-chat/${roomId}/users`,
         {
@@ -180,25 +189,34 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
       );
 
       if (!response.ok) {
-        console.error("참가자 목록 가져오기 실패:", response.status);
+        console.error("참가자 목록 조회 실패:", response.status);
         return;
       }
 
       const data = await response.json();
-      console.log("참가자 목록 원본 응답:", data);
+      console.log("참가자 목록 데이터:", data);
 
-      // 단순 문자열 배열 형태로 온다고 가정
+      // 배열인지 확인하고 설정
       if (Array.isArray(data)) {
-        setParticipants(data); // 그대로 저장
-      } else if (data.data && Array.isArray(data.data)) {
-        setParticipants(data.data);
+        setParticipants(data);
+      } else {
+        console.error("참가자 목록이 배열이 아님:", data);
+        setParticipants([]);
       }
-
-      console.log("처리된 참가자 목록:", participants);
     } catch (error) {
-      console.error("참가자 목록 가져오기 오류:", error);
+      console.error("참가자 목록 조회 오류:", error);
+      setParticipants([]);
     }
   };
+
+  // 초기화 useEffect에 추가
+  useEffect(() => {
+    // 기존 코드...
+    if (roomId) {
+      fetchParticipants();
+    }
+    // 기존 코드...
+  }, [roomId]);
 
   // 중복 메시지 방지하면서 타임라인에 메시지 추가
   const addMessageToTimeline = useCallback((newMessage: TimelineMessage) => {
@@ -601,39 +619,14 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-[700px] h-[600px] rounded-lg flex flex-col shadow-xl">
-        {/* 헤더 */}
-        <div className="px-4 py-3 flex items-center border-b bg-green-400 rounded-t-lg">
-          <button
-            onClick={onClose}
-            className="mr-4 text-black hover:text-gray-700"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <h2 className="text-lg font-medium flex-1 text-black">
-            {chatRoom?.name || `그룹 채팅방 (${roomId})`}
-          </h2>
-
-          {/* 참여자 목록 토글 버튼 */}
-          <div className="relative mr-4">
-            <button
-              onClick={toggleParticipantsList}
-              className="flex items-center space-x-1 bg-white px-3 py-1.5 rounded-full text-sm text-green-700 hover:bg-gray-100 transition-colors"
-            >
+      <div className="flex items-stretch">
+        {/* 채팅창 */}
+        <div className="bg-white rounded-lg flex flex-col shadow-xl w-[700px] h-[600px]">
+          {/* 헤더 */}
+          <div className="px-4 py-3 flex items-center border-b bg-green-400 rounded-t-lg">
+            <button onClick={onClose} className="mr-3 text-white">
               <svg
-                className="w-5 h-5"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -642,100 +635,51 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-              <span>참여자 ({participants.length})</span>
-              <svg
-                className={`w-4 h-4 transition-transform ${
-                  showParticipants ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
+                  d="M15 19l-7-7 7-7"
                 />
               </svg>
             </button>
+            <h2 className="text-lg font-medium flex-1 text-white">
+              {chatRoom?.name || `그룹 채팅방 (${roomId})`}
+            </h2>
 
-            {/* 드롭다운 참여자 목록 */}
-            {showParticipants && (
-              <div className="absolute right-0 mt-2 w-60 bg-white rounded-lg shadow-lg z-10 border border-gray-200 overflow-hidden">
-                <div className="py-2 px-3 bg-gray-50 border-b flex justify-between items-center">
-                  <span className="font-medium text-sm text-gray-700">
-                    참여자 목록
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fetchParticipants();
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowParticipants(!showParticipants)}
+                className="text-white hover:bg-white/20 py-1 px-3 rounded-full flex items-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                </svg>
+                <span>참가자</span>
+              </button>
 
-                      // 새로고침 아이콘 애니메이션
-                      const refreshIcon = document.getElementById(
-                        "dropdown-refresh-icon"
-                      );
-                      if (refreshIcon) {
-                        refreshIcon.classList.add("animate-spin");
-                        setTimeout(
-                          () => refreshIcon.classList.remove("animate-spin"),
-                          1000
-                        );
-                      }
-                    }}
-                    className="text-xs text-gray-600 hover:text-green-600"
-                  >
-                    <svg
-                      id="dropdown-refresh-icon"
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      />
-                    </svg>
-                  </button>
+              <button onClick={leaveChat} className="text-white">
+                나가기
+              </button>
+            </div>
+          </div>
+
+          {/* 채팅 영역 */}
+          <div className="flex-1 flex flex-col">
+            {/* 메시지 영역 */}
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+              {loading && timelineMessages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-3"></div>
+                  <p className="text-gray-500">메시지를 불러오는 중...</p>
                 </div>
-
-                <div className="max-h-60 overflow-y-auto">
-                  {participants.length > 0 ? (
-                    <ul className="py-1">
-                      {participants.map((nickname, index) => (
-                        <li
-                          key={`participant-${index}`}
-                          className={`px-3 py-2 hover:bg-gray-50 ${
-                            nickname === currentUser?.nickname
-                              ? "bg-green-50"
-                              : ""
-                          }`}
-                        >
-                          <div className="flex items-center">
-                            <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                            <span className="text-sm">
-                              {nickname}
-                              {nickname === currentUser?.nickname && (
-                                <span className="ml-1 text-xs text-green-600">
-                                  (나)
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="py-6 px-4 text-center">
+              ) : (
+                <div className="space-y-4">
+                  {timelineMessages.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
                       <svg
-                        className="w-8 h-8 mx-auto mb-2 text-gray-400"
+                        className="w-12 h-12 mx-auto mb-2 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -743,126 +687,190 @@ export default function GroupChatRoom({ roomId, onClose }: GroupChatRoomProps) {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                          strokeWidth={1.5}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
                         />
                       </svg>
-                      <p className="text-sm text-gray-500">
-                        참여자 정보를 불러오는 중...
-                      </p>
+                      <p>아직 메시지가 없습니다.</p>
+                      <p className="text-sm mt-1">첫 메시지를 보내보세요!</p>
                     </div>
+                  ) : (
+                    timelineMessages.map((msg, index) => (
+                      <div
+                        key={msg.id || `msg-${index}`}
+                        className={
+                          msg.type === "system"
+                            ? "flex justify-center"
+                            : msg.writerName === currentUser?.nickname
+                              ? "flex flex-col items-end"
+                              : "flex flex-col items-start"
+                        }
+                      >
+                        {/* 시스템 메시지 */}
+                        {msg.type === "system" ? (
+                          <div className="bg-gray-200 rounded-full px-4 py-2 text-sm text-gray-600">
+                            {msg.message}
+                          </div>
+                        ) : (
+                          <>
+                            {/* 상대방 메시지일 경우 닉네임 표시 */}
+                            {msg.writerName !== currentUser?.nickname && (
+                              <div className="font-medium text-xs ml-2 mb-1 text-gray-700">
+                                {msg.writerName}
+                              </div>
+                            )}
+
+                            {/* 메시지 말풍선 */}
+                            <div className="flex items-end">
+                              {/* 내 메시지면 시간이 왼쪽, 상대방 메시지면 시간이 오른쪽 */}
+                              {msg.writerName === currentUser?.nickname && (
+                                <div className="text-xs text-gray-500 mr-2">
+                                  {new Date(msg.timestamp).toLocaleTimeString(
+                                    [],
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </div>
+                              )}
+
+                              <div
+                                className={`${
+                                  msg.writerName === currentUser?.nickname
+                                    ? "bg-green-400 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg"
+                                    : "bg-white border border-gray-200 text-gray-800 rounded-tl-lg rounded-tr-lg rounded-br-lg"
+                                } py-2 px-4 max-w-[80%] w-auto`}
+                              >
+                                <div className="break-words">{msg.message}</div>
+                              </div>
+
+                              {/* 상대방 메시지면 시간이 오른쪽 */}
+                              {msg.writerName !== currentUser?.nickname && (
+                                <div className="text-xs text-gray-500 ml-2">
+                                  {new Date(msg.timestamp).toLocaleTimeString(
+                                    [],
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))
                   )}
+                  <div ref={messageEndRef} />
                 </div>
+              )}
+            </div>
+
+            {/* 메시지 입력 영역 */}
+            <div className="p-4 border-t bg-white">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                  placeholder="메시지 입력..."
+                  className="flex-1 rounded-full px-4 py-2 border focus:outline-none focus:border-green-400"
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!message.trim() || loading}
+                  className="px-4 py-2 bg-green-400 text-white rounded-full hover:bg-green-500 disabled:opacity-50"
+                >
+                  전송
+                </button>
               </div>
-            )}
-          </div>
-
-          <button
-            onClick={leaveChat}
-            className="text-black hover:text-gray-700"
-          >
-            나가기
-          </button>
-        </div>
-
-        {/* 채팅 영역 (이제 전체 화면을 차지) */}
-        <div className="flex-1 flex flex-col">
-          {/* 메시지 영역 */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-            {loading && timelineMessages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-3"></div>
-                <p className="text-gray-500">메시지를 불러오는 중...</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {timelineMessages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col ${
-                      msg.writerName === currentUser?.nickname
-                        ? "items-end"
-                        : "items-start"
-                    }`}
-                  >
-                    {msg.type === "system" ? (
-                      // 시스템 메시지
-                      <div className="bg-gray-200/70 rounded-full px-4 py-2 text-sm text-gray-600 mx-auto">
-                        {msg.message}
-                      </div>
-                    ) : (
-                      // 채팅 메시지
-                      <div className="max-w-[70%]">
-                        {/* 사용자 이름 (말풍선 밖) */}
-                        <div
-                          className={`text-xs font-medium mb-1 ${
-                            msg.writerName === currentUser?.nickname
-                              ? "text-right"
-                              : "text-left"
-                          }`}
-                        >
-                          {msg.writerName}
-                        </div>
-
-                        {/* 말풍선 메시지 */}
-                        <div
-                          className={`relative inline-block ${
-                            msg.writerName === currentUser?.nickname
-                              ? "rounded-tl-2xl rounded-tr-none rounded-bl-2xl rounded-br-2xl"
-                              : "rounded-tl-none rounded-tr-2xl rounded-bl-2xl rounded-br-2xl"
-                          } p-3 ${
-                            msg.writerName === currentUser?.nickname
-                              ? "bg-green-500 text-white"
-                              : "bg-white border border-gray-200"
-                          }`}
-                        >
-                          {msg.message}
-                        </div>
-
-                        {/* 시간 (말풍선 밖) */}
-                        <div
-                          className={`text-xs text-gray-500 mt-1 ${
-                            msg.writerName === currentUser?.nickname
-                              ? "text-right"
-                              : "text-left"
-                          }`}
-                        >
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <div ref={messageEndRef} />
-              </div>
-            )}
-          </div>
-
-          {/* 메시지 입력 영역 */}
-          <div className="p-4 border-t bg-white">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="메시지 입력..."
-                className="flex-1 rounded-full px-4 py-2 border focus:outline-none focus:border-green-400"
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!message.trim() || loading}
-                className="px-4 py-2 bg-green-400 text-white rounded-full hover:bg-green-500 disabled:opacity-50"
-              >
-                전송
-              </button>
             </div>
           </div>
         </div>
+
+        {/* 참가자 목록 - 이미지와 동일한 스타일로 수정 */}
+        {showParticipants && (
+          <div className="bg-white h-[600px] w-[250px] flex flex-col border-l shadow-md">
+            {/* 헤더 - 더 연한 녹색으로 변경 */}
+            <div
+              className="flex items-center justify-between p-3"
+              style={{ backgroundColor: "#e8fff0" }}
+            >
+              <h3 className="font-bold text-base" style={{ color: "#00a65a" }}>
+                참가자 ({participants.length})
+              </h3>
+              <button
+                onClick={() => setShowParticipants(false)}
+                className="hover:opacity-70"
+                style={{ color: "#00a65a" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 참가자 목록 - 흰색 배경 */}
+            <div className="flex-1 overflow-y-auto bg-white">
+              {participants.length === 0 ? (
+                <div className="text-center text-gray-500 text-sm p-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto mb-2"></div>
+                  참가자 정보를 불러오는 중...
+                </div>
+              ) : (
+                <div>
+                  {participants.map((user, index) => (
+                    <div
+                      key={`user-${index}`}
+                      className="flex items-center p-3 border-b border-gray-100"
+                    >
+                      {/* 프로필 이미지 - 이미지와 같은 회색 원 */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-gray-500"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* 사용자 정보 */}
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">
+                          {typeof user === "string"
+                            ? user
+                            : user?.nickname || "사용자"}
+                          {(typeof user === "string"
+                            ? user === currentUser?.nickname
+                            : user?.userId === currentUser?.id) && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              (나)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 푸터 - 참가자 상태 표시 */}
+            <div className="p-3 text-xs text-center text-gray-500 border-t bg-white">
+              총 {participants.length}명이 대화에 참여 중입니다
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default GroupChatRoom;
