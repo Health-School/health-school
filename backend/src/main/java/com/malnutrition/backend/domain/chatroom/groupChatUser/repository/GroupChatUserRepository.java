@@ -16,4 +16,6 @@ public interface GroupChatUserRepository extends JpaRepository<GroupChatUser, Lo
 
     @Query("SELECT u FROM GroupChatUser u JOIN FETCH u.user WHERE u.groupChatRoom.id = :roomId")
     List<GroupChatUser> findAllByGroupChatRoomId(@Param("roomId") Long roomId);
+
+    void deleteByGroupChatRoomIdAndUserId(Long roomId, Long userId);
 }

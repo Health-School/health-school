@@ -28,7 +28,7 @@ public class GroupChatMessageController {
         List<GroupChatMessage> messages = groupChatMessageRepository.findAllWithSenderByGroupChatRoomId(roomId);
 
         List<GroupChatMessageResponseDto> result = messages.stream()
-                .map(GroupChatMessageResponseDto::fromEntity)
+                .map(message -> GroupChatMessageResponseDto.fromEntity(message, imageService))  // ✅ imageService 넘기기
                 .toList();
 
         return ResponseEntity.ok(result);

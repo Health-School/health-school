@@ -8,6 +8,7 @@ import com.malnutrition.backend.domain.chatroom.groupChatRoom.entity.GroupChatRo
 import com.malnutrition.backend.domain.chatroom.groupChatRoom.repository.GroupChatRoomRepository;
 import com.malnutrition.backend.domain.chatroom.groupChatUser.entity.GroupChatUser;
 import com.malnutrition.backend.domain.chatroom.groupChatUser.repository.GroupChatUserRepository;
+import com.malnutrition.backend.domain.image.service.ImageService;
 import com.malnutrition.backend.domain.user.user.entity.User;
 import com.malnutrition.backend.domain.user.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,6 +32,7 @@ public class GroupChatController {
     private final GroupChatMessageRepository groupChatMessageRepository;
     private final GroupChatUserRepository groupChatUserRepository;
     private final SimpMessagingTemplate messageTemplate;
+    private final ImageService imageService;
 
     @MessageMapping(value = "/chat/group/room/enter/{roomId}")
     @Transactional
@@ -130,8 +132,62 @@ public class GroupChatController {
                 .writerName(sender.getNickname())
                 .message(sendMessageDto.getMessage())
                 .userType(UserType.TALK)
+                .profileImage(imageService.getImageUrl(sender.getProfileImage()))
                 .build();
 
         messageTemplate.convertAndSend("/subscribe/group/message/room/" + roomId, broadcastMessage);
+    }
+
+    @MessageMapping("/chat/group/room/leave/{roomId}")
+    @Transactional
+    public void leaveGroupChatRoom(
+            @DestinationVariable("roomId") Long roomId,
+            @Payload GroupChatEnterRequestDto leaveMessage) {
+
+        GroupChatRoom groupChatRoom = groupChatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("그룹 채팅방이 존재하지 않습니다."));
+
+        User sender = userRepository.findByNickname(leaveMessage.getWriterName())
+                .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
+
+        // ✅ 퇴장 메시지 저장
+        String msg = sender.getNickname() + "님이 그룹 채팅방에서 퇴장하였습니다.";
+        GroupChatMessage chatMessage = GroupChatMessage.builder()
+                .groupChatRoom(groupChatRoom)
+                .sender(sender)
+                .message(msg)
+                .userType(UserType.LEAVE)
+                .build();
+        groupChatMessageRepository.save(chatMessage);
+
+        // ✅ 퇴장 메시지 브로드캐스트
+        GroupChatEnterResponseMessageDto message = GroupChatEnterResponseMessageDto.builder()
+                .roomId(groupChatRoom.getId())
+                .writerName(sender.getNickname())
+                .message(msg)
+                .userType(UserType.LEAVE)
+                .build();
+        messageTemplate.convertAndSend("/subscribe/group/enter/room/" + roomId, message);
+
+        // ✅ 참여자 목록에서 제거 (원한다면)
+        groupChatUserRepository.deleteByGroupChatRoomIdAndUserId(roomId, sender.getId());
+
+        // ✅ 새로운 참여자 목록 브로드캐스트
+        List<GroupChatUserListResponseDto> participants = groupChatUserRepository
+                .findAllByGroupChatRoomId(roomId)
+                .stream()
+                .map(user -> GroupChatUserListResponseDto.builder()
+                        .userId(user.getUser().getId())
+                        .nickname(user.getUser().getNickname())
+                        .profileImage(imageService.getImageUrl(user.getUser().getProfileImage()))
+                        .build())
+                .toList();
+
+        GroupChatUserListBroadcastDto participantListMessage = GroupChatUserListBroadcastDto.builder()
+                .roomId(roomId)
+                .participants(participants)
+                .build();
+
+        messageTemplate.convertAndSend("/subscribe/group/users/room/" + roomId, participantListMessage);
     }
 }

@@ -11,4 +11,5 @@ public class GroupChatBroadcastMessageDto {
     private String writerName;
     private String message;
     private UserType userType;
+    private String profileImage;
 }
