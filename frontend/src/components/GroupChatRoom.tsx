@@ -81,6 +81,7 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
   const stompClient = useRef<CompatClient | null>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const hasEnterMessageSent = useRef(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null); // 메시지 컨테이너 참조 추가
 
   // 현재 사용자 정보 가져오기
   const fetchCurrentUser = async () => {
@@ -436,60 +437,25 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
     }
   };
 
-  // 메시지 전송 함수
-  const sendMessage = () => {
-    if (!stompClient.current || !currentUser || !message.trim()) {
-      return;
-    }
+  // Modify your existing leave/exit function
+  const handleLeaveRoom = () => {
+    // Show confirmation alert before leaving
+    const confirmed = window.confirm("이 방을 정말 나가시겠습니까?");
 
-    // 백엔드 GroupChatSendMessageDto와 일치하는 형식으로 데이터 구성
-    const messageData = {
-      writerName: currentUser.nickname,
-      message: message.trim(),
-    };
-
-    try {
-      // Spring의 MessageMapping 경로로 메시지 전송
-      stompClient.current.send(
-        `/publish/chat/group/room/message/${roomId}`,
-        { "Content-Type": "application/json" },
-        JSON.stringify(messageData)
-      );
-
-      console.log("그룹 메시지 전송:", messageData);
-      setMessage(""); // 입력창 비우기
-    } catch (error) {
-      console.error("그룹 메시지 전송 실패:", error);
-    }
-  };
-
-  // 채팅방 나가기
-  const leaveChat = () => {
-    if (!stompClient.current || !currentUser) {
-      onClose();
-      return;
-    }
-
-    try {
-      const leaveData = {
-        writerName: currentUser.nickname,
+    if (confirmed) {
+      // Create leave message payload
+      const leaveMessage = {
+        writerName: currentUser?.nickname, // Adjust based on your user state variable
       };
 
-      stompClient.current.send(
-        `/publish/chat/group/room/leave/${roomId}`,
-        { "Content-Type": "application/json" },
-        JSON.stringify(leaveData)
-      );
+      // Send leave message to the server
+      stompClient.current?.publish({
+        destination: `/publish/chat/group/room/leave/${roomId}`,
+        body: JSON.stringify(leaveMessage),
+      });
 
-      setTimeout(() => {
-        if (stompClient.current) {
-          stompClient.current.disconnect();
-        }
-        onClose();
-      }, 500);
-    } catch (error) {
-      console.error("채팅방 나가기 실패:", error);
-      onClose();
+      // Navigate back to chat list or home page
+      onClose(); // Adjust based on your routing
     }
   };
 
@@ -598,6 +564,27 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
     };
   }, [roomId]); // roomId가 변경될 때마다 새로 설정
 
+  // 메시지 컨테이너 스크롤 설정
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      // 메시지 수가 10개 초과인지 확인
+      const messageCount = timelineMessages.length;
+
+      if (messageCount > 10) {
+        // 스크롤 활성화
+        messagesContainerRef.current.style.overflowY = "auto";
+        messagesContainerRef.current.style.maxHeight = "60vh"; // 필요에 따라 높이 조정
+        // 새 메시지가 도착하면 아래로 스크롤
+        messagesContainerRef.current.scrollTop =
+          messagesContainerRef.current.scrollHeight;
+      } else {
+        // 아직 스크롤 필요 없음
+        messagesContainerRef.current.style.overflowY = "visible";
+        messagesContainerRef.current.style.maxHeight = "none";
+      }
+    }
+  }, [timelineMessages]); // timelineMessages가 변경될 때마다 실행
+
   if (error) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -659,7 +646,7 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                 <span>참가자</span>
               </button>
 
-              <button onClick={leaveChat} className="text-white">
+              <button onClick={handleLeaveRoom} className="text-white">
                 나가기
               </button>
             </div>
@@ -668,7 +655,10 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
           {/* 채팅 영역 */}
           <div className="flex-1 flex flex-col">
             {/* 메시지 영역 */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+            <div
+              className="flex-1 overflow-y-auto p-4 bg-gray-50"
+              ref={messagesContainerRef} // 메시지 컨테이너 참조 추가
+            >
               {loading && timelineMessages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mb-3"></div>
@@ -695,73 +685,118 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                       <p className="text-sm mt-1">첫 메시지를 보내보세요!</p>
                     </div>
                   ) : (
-                    timelineMessages.map((msg, index) => (
-                      <div
-                        key={msg.id || `msg-${index}`}
-                        className={
-                          msg.type === "system"
-                            ? "flex justify-center"
-                            : msg.writerName === currentUser?.nickname
-                              ? "flex flex-col items-end"
-                              : "flex flex-col items-start"
-                        }
-                      >
-                        {/* 시스템 메시지 */}
-                        {msg.type === "system" ? (
+                    timelineMessages.map((msg, index) => {
+                      // 같은 사람의 연속 메시지인지 확인
+                      const showProfile =
+                        index === 0 ||
+                        timelineMessages[index - 1].writerName !==
+                          msg.writerName;
+
+                      return msg.type === "system" ? (
+                        // 시스템 메시지
+                        <div
+                          key={msg.id || `msg-${index}`}
+                          className="flex justify-center"
+                        >
                           <div className="bg-gray-200 rounded-full px-4 py-2 text-sm text-gray-600">
                             {msg.message}
                           </div>
-                        ) : (
-                          <>
-                            {/* 상대방 메시지일 경우 닉네임 표시 */}
-                            {msg.writerName !== currentUser?.nickname && (
-                              <div className="font-medium text-xs ml-2 mb-1 text-gray-700">
-                                {msg.writerName}
+                        </div>
+                      ) : msg.writerName === currentUser?.nickname ? (
+                        // 내 메시지
+                        <div
+                          key={msg.id || `msg-${index}`}
+                          className="flex justify-end items-end"
+                        >
+                          <div className="text-xs text-gray-500 mr-2">
+                            {new Date(msg.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+
+                          <div className="bg-green-400 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg py-2 px-3 max-w-[75%]">
+                            <div className="break-words">{msg.message}</div>
+                          </div>
+                        </div>
+                      ) : (
+                        // 상대방 메시지
+                        <div
+                          key={msg.id || `msg-${index}`}
+                          className="flex flex-col"
+                        >
+                          {/* 다른 사람의 첫 메시지일 때만 닉네임 표시 */}
+                          {showProfile && (
+                            <div className="text-xs font-medium text-gray-700 ml-10 mb-1">
+                              {msg.writerName}
+                            </div>
+                          )}
+
+                          <div className="flex items-end">
+                            {/* 프로필 이미지 - 이미지에 맞게 조정 */}
+                            {showProfile ? (
+                              <div className="w-8 h-8 rounded-full overflow-hidden mr-2 flex-shrink-0 bg-gray-200 flex items-center justify-center">
+                                {(() => {
+                                  const sender = Array.isArray(participants)
+                                    ? participants.find(
+                                        (p) =>
+                                          p &&
+                                          typeof p === "object" &&
+                                          "nickname" in p &&
+                                          p.nickname === msg.writerName
+                                      )
+                                    : null;
+
+                                  return sender &&
+                                    "profileImage" in sender &&
+                                    sender.profileImage ? (
+                                    <img
+                                      src={sender.profileImage as string}
+                                      alt={`${msg.writerName} 프로필`}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        target.onerror = null;
+                                        target.src =
+                                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239ca3af'%3E%3Cpath fill-rule='evenodd' d='M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z' clip-rule='evenodd'/%3E%3C/svg%3E";
+                                      }}
+                                    />
+                                  ) : (
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-4 w-4 text-gray-500"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  );
+                                })()}
                               </div>
+                            ) : (
+                              // 연속 메시지일 경우 프로필 공간 유지
+                              <div className="w-8 mr-2 flex-shrink-0"></div>
                             )}
 
-                            {/* 메시지 말풍선 */}
-                            <div className="flex items-end">
-                              {/* 내 메시지면 시간이 왼쪽, 상대방 메시지면 시간이 오른쪽 */}
-                              {msg.writerName === currentUser?.nickname && (
-                                <div className="text-xs text-gray-500 mr-2">
-                                  {new Date(msg.timestamp).toLocaleTimeString(
-                                    [],
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
-                                </div>
-                              )}
-
-                              <div
-                                className={`${
-                                  msg.writerName === currentUser?.nickname
-                                    ? "bg-green-400 text-white rounded-tl-lg rounded-tr-lg rounded-bl-lg"
-                                    : "bg-white border border-gray-200 text-gray-800 rounded-tl-lg rounded-tr-lg rounded-br-lg"
-                                } py-2 px-4 max-w-[80%] w-auto`}
-                              >
-                                <div className="break-words">{msg.message}</div>
-                              </div>
-
-                              {/* 상대방 메시지면 시간이 오른쪽 */}
-                              {msg.writerName !== currentUser?.nickname && (
-                                <div className="text-xs text-gray-500 ml-2">
-                                  {new Date(msg.timestamp).toLocaleTimeString(
-                                    [],
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
-                                </div>
-                              )}
+                            <div className="bg-white border border-gray-200 text-gray-800 rounded-tl-lg rounded-tr-lg rounded-br-lg py-2 px-3 max-w-[75%]">
+                              <div className="break-words">{msg.message}</div>
                             </div>
-                          </>
-                        )}
-                      </div>
-                    ))
+
+                            <div className="text-xs text-gray-500 ml-2">
+                              {new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                   <div ref={messageEndRef} />
                 </div>
@@ -775,12 +810,12 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder="메시지 입력..."
                   className="flex-1 rounded-full px-4 py-2 border focus:outline-none focus:border-green-400"
                 />
                 <button
-                  onClick={sendMessage}
+                  onClick={handleSendMessage}
                   disabled={!message.trim() || loading}
                   className="px-4 py-2 bg-green-400 text-white rounded-full hover:bg-green-500 disabled:opacity-50"
                 >
