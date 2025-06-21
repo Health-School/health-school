@@ -14,7 +14,13 @@ public interface GroupChatUserRepository extends JpaRepository<GroupChatUser, Lo
 
     boolean existsByGroupChatRoomIdAndUserId(Long groupChatRoomId, Long userId);
 
-    @Query("SELECT u FROM GroupChatUser u JOIN FETCH u.user WHERE u.groupChatRoom.id = :roomId")
+    @Query("""
+    SELECT u FROM GroupChatUser u
+    JOIN FETCH u.user
+    JOIN FETCH u.groupChatRoom g
+    JOIN FETCH g.createdBy
+    WHERE u.groupChatRoom.id = :roomId
+    """)
     List<GroupChatUser> findAllByGroupChatRoomId(@Param("roomId") Long roomId);
 
     void deleteByGroupChatRoomIdAndUserId(Long roomId, Long userId);

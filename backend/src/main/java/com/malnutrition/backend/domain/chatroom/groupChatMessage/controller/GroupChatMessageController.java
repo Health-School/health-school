@@ -7,6 +7,7 @@ import com.malnutrition.backend.domain.chatroom.groupChatMessage.repository.Grou
 import com.malnutrition.backend.domain.chatroom.groupChatUser.entity.GroupChatUser;
 import com.malnutrition.backend.domain.chatroom.groupChatUser.repository.GroupChatUserRepository;
 import com.malnutrition.backend.domain.image.service.ImageService;
+import com.malnutrition.backend.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ public class GroupChatMessageController {
     private final GroupChatMessageRepository groupChatMessageRepository;
     private final GroupChatUserRepository groupChatUserRepository;
     private final ImageService imageService;
+    private final Rq rq;
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<List<GroupChatMessageResponseDto>> getMessages(@PathVariable Long roomId) {
         List<GroupChatMessage> messages = groupChatMessageRepository.findAllWithSenderByGroupChatRoomId(roomId);
@@ -42,7 +44,8 @@ public class GroupChatMessageController {
                 .map(groupChatUser -> GroupChatUserListResponseDto.builder()
                         .userId(groupChatUser.getUser().getId())
                         .nickname(groupChatUser.getUser().getNickname())
-                        .profileImage(imageService.getImageUrl(groupChatUser.getUser().getProfileImage()))  // ⚠️ 이 필드가 User 엔티티에 있어야 함
+                        .profileImage(imageService.getImageUrl(groupChatUser.getUser().getProfileImage()))
+                        .isCreator(groupChatUser.getGroupChatRoom().getCreatedBy().getId().equals(groupChatUser.getUser().getId()))// ⚠️ 이 필드가 User 엔티티에 있어야 함
                         .build())
                 .toList();
 
