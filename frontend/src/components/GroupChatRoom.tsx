@@ -21,14 +21,14 @@ type GroupChatEnterResponseMessageDto = {
   roomId: number;
   writerName: string;
   message: string;
-  userType: "ENTER" | "LEAVE" | "TALK";
+  userType: "ENTER" | "LEAVE" | "TALK" | "FORCE_LEAVE"; // "FORCE_LEAVE" 추가
 };
 
 type GroupChatMessageResponseDto = {
   id: number;
   message: string;
   writerName: string;
-  userType: "ENTER" | "LEAVE" | "TALK";
+  userType: "ENTER" | "LEAVE" | "TALK" | "FORCE_LEAVE"; // "FORCE_LEAVE" 추가
   createdDate: string;
 };
 
@@ -149,11 +149,14 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
         return;
       }
 
-      // 메시지를 타임라인 형식으로 변환
+      // 메시지를 타임라인 형식으로 변환 - 타입 확인 로직 강화
       const timelineMessages: TimelineMessage[] = messages.map((msg) => ({
         id: msg.id,
+        // 타입 판별 로직 강화
         type:
-          msg.userType === "ENTER" || msg.userType === "LEAVE"
+          msg.userType === "ENTER" ||
+          msg.userType === "LEAVE" ||
+          msg.userType === "FORCE_LEAVE"
             ? "system"
             : "chat",
         message: msg.message,
@@ -292,12 +295,26 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
             }
           );
 
-          // 입장 메시지 구독
+          // 입장 메시지 구독 수정
           client.subscribe(
             `/subscribe/group/enter/room/${roomId}`,
             (message) => {
               try {
                 const enterMessage = JSON.parse(message.body);
+
+                // 강제퇴장 메시지이고 현재 사용자와 관련된 메시지인지 확인
+                if (
+                  enterMessage.userType === "FORCE_LEAVE" &&
+                  enterMessage.writerName === currentUser?.nickname
+                ) {
+                  // 강제퇴장 알림 표시
+                  alert("방장에 의해 강제퇴장 되었습니다.");
+
+                  // 채팅방 나가기
+                  onClose();
+                  return;
+                }
+
                 addMessageToTimeline({
                   id: enterMessage.id,
                   type: "system",
@@ -315,15 +332,16 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
             }
           );
 
-          // 퇴장 메시지 구독
+          // 퇴장 메시지 구독 수정
           client.subscribe(
             `/subscribe/group/leave/room/${roomId}`,
             (message) => {
               try {
                 const leaveMessage = JSON.parse(message.body);
+                // 명시적으로 타입을 "system"으로 설정
                 addMessageToTimeline({
                   id: leaveMessage.id,
-                  type: "system",
+                  type: "system", // 명확하게 시스템 타입으로 설정
                   message: leaveMessage.message,
                   timestamp: new Date(),
                 });
@@ -456,6 +474,60 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
 
       // Navigate back to chat list or home page
       onClose(); // Adjust based on your routing
+    }
+  };
+
+  // 사용자 강퇴 처리 함수
+  const handleKickUser = (user: any) => {
+    console.log("강퇴 함수 호출됨", user);
+
+    if (typeof user === "string" || !user?.userId || !currentUser) {
+      console.log(
+        "강퇴 불가: 잘못된 사용자 정보",
+        typeof user,
+        user?.userId,
+        currentUser
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `${user.nickname}님을 강제퇴장 하시겠습니까?`
+    );
+
+    if (confirmed) {
+      try {
+        // 강퇴 요청 데이터 생성
+        const kickRequestData = {
+          targetNickname: user.nickname,
+          requesterNickname: currentUser.nickname,
+        };
+
+        console.log("강퇴 요청 데이터:", kickRequestData);
+
+        // WebSocket을 통해 강퇴 요청 메시지 전송
+        if (stompClient.current && stompClient.current.connected) {
+          console.log("WebSocket 연결 상태:", stompClient.current.connected);
+          console.log(
+            "강퇴 메시지 전송 경로:",
+            `/publish/chat/group/room/force-leave/${roomId}`
+          );
+
+          stompClient.current.send(
+            `/publish/chat/group/room/force-leave/${roomId}`,
+            { "Content-Type": "application/json" },
+            JSON.stringify(kickRequestData)
+          );
+
+          console.log(`${user.nickname}님 강제퇴장 요청 전송 완료`);
+        } else {
+          console.error("WebSocket 연결이 없어 강제퇴장을 처리할 수 없습니다.");
+          alert("채팅 서버와 연결이 끊어져 강제퇴장을 처리할 수 없습니다.");
+        }
+      } catch (error) {
+        console.error("강퇴 처리 오류:", error);
+        alert("사용자 강제퇴장 중 오류가 발생했습니다.");
+      }
     }
   };
 
@@ -858,10 +930,10 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                   {participants.map((user, index) => (
                     <div
                       key={`user-${index}`}
-                      className="flex items-center p-3 border-b border-gray-100"
+                      className="flex items-center p-3 border-b border-gray-100 participant-item"
                     >
                       {/* 프로필 이미지 - 실제 이미지 표시 */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0 bg-gray-100 flex items-center justify-center participant-avatar">
                         {user?.profileImage ? (
                           <img
                             src={user.profileImage}
@@ -892,11 +964,12 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                       </div>
 
                       {/* 사용자 정보 */}
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-800">
+                      <div className="flex-1 participant-info">
+                        <div className="font-medium text-gray-800 participant-name">
                           {typeof user === "string"
                             ? user
                             : user?.nickname || "사용자"}
+                          {/* 나 표시 */}
                           {(typeof user === "string"
                             ? user === currentUser?.nickname
                             : user?.userId === currentUser?.id) && (
@@ -904,8 +977,43 @@ const GroupChatRoom = ({ roomId, onClose }: GroupChatRoomProps) => {
                               (나)
                             </span>
                           )}
+                          {/* 개설자 표시 - creator 속성을 확인하도록 수정 */}
+                          {typeof user !== "string" && user?.creator && (
+                            <span className="text-xs text-green-600 ml-1 font-semibold">
+                              (개설자)
+                            </span>
+                          )}
                         </div>
                       </div>
+
+                      {/* 강퇴 버튼 - 현재 사용자가 개설자이고, 자기 자신이 아닌 경우에만 표시 */}
+                      {participants.some(
+                        (p) =>
+                          typeof p !== "string" &&
+                          p?.creator &&
+                          p?.userId === currentUser?.id
+                      ) &&
+                        typeof user !== "string" &&
+                        user?.userId !== currentUser?.id && (
+                          <button
+                            onClick={() => handleKickUser(user)}
+                            className="text-red-500 hover:text-red-700 text-sm ml-2 p-1"
+                            title="강퇴하기"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        )}
                     </div>
                   ))}
                 </div>
