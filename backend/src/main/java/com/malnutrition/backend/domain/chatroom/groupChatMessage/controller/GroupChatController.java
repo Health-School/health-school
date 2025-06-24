@@ -190,4 +190,69 @@ public class GroupChatController {
 
         messageTemplate.convertAndSend("/subscribe/group/users/room/" + roomId, participantListMessage);
     }
+
+    @MessageMapping("/chat/group/room/force-leave/{roomId}")
+    @Transactional
+    public void forceLeaveUserFromGroupChat(
+            @DestinationVariable("roomId") Long roomId,
+            @Payload GroupChatForceLeaveRequestDto requestDto) {
+
+        GroupChatRoom chatRoom = groupChatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+
+        User requester = userRepository.findByNickname(requestDto.getRequesterNickname())
+                .orElseThrow(() -> new EntityNotFoundException("요청자를 찾을 수 없습니다."));
+
+        // ✅ 관리자인지 확인 (예: 방 개설자가 관리자)
+        if (!chatRoom.getCreatedBy().getNickname().equals(requester.getNickname())) {
+            throw new IllegalStateException("해당 유저는 관리자 권한이 없습니다.");
+        }
+
+        // ✅ 대상 유저 조회
+        User target = userRepository.findByNickname(requestDto.getTargetNickname())
+                .orElseThrow(() -> new EntityNotFoundException("강퇴 대상 유저를 찾을 수 없습니다."));
+
+        // ✅ 메시지 저장 (FORCE_LEAVE)
+        String msg = target.getNickname() + "님이 강제 퇴장당했습니다.";
+
+        GroupChatMessage forceLeaveMessage = GroupChatMessage.builder()
+                .groupChatRoom(chatRoom)
+                .sender(target)
+                .message(msg)
+                .userType(UserType.FORCE_LEAVE)
+                .build();
+        groupChatMessageRepository.save(forceLeaveMessage);
+
+        // ✅ 참여자 목록에서 제거
+        groupChatUserRepository.deleteByGroupChatRoomIdAndUserId(roomId, target.getId());
+
+        // ✅ 강퇴 메시지 브로드캐스트
+        GroupChatEnterResponseMessageDto leaveNotice = GroupChatEnterResponseMessageDto.builder()
+                .roomId(roomId)
+                .writerName(target.getNickname())
+                .message(msg)
+                .userType(UserType.FORCE_LEAVE)
+                .build();
+
+        messageTemplate.convertAndSend("/subscribe/group/enter/room/" + roomId, leaveNotice);
+
+        // ✅ 전체 참여자 목록 다시 브로드캐스트
+        List<GroupChatUserListResponseDto> participants = groupChatUserRepository
+                .findAllByGroupChatRoomId(roomId)
+                .stream()
+                .map(user -> GroupChatUserListResponseDto.builder()
+                        .userId(user.getUser().getId())
+                        .nickname(user.getUser().getNickname())
+                        .profileImage(imageService.getImageUrl(user.getUser().getProfileImage()))
+                        .build())
+                .toList();
+
+        GroupChatUserListBroadcastDto updatedList = GroupChatUserListBroadcastDto.builder()
+                .roomId(roomId)
+                .participants(participants)
+                .build();
+
+        messageTemplate.convertAndSend("/subscribe/group/users/room/" + roomId, updatedList);
+    }
+
 }
