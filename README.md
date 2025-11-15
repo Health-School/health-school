@@ -32,7 +32,7 @@
 |:------------------------------------------:|:--------------------------------------:|:---------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|
 |     <img src="https://github.com/user-attachments/assets/77fd117d-ee6d-4850-ad41-7d427de289f8" alt="강성민" width="150">     |   <img src="https://github.com/user-attachments/assets/cae6d95d-fd1f-4e36-b6b0-d1a94f4a6ace" alt="강준호" width="150">   |   <img src="https://github.com/user-attachments/assets/0169b53e-e333-4052-905d-c2dc441cad36" alt="권태윤" width="150">    |    <img src="https://github.com/user-attachments/assets/1aa87ede-1cfa-4883-9dcd-4d627b5e247b" alt="유광륜" width="150">     |     <img src="https://github.com/user-attachments/assets/9edd4bbd-44f8-4670-b4ad-36c4dbed0be5" alt="최정인" width="150">    |
 |                     팀장                     |                  부팀장                   |                   팀원                    |                    팀원                     |                    팀원                     |
-|  [GitHub](https://github.com/thatisbummer)  | [GitHub](https://github.com/0320kangk) | [GitHub](https://github.com/Kwon-TaeYun) | [GitHub](https://github.com/yoogwangryun) | [GitHub](https://github.com/bombab) |
+|  [GitHub](https://github.com/thatisbummer)  | [GitHub](https://github.com/0320kangk) | [GitHub](https://github.com/Kwon-TaeYun) | [GitHub](https://github.com/yoogwangryun) | [GitHub](https://github.com/CJI0524) |
 
 
 ---
